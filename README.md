@@ -1,4 +1,4 @@
-# NFT Marketplace
+# NFT Contract Testing
 
 This project is for the blockchain application NFT Marketplace. It contains code for the Smart Contract, web-based dapp and NodeJS server. 
 
