@@ -7,23 +7,423 @@ const fcl = require("@onflow/fcl");
 
 module.exports = class DappScripts {
 
-	static flowtoken_get_flow_balance() {
+	static characterx_characters_get_all_characters() {
 		return fcl.script`
-				import FungibleToken from 0xee82856bf20e2aa6
-				import FlowToken from 0x0ae53cb6e3f42a79
+				import CharacterX from 0x01cf0e2f2f715450
 				
-				// Returns the balance of a FlowToken Vault
+				pub fun main(): [CharacterX.CharacterY] {
+				    return CharacterX.getAllCharacters()
+				}
+		`;
+	}
+
+	static characterx_characters_get_character_data() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
 				
-				pub fun main(account: Address): UFix64 {
-				    // Borrow the account's FlowToken Vault
-				    let vaultRef = getAccount(account)
-				        .getCapability(/public/flowTokenBalance)
-				        .borrow<&FlowToken.Vault{FungibleToken.Balance}>()
-				        ?? panic("Could not borrow Balance reference to the Vault")
+				pub fun main(characterID: UInt32): {String: String} {
+				    let data = CharacterX.getCharacterData(characterID: characterID)
+				        ?? panic("Character doesn't exist")
 				
-				    // Return the balance in the FlowToken Vault
-				    return vaultRef.balance
-				}  
+				    return data
+				}
+		`;
+	}
+
+	static characterx_characters_get_character_data_field() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(characterID: UInt32, field: String): String {
+				    let field = CharacterX.getCharacterDataByField(characterID: characterID, field: field)
+				        ?? panic("Character doesn't exist")
+				
+				    return field
+				}
+		`;
+	}
+
+	static characterx_characters_get_character_traits() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(characterID: UInt32): {String: String} {
+				    let traits = CharacterX.getCharacterTraits(characterID: characterID)
+				        ?? panic("Character doesn't exist")
+				
+				    return traits
+				}
+		`;
+	}
+
+	static characterx_characters_get_character_traits_field() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(characterID: UInt32, field: String): String {
+				    let field = CharacterX.getCharacterTraitsByField(characterID: characterID, field: field)
+				        ?? panic("Character doesn't exist")
+				
+				    return field
+				}
+		`;
+	}
+
+	static characterx_characters_get_nextCharacterID() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(): UInt32 {
+				    return CharacterX.nextCharacterID
+				}
+		`;
+	}
+
+	static characterx_collections_get_character_characterID() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(account: Address, id: UInt64): UInt32 {
+				
+				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
+				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
+				        ?? panic("Couldn't get public character collection reference")
+				
+				    let token = collectionRef.borrowCharacterNFT(id: id)
+				        ?? panic("Couldn't borrow a reference to the specified character")
+				
+				    let data = token.data
+				    
+				        return data.characterID
+				}
+		`;
+	}
+
+	static characterx_collections_get_character_serialNum() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(account: Address, id: UInt64): UInt32 {
+				
+				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
+				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
+				        ?? panic("Couldn't get public character collection reference")
+				
+				    let token = collectionRef.borrowCharacterNFT(id: id)
+				        ?? panic("Couldn't borrow a reference to the specified character")
+				
+				    let data = token.data
+				    
+				    return data.serialNumber
+				}
+		`;
+	}
+
+	static characterx_collections_get_character_series() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(account: Address, id: UInt64): UInt32 {
+				
+				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
+				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
+				        ?? panic("Couldn't get public character collection reference")
+				
+				    let token = collectionRef.borrowCharacterNFT(id: id)
+				        ?? panic("Couldn't borrow a reference to the specified character")
+				
+				    let data = token.data
+				    
+				    return CharacterX.getSetSeries(setID: data.setID)!
+				}
+		`;
+	}
+
+	static characterx_collections_get_character_setID() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(account: Address, id: UInt64): UInt32 {
+				
+				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
+				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
+				        ?? panic("Couldn't get public character collection reference")
+				
+				    let token = collectionRef.borrowCharacterNFT(id: id)
+				        ?? panic("Couldn't borrow a reference to the specified character")
+				
+				    let data = token.data
+				    
+				        return data.setID
+				}
+		`;
+	}
+
+	static characterx_collections_get_character_setName() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(account: Address, id: UInt64): String {
+				
+				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
+				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
+				        ?? panic("Couldn't get public character collection reference")
+				
+				    let token = collectionRef.borrowCharacterNFT(id: id)
+				        ?? panic("Couldn't borrow a reference to the specified character")
+				
+				    let data = token.data
+				    
+				        return CharacterX.getSetName(setID: data.setID)!
+				}
+		`;
+	}
+
+	static characterx_collections_get_collection_ids() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(account: Address): [UInt64] {
+				    
+				    let acct = getAccount(account)
+				
+				    let collectionRef = acct.getCapability(CharacterX.CollectionPublicPath)
+				        .borrow<&{CharacterX.CharacterCollectionPublic}>()!
+				
+				    return collectionRef.getIDs()
+				
+				}
+		`;
+	}
+
+	static characterx_collections_get_data() {
+		return fcl.script`
+				//TODO: Write more scripts that get the rest of a character's data. We have more separated data than NBATS' metadata
+				
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(account: Address, id: UInt64): {String: String} {
+				    
+				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
+				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
+				        ?? panic("Couldn't get public character collection reference")
+				
+				    let token = collectionRef.borrowCharacterNFT(id: id)
+				        ?? panic("Couldn't borrow a reference to the specified character")
+				
+				    let data = token.data
+				
+				    let characterData = CharacterX.getCharacterData(characterID: data.characterID) ?? panic("Character doesn't exist") 
+				
+				    return characterData
+				}
+				
+		`;
+	}
+
+	static characterx_collections_get_data_field() {
+		return fcl.script`
+				//TODO: Write more scripts that get the rest of a character's data. We have more separated data than NBATS' metadata
+				//in case we don't write getters for each field in contract we might do like setdata script
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(account: Address, characterID: UInt64, fieldToSearch: String): String {
+				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
+				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
+				        ?? panic("Couldn't get public character collection reference")
+				
+				    let token = collectionRef.borrowCharacterNFT(id: characterID)
+				        ?? panic("Couldn't borrow a reference to the specified character")
+				
+				    let data = token.data
+				
+				    let field = CharacterX.getCharacterDataByField(characterID: data.characterID, field: fieldToSearch) ?? panic("Character doesn't exist")
+				
+				    return field
+				}
+		`;
+	}
+
+	static characterx_collections_get_id_in_Collection() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(account: Address, id: UInt64): Bool {
+				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
+				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
+				        ?? panic("Couldn't get public character collection reference")
+				
+				    return collectionRef.borrowNFT(id: id) != nil
+				}
+		`;
+	}
+
+	static characterx_collections_get_setCharacters_are_owned() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(account: Address, setIDs: [UInt32], characterIDs: [UInt32]): Bool {
+				    assert(setIDs.length == characterIDs.length, 
+				    message: "set and character ID arrays have mismatched lengths"
+				    )
+				
+				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
+				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
+				        ?? panic("Couldn't get public character collection reference")
+				
+				    let characterNFTIDs = collectionRef.getIDs()
+				
+				    var i = 0
+				
+				    while i < setIDs.length {
+				        var hasMatchingCharacter = false
+				        for characterID in characterNFTIDs {
+				            let token = collectionRef.borrowCharacterNFT(id: characterID)
+				                ?? panic("Couldn't borrow a reference to the specified character")
+				
+				            let characterData = token.data
+				            if characterData.setID == setIDs[i] && characterData.characterID == characterIDs[i] {
+				                hasMatchingCharacter = true
+				                break
+				            }
+				        }
+				        if !hasMatchingCharacter {
+				            return false
+				        }
+				        i = i + 1
+				    }
+				
+				    return true
+				}
+				
+		`;
+	}
+
+	static characterx_get_currentSeries() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(): UInt32 {
+				    return CharacterX.currentSeries
+				}
+		`;
+	}
+
+	static characterx_get_totalSupply() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(): UInt64 {
+				
+				    return CharacterX.totalSupply
+				}
+		`;
+	}
+
+	static characterx_sets_get_characters_in_set() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(setID: UInt32): [UInt32] {
+				
+				    let characters = CharacterX.getCharactersInSet(setID: setID)!
+				
+				    return characters
+				}
+		`;
+	}
+
+	static characterx_sets_get_edition_retired() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(setID: UInt32, characterID: UInt32): Bool {
+				    let isRetired = CharacterX.isEditionRetired(setID: setID, characterID: characterID)
+				        ?? panic("Couldn't find the specified edition")
+				
+				    return isRetired
+				}
+		`;
+	}
+
+	static characterx_sets_get_nextSetID() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(): UInt32 {
+				    return CharacterX.nextSetID
+				}
+		`;
+	}
+
+	static characterx_sets_get_numCharacters_in_edition() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(setID: UInt32, characterID: UInt32): UInt32 {
+				
+				    let numCharacters = CharacterX.getNumNFTCharactersInEdition(setID: setID, characterID: characterID)
+				        ?? panic("Couldn't find the specified edition")
+				
+				    return numCharacters
+				}
+		`;
+	}
+
+	static characterx_sets_get_setIDs_by_name() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(setName: String): [UInt32] {
+				
+				    let ids = CharacterX.getSetIDsByName(setName: setName)
+				        ?? panic("Couldn't find the specified set name")
+				
+				    return ids
+				
+				}
+		`;
+	}
+
+	static characterx_sets_get_setName() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(setID: UInt32): String {
+				
+				    let name = CharacterX.getSetName(setID: setID)
+				        ?? panic("Couldn't find the specified set")
+				
+				    return name
+				}
+		`;
+	}
+
+	static characterx_sets_get_setSeries() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(setID: UInt32): UInt32 {
+				
+				    let series = CharacterX.getSetSeries(setID: setID)
+				        ?? panic("Couldn't find the specified set")
+				
+				    return series
+				}
+		`;
+	}
+
+	static characterx_sets_get_set_locked() {
+		return fcl.script`
+				import CharacterX from 0x01cf0e2f2f715450
+				
+				pub fun main(setID: UInt32): Bool {
+				
+				    let isLocked = CharacterX.isSetLocked(setID: setID)
+				        ?? panic("Coulnd't find the specified set")
+				
+				    return isLocked
+				}
 		`;
 	}
 
@@ -145,422 +545,23 @@ module.exports = class DappScripts {
 		`;
 	}
 
-	static characterx_characters_get_all_characters() {
+	static flowtoken_get_flow_balance() {
 		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(): [CharacterX.CharacterY] {
-				    return CharacterX.getAllCharacters()
-				}
-		`;
-	}
-
-	static characterx_characters_get_character_traits() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(characterID: UInt32): {String: String} {
-				    let traits = CharacterX.getCharacterTraits(characterID: characterID)
-				        ?? panic("Character doesn't exist")
-				
-				    return traits
-				}
-		`;
-	}
-
-	static characterx_characters_get_character_data() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(characterID: UInt32): {String: String} {
-				    let data = CharacterX.getCharacterData(characterID: characterID)
-				        ?? panic("Character doesn't exist")
-				
-				    return data
-				}
-		`;
-	}
-
-	static characterx_characters_get_character_data_field() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(characterID: UInt32, field: String): String {
-				    let field = CharacterX.getCharacterDataByField(characterID: characterID, field: field)
-				        ?? panic("Character doesn't exist")
-				
-				    return field
-				}
-		`;
-	}
-
-	static characterx_characters_get_nextCharacterID() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(): UInt32 {
-				    return CharacterX.nextCharacterID
-				}
-		`;
-	}
-
-	static characterx_characters_get_character_traits_field() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(characterID: UInt32, field: String): String {
-				    let field = CharacterX.getCharacterTraitsByField(characterID: characterID, field: field)
-				        ?? panic("Character doesn't exist")
-				
-				    return field
-				}
-		`;
-	}
-
-	static characterx_collections_get_character_characterID() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(account: Address, id: UInt64): UInt32 {
-				
-				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
-				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
-				        ?? panic("Couldn't get public character collection reference")
-				
-				    let token = collectionRef.borrowCharacterNFT(id: id)
-				        ?? panic("Couldn't borrow a reference to the specified character")
-				
-				    let data = token.data
-				    
-				        return data.characterID
-				}
-		`;
-	}
-
-	static characterx_collections_get_character_serialNum() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(account: Address, id: UInt64): UInt32 {
-				
-				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
-				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
-				        ?? panic("Couldn't get public character collection reference")
-				
-				    let token = collectionRef.borrowCharacterNFT(id: id)
-				        ?? panic("Couldn't borrow a reference to the specified character")
-				
-				    let data = token.data
-				    
-				    return data.serialNumber
-				}
-		`;
-	}
-
-	static characterx_collections_get_character_setID() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(account: Address, id: UInt64): UInt32 {
-				
-				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
-				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
-				        ?? panic("Couldn't get public character collection reference")
-				
-				    let token = collectionRef.borrowCharacterNFT(id: id)
-				        ?? panic("Couldn't borrow a reference to the specified character")
-				
-				    let data = token.data
-				    
-				        return data.setID
-				}
-		`;
-	}
-
-	static characterx_collections_get_character_setName() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(account: Address, id: UInt64): String {
-				
-				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
-				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
-				        ?? panic("Couldn't get public character collection reference")
-				
-				    let token = collectionRef.borrowCharacterNFT(id: id)
-				        ?? panic("Couldn't borrow a reference to the specified character")
-				
-				    let data = token.data
-				    
-				        return CharacterX.getSetName(setID: data.setID)!
-				}
-		`;
-	}
-
-	static characterx_collections_get_character_series() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(account: Address, id: UInt64): UInt32 {
-				
-				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
-				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
-				        ?? panic("Couldn't get public character collection reference")
-				
-				    let token = collectionRef.borrowCharacterNFT(id: id)
-				        ?? panic("Couldn't borrow a reference to the specified character")
-				
-				    let data = token.data
-				    
-				    return CharacterX.getSetSeries(setID: data.setID)!
-				}
-		`;
-	}
-
-	static characterx_collections_get_data_field() {
-		return fcl.script`
-				//TODO: Write more scripts that get the rest of a character's data. We have more separated data than NBATS' metadata
-				//in case we don't write getters for each field in contract we might do like setdata script
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(account: Address, characterID: UInt64, fieldToSearch: String): String {
-				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
-				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
-				        ?? panic("Couldn't get public character collection reference")
-				
-				    let token = collectionRef.borrowCharacterNFT(id: characterID)
-				        ?? panic("Couldn't borrow a reference to the specified character")
-				
-				    let data = token.data
-				
-				    let field = CharacterX.getCharacterDataByField(characterID: data.characterID, field: fieldToSearch) ?? panic("Character doesn't exist")
-				
-				    return field
-				}
-		`;
-	}
-
-	static characterx_collections_get_data() {
-		return fcl.script`
-				//TODO: Write more scripts that get the rest of a character's data. We have more separated data than NBATS' metadata
-				
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(account: Address, id: UInt64): {String: String} {
-				    
-				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
-				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
-				        ?? panic("Couldn't get public character collection reference")
-				
-				    let token = collectionRef.borrowCharacterNFT(id: id)
-				        ?? panic("Couldn't borrow a reference to the specified character")
-				
-				    let data = token.data
-				
-				    let characterData = CharacterX.getCharacterData(characterID: data.characterID) ?? panic("Character doesn't exist") 
-				
-				    return characterData
-				}
-				
-		`;
-	}
-
-	static characterx_collections_get_collection_ids() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(account: Address): [UInt64] {
-				    
-				    let acct = getAccount(account)
-				
-				    let collectionRef = acct.getCapability(CharacterX.CollectionPublicPath)
-				        .borrow<&{CharacterX.CharacterCollectionPublic}>()!
-				
-				    return collectionRef.getIDs()
-				
-				}
-		`;
-	}
-
-	static characterx_collections_get_id_in_Collection() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(account: Address, id: UInt64): Bool {
-				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
-				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
-				        ?? panic("Couldn't get public character collection reference")
-				
-				    return collectionRef.borrowNFT(id: id) != nil
-				}
-		`;
-	}
-
-	static characterx_collections_get_setCharacters_are_owned() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(account: Address, setIDs: [UInt32], characterIDs: [UInt32]): Bool {
-				    assert(setIDs.length == characterIDs.length, 
-				    message: "set and character ID arrays have mismatched lengths"
-				    )
-				
-				    let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)
-				        .borrow<&{CharacterX.CharacterCollectionPublic}>()
-				        ?? panic("Couldn't get public character collection reference")
-				
-				    let characterNFTIDs = collectionRef.getIDs()
-				
-				    var i = 0
-				
-				    while i < setIDs.length {
-				        var hasMatchingCharacter = false
-				        for characterID in characterNFTIDs {
-				            let token = collectionRef.borrowCharacterNFT(id: characterID)
-				                ?? panic("Couldn't borrow a reference to the specified character")
-				
-				            let characterData = token.data
-				            if characterData.setID == setIDs[i] && characterData.characterID == characterIDs[i] {
-				                hasMatchingCharacter = true
-				                break
-				            }
-				        }
-				        if !hasMatchingCharacter {
-				            return false
-				        }
-				        i = i + 1
-				    }
-				
-				    return true
-				}
-				
-		`;
-	}
-
-	static characterx_get_currentSeries() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(): UInt32 {
-				    return CharacterX.currentSeries
-				}
-		`;
-	}
-
-	static characterx_get_totalSupply() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(): UInt64 {
-				    return CharacterX.totalSupply
-				}
-		`;
-	}
-
-	static characterx_sets_get_characters_in_set() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(setID: UInt32): [UInt32] {
-				
-				    let characters = CharacterX.getCharactersInSet(setID: setID)!
-				
-				    return characters
-				}
-		`;
-	}
-
-	static characterx_sets_get_edition_retired() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(setID: UInt32, characterID: UInt32): Bool {
-				    let isRetired = CharacterX.isEditionRetired(setID: setID, characterID: characterID)
-				        ?? panic("Couldn't find the specified edition")
-				
-				    return isRetired
-				}
-		`;
-	}
-
-	static characterx_sets_get_nextSetID() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(): UInt32 {
-				    return CharacterX.nextSetID
-				}
-		`;
-	}
-
-	static characterx_sets_get_numCharacters_in_edition() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(setID: UInt32, characterID: UInt32): UInt32 {
-				
-				    let numCharacters = CharacterX.getNumNFTCharactersInEdition(setID: setID, characterID: characterID)
-				        ?? panic("Couldn't find the specified edition")
-				
-				    return numCharacters
-				}
-		`;
-	}
-
-	static characterx_sets_get_setName() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(setID: UInt32): String {
-				
-				    let name = CharacterX.getSetName(setID: setID)
-				        ?? panic("Couldn't find the specified set")
-				
-				    return name
-				}
-		`;
-	}
-
-	static characterx_sets_get_setSeries() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(setID: UInt32): UInt32 {
-				
-				    let series = CharacterX.getSetSeries(setID: setID)
-				        ?? panic("Couldn't find the specified set")
-				
-				    return series
-				}
-		`;
-	}
-
-	static characterx_sets_get_setIDs_by_name() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(setName: String): [UInt32] {
-				
-				    let ids = CharacterX.getSetIDsByName(setName: setName)
-				        ?? panic("Couldn't find the specified set name")
-				
-				    return ids
-				
-				}
-		`;
-	}
-
-	static characterx_sets_get_set_locked() {
-		return fcl.script`
-				import CharacterX from 0x01cf0e2f2f715450
-				
-				pub fun main(setID: UInt32): Bool {
-				
-				    let isLocked = CharacterX.isSetLocked(setID: setID)
-				        ?? panic("Coulnd't find the specified set")
-				
-				    return isLocked
-				}
+				import FungibleToken from 0xee82856bf20e2aa6
+				import FlowToken from 0x0ae53cb6e3f42a79
+				
+				// Returns the balance of a FlowToken Vault
+				
+				pub fun main(account: Address): UFix64 {
+				    // Borrow the account's FlowToken Vault
+				    let vaultRef = getAccount(account)
+				        .getCapability(/public/flowTokenBalance)
+				        .borrow<&FlowToken.Vault{FungibleToken.Balance}>()
+				        ?? panic("Could not borrow Balance reference to the Vault")
+				
+				    // Return the balance in the FlowToken Vault
+				    return vaultRef.balance
+				}  
 		`;
 	}
 

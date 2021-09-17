@@ -437,6 +437,30 @@ module.exports = class DappLib {
 
     }
 
+    // characterxSetupAccount
+    // calls transactions/characterx/setup_account.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxSetupAccount(data) {
+
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_setup_account'
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
     /********** Scripts **********/
 
     // characterxGetCurrentSeries

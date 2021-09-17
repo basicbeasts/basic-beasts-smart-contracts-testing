@@ -3,7 +3,6 @@ const DappLib = require('../src/dapp-lib.js');
 const fkill = require('fkill');
 
 describe('Flow Dapp Tests', async() => {
-
     let config = null;
     before('setup contract', async() => {
         // Setup tasks for tests
@@ -16,6 +15,36 @@ describe('Flow Dapp Tests', async() => {
 
     /************ Character X ************/
     describe('Character X Tests', async() => {
+
+        it(`0. Set up accounts`, async() => {
+
+            let testData0 = {
+                signer: config.accounts[0]
+            }
+
+            let testData1 = {
+                signer: config.accounts[1]
+            }
+
+            let testData2 = {
+                signer: config.accounts[2]
+            }
+
+            let testData3 = {
+                signer: config.accounts[3]
+            }
+
+            let testData4 = {
+                signer: config.accounts[4]
+            }
+
+            await DappLib.characterxSetupAccount(testData0)
+            await DappLib.characterxSetupAccount(testData1)
+            await DappLib.characterxSetupAccount(testData2)
+            await DappLib.characterxSetupAccount(testData3)
+            await DappLib.characterxSetupAccount(testData4)
+
+        });
         it(`1. Create an "Admin set" (Set ID = 0)`, async() => {
             let testData1 = {
                 signer: config.accounts[0],
@@ -242,8 +271,8 @@ describe('Flow Dapp Tests', async() => {
             try {
                 await DappLib.characterxAddCharacterToSet(testData1)
             } catch (e) {
-                let res1 = await DappLib.characterxSetsGetCharactersInSet(testData1.setID)
-                assert.deepEequal(res1.result, [], "❗Incorrect. setID 0 should be empty")
+                let res1 = await DappLib.characterxSetsGetCharactersInSet(testData1)
+                assert.deepEqual(res1.result, [], "❗Incorrect. setID 0 should be empty")
                 console.log("Could not add the character " + testData1.characterID + " to set: " + testData1.setID)
             }
 
@@ -375,7 +404,7 @@ describe('Flow Dapp Tests', async() => {
             try {
                 await DappLib.characterxAddCharactersToSet(testData1)
             } catch (e) {
-                let res1 = await DappLib.characterxSetsGetCharactersInSet(testData1.setID)
+                let res1 = await DappLib.characterxSetsGetCharactersInSet(testData1)
                 assert.deepEqual(res1.result, [0], "❗Incorrect. setID 0 should only contain characterID 0")
             }
         });
@@ -421,13 +450,192 @@ describe('Flow Dapp Tests', async() => {
             try {
                 await DappLib.characterxAddCharactersToSet(testData1)
             } catch (e) {
-                let res1 = await DappLib.characterxSetsGetCharactersInSet(testData1.setID)
+                let res1 = await DappLib.characterxSetsGetCharactersInSet(testData1)
                 assert.deepEqual(res1.result, [0, 1, 2], "❗Incorrect. setID 0 should contain characterID 0, 1, 2")
                 console.log("Character ID 1 and 2 already exist in set ID 0")
             }
 
         });
 
+        it(`23. Get total supply - before minting charaters`, async() => {
+
+            let res1 = await DappLib.characterxGetTotalSupply({})
+            assert.equal(res1.result, 0, "❗Incorrect. Total supply should be 0")
+            console.log("Total supply is: " + res1.result)
+
+        });
+
+        it(`24. Can not mint characterID 0, setID 0 to accounts[2] - Non Admin`, async() => {
+
+            let testData1 = {
+                signer: config.accounts[1],
+                setID: "0",
+                characterID: "0",
+                recipientAddr: config.accounts[2]
+            }
+
+            try {
+                await DappLib.characterxMintCharacter(testData1)
+            } catch (e) {
+                let res1 = await DappLib.characterxGetTotalSupply({})
+                assert.equal(res1.result, 0, "❗Incorrect. Total supply should be 0")
+                console.log("Total supply should be 0:  " + res1.result)
+            }
+        });
+
+
+        it(`25. Mint characterID 0, setID 0 to Admin account - Admin`, async() => {
+
+            let testData1 = {
+                signer: config.accounts[0],
+                setID: "0",
+                characterID: "0",
+                recipientAddr: config.accounts[0]
+            }
+
+            await DappLib.characterxMintCharacter(testData1)
+            let res1 = await DappLib.characterxGetTotalSupply({})
+            assert.equal(res1.result, 1, "❗Incorrect. The total supply should be 1")
+            console.log("Total supply should be 1:  " + res1.result)
+
+        });
+        /*
+        it(`. Get collections character id`, async() => {
+            let testData1 = {
+                account: config.accounts[0],
+                id: "0"
+            }
+            let res1 = await DappLib.characterxCollectionsGetCharacterCharacterID(testData1)
+            assert.equal(res1.result, 0, "❗Incorrect. The character ID should be 0")
+            console.log("Total collection's characterID is: " + res1.result)
+
+        });
+  
+                it(`24. Get total supply`, async() => {
+
+                    let res1 = await DappLib.characterxGetTotalSupply({})
+                    assert.equal(res1.result, 1, "❗Incorrect. Total supply should be 0")
+                    console.log("Total supply is: " + res1.result)
+
+                });
+
+                */
+        /*
+                it(`27. Can not batch mint characterID 1, setID 0 to accounts[2] - Non Admin`, async() => {
+
+                    let testData1 = {
+                        signer: config.accounts[1],
+                        setID: "0",
+                        characterID: "1",
+                        quantity: "5",
+                        recipientAddr: config.accounts[0]
+                    }
+
+                    try {
+                        await DappLib.characterxBatchMintCharacter(testData1)
+                    } catch (e) {
+                        let res1 = await DappLib.characterxGetTotalSupply({})
+                        assert.equal(res1.result, 2, "❗Incorrect. The total supply should be 2")
+                        console.log("Total supply should be 2:  " + res1.result)
+                    }
+                });
+
+                it(`28. Batch mint characterID 1, setID 0, quantity 5 to accounts[2] and Admin account - Admin`, async() => {
+
+                    let testData1 = {
+                        signer: config.accounts[0],
+                        setID: "0",
+                        characterID: "1",
+                        quantity: "5",
+                        recipientAddr: config.accounts[0]
+                    }
+
+                    let testData2 = {
+                        signer: config.accounts[0],
+                        setID: "0",
+                        characterID: "1",
+                        quantity: "5",
+                        recipientAddr: config.accounts[2]
+                    }
+
+                    await DappLib.characterxBatchMintCharacter(testData1)
+                    let res1 = await DappLib.characterxGetTotalSupply({})
+                    assert.equal(res1.result, 7, "❗Incorrect. Total supply should be 7")
+                    console.log("Total supply should be 12:  " + res1.result)
+
+                    try {
+                        await DappLib.characterxBatchMintCharacter(testData2)
+                    } catch (e) {
+                        let res2 = await DappLib.characterxGetTotalSupply({})
+                        assert.equal(res2.result, 12, "❗Incorrect. Total supply should be 12")
+                        console.log("Total supply should be 12:  " + res2.result)
+                    }
+                });
+
+                it(`29. Get total supply - after minting charaters`, async() => {
+
+                    let res1 = await DappLib.characterxGetTotalSupply({})
+                    assert.equal(res1.result, 12, "❗Incorrect. Total supply should be 12")
+                    console.log("Total supply is 12: " + res1.result)
+
+                });
+
+                it(`30. Can not retire character ID 0, setID 0 - Non Admin`, async() => {
+
+                    let testData1 = {
+                        signer: config.accounts[1],
+                        setID: "0",
+                        characterID: "0"
+                    }
+
+                    try {
+                        await DappLib.characterxRetireCharacterFromSet(testData1)
+                    } catch (e) {
+                        let res1 = await DappLib.characterxSetsGetEditionRetired(testData1)
+                        assert.isFalse(res1.result, "❗Incorrect. The character ID 0, set ID 0 should not be retired")
+                        console.log("Retired should be false: " + res1.result)
+                    }
+                });
+
+                it(`31. Retire character ID 0, setID 0 - Admin`, async() => {
+
+                    let testData1 = {
+                        signer: config.accounts[1],
+                        setID: "0",
+                        characterID: "0"
+                    }
+                    await DappLib.characterxRetireCharacterFromSet(testData1)
+                    let res1 = await DappLib.characterxSetsGetEditionRetired(testData1)
+                    assert.isTrue(res1.result, "❗Incorrect. The character ID 0, set ID 0 should be retired")
+                    console.log("Retired should be true: " + res1.result)
+                });
+
+                it(`32. Retire character ID 0, setID 0 - Admin`, async() => {
+
+                    let testData1 = {
+                        signer: config.accounts[1],
+                        setID: "0",
+                        characterID: "0"
+                    }
+                    await DappLib.characterxRetireCharacterFromSet(testData1)
+                    let res1 = await DappLib.characterxSetsGetEditionRetired(testData1)
+                    assert.isTrue(res1.result, "❗Incorrect. The character ID 0, set ID 0 should be retired")
+                    console.log("Retired should be true: " + res1.result)
+                });
+
+                it(`33. Can not mint character ID 0, setID 0 (retired)- Admin`, async() => {
+
+                    let testData1 = {
+                        signer: config.accounts[1],
+                        setID: "0",
+                        characterID: "0"
+                    }
+                    await DappLib.characterxRetireCharacterFromSet(testData1)
+                    let res1 = await DappLib.characterxSetsGetEditionRetired(testData1)
+                    assert.isTrue(res1.result, "❗Incorrect. The character ID 0, set ID 0 should be retired")
+                    console.log("Retired should be true: " + res1.result)
+                });
+        */
     });
 
 
