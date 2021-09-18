@@ -12,7 +12,7 @@
 //TODO: Get confirmation besides Jacob whether getters should be made in the Contract for character fields although they are already public
 
 //TODO: Run UNIT TEST that are really mean to break it.
-import NonFungibleToken from Flow.NonFungibleToken
+import NonFungibleToken from "../Flow/NonFungibleToken.cdc"
 
 //TODO add events
 

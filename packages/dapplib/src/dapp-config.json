@@ -6,7 +6,12 @@
 		"Flow.FlowStorageFees": "0xf8d6e0586b0a20c7",
 		"Flow.FlowToken": "0x0ae53cb6e3f42a79",
 		"Flow.FungibleToken": "0xee82856bf20e2aa6",
-		"Flow.NonFungibleToken": "0x01cf0e2f2f715450"
+		"Flow.NonFungibleToken": "0x01cf0e2f2f715450",
+		"Project.NFTContract": "0x01cf0e2f2f715450",
+		"Project.PackContract": "0x01cf0e2f2f715450",
+		"Project.AdminContract": "0x01cf0e2f2f715450",
+		"Project.CharacterX": "0x01cf0e2f2f715450",
+		"Project.MarketplaceContract": "0x01cf0e2f2f715450"
 	},
 	"accounts": [
 		"0x01cf0e2f2f715450",
@@ -29,14 +34,14 @@
 		"address": "0x120e725050340cab",
 		"keys": [
 			{
-				"publicKey": "565b70e60aa4fa07bd219c7cc774bc04be8d455c0b2ea076072b813a45dfb30a47eb46c080ab507b055176d2474638498bc275618a2d1d93f8a5710f67978dac",
-				"privateKey": "c91bee7e6f4efb6951408b280dd823db31b91786a81678b7571a0902844c4b60",
+				"publicKey": "3333f6cc58e425734fca61ff1d33d6287b8a7cdb0a411442b7c8e81b92b5f7c86b80a8733366e0080de1e7548e60f9ceac77568105545b95ad2b3cfb1554d3ac",
+				"privateKey": "3548447a553ee47193b9e194286e86b5a1c680991c589fa4e53e6c43bc0f8a23",
 				"keyId": 0,
 				"weight": 1000
 			},
 			{
-				"publicKey": "c8f6381a68a58512bfcdfa6b8b438f95cf531d569884534be9fc698681e74d5e326f0b27651c7040b0e0679ac17d6993899d3af7cba87c291df6659e17b685f2",
-				"privateKey": "7282a23b400f8d7fb47f25b750e452dd539f7b8c4a7208a19e15ed9c6e72a2f3",
+				"publicKey": "8096cb4834a1cb1485c1bfd573adafa825143246c8c59d4b35f79697a69ef2bc5c009fa1e0ca38055aa111410662b7d02e786986009c3c18cb63bc707dfa519b",
+				"privateKey": "f33b2ba5a3aab11a494753b66c11967a065965dd0d0726ded61929e9efe59f86",
 				"keyId": 1,
 				"weight": 500
 			}
@@ -47,14 +52,14 @@
 			"address": "0x01cf0e2f2f715450",
 			"keys": [
 				{
-					"publicKey": "662cb7e2439cb22eedd17f0176c25f53060fbd32f2a8075f10f739b229e37389f3bc3b9a0cd52987c8efa0a7a475e0c30f2873dd2336a2b9f6b4fc505eb1958f",
-					"privateKey": "eba9cff827721a627b218c6ac23098a179e6bf4716abc7854ffca0e92fae64cb",
+					"publicKey": "e2f037fa69635fb172ba117890722cf5aeb9b8aee1bcd7c81a46508f748bc923d2daa09d90d6fddb9c9f2a6ef76c4d09c8350d1a6b3774dabfba1a4468238da7",
+					"privateKey": "7b52ae72a23c7c503ee3bc526bd154ab72fa59a8d4cfb215cff9d66789c41aba",
 					"keyId": 0,
 					"weight": 1000
 				},
 				{
-					"publicKey": "559c97d19827227b8ccccb1588fae1267d139378d0cee92ed2e91ae56fdaecc282b441df1fe31a8b1e044303d83e7c9098e4bb6d9707c1c65db7625b14960a94",
-					"privateKey": "a8abea63b6a95f4aac2fc4e2ac362f47d9b0d2d00847b3120bb5e9f206386858",
+					"publicKey": "94d5de7fe88b1b4d5a661b209be54451127dab743779a5cb1c1d4e2b2a05e4e690c85e838f94256f0ad68d8418d8697fe33ebbdf92e0db9f4be1856f7b7964a4",
+					"privateKey": "b18c81a3d7d8e0f085a9c66506aff011c2e97dc4bb8c07b1e599c82a3cf41815",
 					"keyId": 1,
 					"weight": 500
 				}
@@ -64,14 +69,14 @@
 			"address": "0x179b6b1cb6755e31",
 			"keys": [
 				{
-					"publicKey": "092b81f995aa127c636811fab5c318eb4c1f1a3f43dff902e74ecfe2ce30637a227b9c231110ef7354a610968fb6307701f252c1335dd553c2bd657a032f72e4",
-					"privateKey": "cdf594a3774df1c8412cac7760495868a98a4bb7739352fb4c19a734ab959adf",
+					"publicKey": "9aba0fc7f5cb8e064c1f1fc2c72bd4d31cc87d24b7450c8322109babfb60693b3bac98945a9e33e7125d282bc2f0d256c3d79382da2651974e9b73ac0143429b",
+					"privateKey": "e8807a096ef9b5d72b07d54cb09999196ff73c24ef34f151121f9b593a233c59",
 					"keyId": 0,
 					"weight": 1000
 				},
 				{
-					"publicKey": "8a76ee16c2760c970fbaf485796156703a474532d2a8288a4872161601bbe800cbf6358cf4b55110ec8424da4d6f2fb2ba5c93c9adb2dc38195f29e105c35e42",
-					"privateKey": "36fda6fb086f2379d1e8dae88febfc29d47b4b2eab066b410a790f4114346176",
+					"publicKey": "b4831bfd7927a643fadec65cd4294b320378cf4915e3d1e45703a777da814a918530922092c00ee8f007e307a182f317a8a76db974f44c1dec8d9f2f8ec97536",
+					"privateKey": "aa637de9618c36da8ac78f53dc74d8e0c943024e6fd6dbc8a2ee908c2155fccd",
 					"keyId": 1,
 					"weight": 500
 				}
@@ -81,14 +86,14 @@
 			"address": "0xf3fcd2c1a78f5eee",
 			"keys": [
 				{
-					"publicKey": "63cb0bda84577696db8371f67aec182b602b546e69623a6bfef4a13298731ff45e4d5a180fa2f05163ba8e961d48c68245d2ca6f83280cb6d0f1a0c76f7a65f3",
-					"privateKey": "64a38a08180cd12abbf8bdaeab88dbadd08a091d2fe2643cdcd9981f921c1f78",
+					"publicKey": "22cdd7f9e1cce335bb2f2b1a8e3f2d785fd7fd0bf009fb7ec75de53807258a4e5fe747c21120154e8ec9636c4ee2e97d042581e8fa27626ab3b41bcbb16b118c",
+					"privateKey": "88724358dc842f036d522402c6f59441f347ef10bb4cf453331a17a1343a7917",
 					"keyId": 0,
 					"weight": 1000
 				},
 				{
-					"publicKey": "5c76372a4a7f03bb5815ada8c41cfc103d1b00333524bb84a8ca7252aad50a3a9f7f6f5c20bf9d134b24921bca1f03025cb3c2d945466096159bff0b91001116",
-					"privateKey": "57c207bf56ad03366cde01cbc654b12a264de463d84311916667ac305803da53",
+					"publicKey": "0e3ed78af898b7a7bda951eaf80e17b4441a4afc2d14522372087122d3a6c1324a1718b2d53efbf834e5b787cd3d21da23997f3e872250f051554361d708c3ab",
+					"privateKey": "be32e8062140334da7548e25c23595d01a8b67a9ffdcca21311a104d39ea0f8b",
 					"keyId": 1,
 					"weight": 500
 				}
@@ -98,14 +103,14 @@
 			"address": "0xe03daebed8ca0615",
 			"keys": [
 				{
-					"publicKey": "0af8cce498e12ff79dc4e915c8d2825057c9a265f31b54ea3e7bbcc1e8ca17420affe9b41ef1e899491088365766ac719c40d880c12ebba1f4461af80ef0ae2c",
-					"privateKey": "e899f4c907aaca60da7b813e93495d8d0d95e98e18882bc145ae1d8304f13e28",
+					"publicKey": "6f826d4bb8bf0bb95eb7a91f5474169a9287243352fc1ff1ec29e0fce3523d5af1dfe091760af92e87c2019b81f5b8a27d4a562d9bd88638eddc09d0fe75fa2f",
+					"privateKey": "5abdaf06b2582222f7bdb9a5825e6fce79d09ddbd875f68f88dc5e9e4f5aaf99",
 					"keyId": 0,
 					"weight": 1000
 				},
 				{
-					"publicKey": "ffae7909ff3c9bd2646fe51b9b33a4ae83b2170d5f2e883621760e04cac811b71c9587b627446cc646c7c26352849526465e3ee6adb7500629af7548ed1efc9e",
-					"privateKey": "ed20c4b09e03773e2a89849098eb5d71f1f1a71f2228dbcd9c78e625998d6832",
+					"publicKey": "9ce7550ab858c0f916e2230c105f04aad8146660dcbc7e46cee066047fb0cb5a3e30241f089acdcafd51ba27b5792074539a9f4767660c623f438843c7d3865a",
+					"privateKey": "409ce0cde13a2cb1244bf4c91fff4bd2779a9dc5c7626fc11c69425b87603aa1",
 					"keyId": 1,
 					"weight": 500
 				}
@@ -115,14 +120,14 @@
 			"address": "0x045a1763c93006ca",
 			"keys": [
 				{
-					"publicKey": "c03dcea1cd8852f1eb377cc538306c109c190d77667da7f155b16094de2a5db42aab9997c40aa69d808ea4d52150e539c569b25b54b035e863519b9f482fc03c",
-					"privateKey": "726ec3e499c07c123a3f00dabc47e8dc0eb6221fac1dd1899511b91f907a146f",
+					"publicKey": "4e00f32d083bb863278a047d6b2f9dbffd6fe7917bb15cc0257287738e21d05c108b2ed36d635e08318ad0a13716f812e00d213adbb16fe2646d522b0374d80d",
+					"privateKey": "e5c39943b2a23c857fb57d177159712ab78768e981f0f12baf8f80c16a412af5",
 					"keyId": 0,
 					"weight": 1000
 				},
 				{
-					"publicKey": "980918733dd0d5cc926d501ef86c5b15a7f67d96c4ce5badaa67999984ecc867b28eb0aabc89ae816572d2e9d878fcf4f6a798bbeba2e3bdcf3bfedff00c1a13",
-					"privateKey": "ccfb430de71e66c3d26683b9a302bfc3701be1af9b7b2f3ebc75a734bf97c734",
+					"publicKey": "a5aef81616f64936e64225e13de62f7fe5e3fad05688fde69ee65daa7b537b7e569b13f26087a3c7089194a101f05746d86b7df4f85f5130364899c46f42c529",
+					"privateKey": "b4fb5f5a7120453e1735757c5e11d0dd959e0b9dcb5eb5ccaf5fb16c3e9d8721",
 					"keyId": 1,
 					"weight": 500
 				}
@@ -132,14 +137,14 @@
 			"address": "0x120e725050340cab",
 			"keys": [
 				{
-					"publicKey": "565b70e60aa4fa07bd219c7cc774bc04be8d455c0b2ea076072b813a45dfb30a47eb46c080ab507b055176d2474638498bc275618a2d1d93f8a5710f67978dac",
-					"privateKey": "c91bee7e6f4efb6951408b280dd823db31b91786a81678b7571a0902844c4b60",
+					"publicKey": "3333f6cc58e425734fca61ff1d33d6287b8a7cdb0a411442b7c8e81b92b5f7c86b80a8733366e0080de1e7548e60f9ceac77568105545b95ad2b3cfb1554d3ac",
+					"privateKey": "3548447a553ee47193b9e194286e86b5a1c680991c589fa4e53e6c43bc0f8a23",
 					"keyId": 0,
 					"weight": 1000
 				},
 				{
-					"publicKey": "c8f6381a68a58512bfcdfa6b8b438f95cf531d569884534be9fc698681e74d5e326f0b27651c7040b0e0679ac17d6993899d3af7cba87c291df6659e17b685f2",
-					"privateKey": "7282a23b400f8d7fb47f25b750e452dd539f7b8c4a7208a19e15ed9c6e72a2f3",
+					"publicKey": "8096cb4834a1cb1485c1bfd573adafa825143246c8c59d4b35f79697a69ef2bc5c009fa1e0ca38055aa111410662b7d02e786986009c3c18cb63bc707dfa519b",
+					"privateKey": "f33b2ba5a3aab11a494753b66c11967a065965dd0d0726ded61929e9efe59f86",
 					"keyId": 1,
 					"weight": 500
 				}

@@ -1,6 +1,6 @@
-import NFTContract from Project.NFTContract
-import PackContract from Project.PackContract
-import NonFungibleToken from Flow.NonFungibleToken
+import NFTContract from "./NFTContract.cdc"
+import PackContract from "./PackContract.cdc"
+import NonFungibleToken from "../Flow/NonFungibleToken.cdc"
 
 pub contract AdminContract {
     // Admin
