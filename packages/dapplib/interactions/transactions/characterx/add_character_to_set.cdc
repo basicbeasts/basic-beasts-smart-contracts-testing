@@ -1,6 +1,6 @@
 //TODO: Do this for all transactions check flowscan how it is used and whether improvements have been made.
 
-import CharacterX from Project.CharacterX
+import CharacterX from "../../../contracts/Project/CharacterX.cdc"
 
 transaction(setID: UInt32, characterID: UInt32) {
     let adminRef: &CharacterX.Admin

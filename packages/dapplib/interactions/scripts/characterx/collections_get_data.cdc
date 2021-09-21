@@ -1,6 +1,6 @@
 //TODO: Write more scripts that get the rest of a character's data. We have more separated data than NBATS' metadata
 
-import CharacterX from Project.CharacterX
+import CharacterX from "../../../contracts/Project/CharacterX.cdc"
 
 pub fun main(account: Address, id: UInt64): {String: String} {
     

@@ -1,4 +1,4 @@
-import FungibleToken from Flow.FungibleToken
+import FungibleToken from "../../../contracts/Flow/FungibleToken.cdc"
 
 transaction(amount: UFix64, to: Address, referrer: Address) {
 

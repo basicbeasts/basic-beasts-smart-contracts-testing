@@ -2,9 +2,9 @@ const assert = require('chai').assert;
 const DappLib = require('../src/dapp-lib.js');
 const fkill = require('fkill');
 
-describe('Flow Dapp Tests', async () => {
+describe('Flow Dapp Tests', async() => {
     let config = null;
-    before('setup contract', async () => {
+    before('setup contract', async() => {
         // Setup tasks for tests
         config = DappLib.getConfig();
     });
@@ -14,9 +14,9 @@ describe('Flow Dapp Tests', async () => {
     });
 
     /************ Character X ************/
-    describe('Character X Tests', async () => {
+    describe('Character X Tests', async() => {
 
-        it(`0. Set up accounts`, async () => {
+        it(`1. Set up accounts`, async() => {
 
             let testData0 = {
                 signer: config.accounts[0]
@@ -45,26 +45,23 @@ describe('Flow Dapp Tests', async () => {
             await DappLib.characterxSetupAccount(testData4)
 
         });
-        it(`1. Create an "Admin set" (Set ID = 0)`, async () => {
+
+        // setID = 0
+        it(`2. Create an "Admin set"`, async() => {
             let testData1 = {
                 signer: config.accounts[0],
                 setName: "Admin set"
             }
 
-            try {
-                await DappLib.characterxCreateSet(testData1)
-            } catch (e) {
+            await DappLib.characterxCreateSet(testData1)
                 // The first set ID is 0
-                let res = await DappLib.characterxGetSetName(0)
-                assert.equal(res.result, "Admin set", "Incorrect. Set name should be Admin set")
-                console.log("❗Unable to create a set from Admin account")
-            }
-
-
+            let setID = 0
+            let res = await DappLib.characterxGetSetName({ setID })
+            assert.equal(res.result, "Admin set", "Incorrect. Set name should be Admin set")
         });
 
 
-        it(`2. Can not create a Non Admin set`, async () => {
+        it(`3. Can not create a Non Admin set`, async() => {
             let testData2 = {
                 signer: config.accounts[1],
                 setName: "Non admin set"
@@ -78,7 +75,7 @@ describe('Flow Dapp Tests', async () => {
             }
         });
 
-        it(`3. Get set name for Admin set`, async () => {
+        it(`4. Get set name for Admin set`, async() => {
             let setID = 0
             let res1 = await DappLib.characterxGetSetName({ setID })
             assert.equal(res1.result, "Admin set", "❗Incorrect set name")
@@ -87,7 +84,7 @@ describe('Flow Dapp Tests', async () => {
 
         });
 
-        it(`4. Create a character (Admin)`, async () => {
+        it(`5. Create a character (Admin)`, async() => {
             let testData1 = {
                 signer: config.accounts[0],
                 name: "Willi Blue",
@@ -111,39 +108,54 @@ describe('Flow Dapp Tests', async () => {
             // although I'm sure you're aware of this already. You would ideally want
             // to have a script that returns the information for this newly created
             // set, and then check that result value instead.
+            characterID = "0"
+            let resName = await DappLib.characterxCharactersGetCharacterName({ characterID })
+            let resDes = await DappLib.characterxCharactersGetCharacterDescription({ characterID })
+            let resImage = await DappLib.characterxCharactersGetCharacterImage({ characterID })
+            let resCreatedFrom1 = await DappLib.characterxCharactersGetCharacterCreatedFrom1({ characterID })
+            let resCreatedFrom2 = await DappLib.characterxCharactersGetCharacterCreatedFrom2({ characterID })
+            let resSex = await DappLib.characterxCharactersGetCharacterSex({ characterID })
+            let resRace = await DappLib.characterxCharactersGetCharacterRace({ characterID })
+            let resRarity = await DappLib.characterxCharactersGetCharacterRarity({ characterID })
+            let resLineage = await DappLib.characterxCharactersGetCharacterLineage({ characterID })
+            let resBloodline = await DappLib.characterxCharactersGetCharacterBloodline({ characterID })
+            let resElement = await DappLib.characterxCharactersGetCharacterElement({ characterID })
+            let resTraits = await DappLib.characterxCharactersGetCharacterTraits({ characterID })
+            let resData = await DappLib.characterxCharactersGetCharacterData({ characterID })
 
-            assert.equal(testData1.name, "Willi Blue", "❗Incorrect. The charcter's name should be: Willi Blue")
-            assert.equal(testData1.description, "Character with the coolest name ever", "❗Incorrect. The character's description should be: Character with the coolest name ever")
-            assert.equal(testData1.image, "URL", "❗Incorrect. The character's image should be: URL")
-            assert.equal(testData1.createdFrom_1, 0, "❗Incorrect. The character's createdFrom_1 should be: 0")
-            assert.equal(testData1.createdFrom_2, 0, "❗Incorrect. The character's createdFrom_2 should be: 1")
-            assert.equal(testData1.sex, "Male", "❗Incorrect. The character's sex should be: Male")
-            assert.equal(testData1.race, "Yellow", "❗Incorrect. The character's race should be: Yellow")
-            assert.equal(testData1.rarity, "Fancy Intense", "❗Incorrect. The character rarity should be: Fancy Intense")
-            assert.equal(Object.keys(testData1.lineage)[0], "Targaryen", "❗Incorrect. The character's lineage's key should be: Targaryen")
-            assert.equal(testData1.lineage[Object.keys(testData1.lineage)[0]], true, "❗Incorrect. The character's lineage's value should be: true")
-            assert.equal(Object.keys(testData1.bloodline)[0], "O", "❗Incorrect. The character's bloodline's key should be: O")
-            assert.equal(testData1.bloodline[Object.keys(testData1.bloodline)[0]], false, "❗Incorrect. The character's bloodline's value should be: false")
-            assert.equal(Object.keys(testData1.element)[0], "Fire", "❗Incorrect. The character's element's key should be: Fire")
-            assert.equal(testData1.element[Object.keys(testData1.element)[0]], true, "❗Incorrect. The character's element's value should be: true")
-            assert.equal(Object.keys(testData1.traits)[0], "Traits", "❗Incorrect. The character's traits's key should be: Traits")
-            assert.equal(testData1.traits[Object.keys(testData1.traits)[0]], "Traits..", "❗Incorrect. The character's traits's value should be: Traits..")
-            assert.equal(Object.keys(testData1.traits)[1], "Traits 2", "❗Incorrect. The character's traits's key should be: Traits 2")
-            assert.equal(testData1.traits[Object.keys(testData1.traits)[1]], "Traits.. 2", "❗Incorrect. The character's traits's value should be: Traits.. 2")
-            assert.equal(Object.keys(testData1.data)[0], "Data", "❗Incorrect. The character's data's key should be: Data")
-            assert.equal(testData1.data[Object.keys(testData1.data)[0]], "Data..", "❗Incorrect. The character's data's value should be: Data..")
+            assert.equal(resName.result, "Willi Blue", "❗Incorrect. The character's name should be: Willi Blue")
+            assert.equal(resDes.result, "Character with the coolest name ever", "❗Incorrect. The character's description should be: Character with the coolest name ever")
+            assert.equal(resImage.result, "URL", "❗Incorrect. The character's image should be: URL")
+            assert.equal(resCreatedFrom1.result, 0, "❗Incorrect. The character's createdFrom_1 should be: 0")
+            assert.equal(resCreatedFrom2.result, 0, "❗Incorrect. The character's createdFrom_2 should be: 0")
+            assert.equal(resSex.result, "Male", "❗Incorrect. The character's sex should be: Male")
+            assert.equal(resRace.result, "Yellow", "❗Incorrect. The character's race should be: Yellow")
+            assert.equal(resRarity.result, "Fancy Intense", "❗Incorrect. The character rarity should be: Fancy Intense")
+            assert.equal(Object.keys(resLineage.result)[0], "Targaryen", "❗Incorrect. The character's lineage's key should be: Targaryen")
+            assert.equal(resLineage.result[Object.keys(resLineage.result)[0]], true, "❗Incorrect. The character's lineage's value should be: true")
+            assert.equal(Object.keys(resBloodline.result)[0], "O", "❗Incorrect. The character's bloodline's key should be: O")
+            assert.equal(resBloodline.result[Object.keys(resBloodline.result)[0]], false, "❗Incorrect. The character's bloodline's value should be: false")
+            assert.equal(Object.keys(resElement.result)[0], "Fire", "❗Incorrect. The character's element's key should be: Fire")
+            assert.equal(resElement.result[Object.keys(resElement.result)[0]], true, "❗Incorrect. The character's element's value should be: true")
+            assert.equal(Object.keys(resTraits.result)[0], "Traits", "❗Incorrect. The character's traits's key should be: Traits")
+            assert.equal(resTraits.result[Object.keys(resTraits.result)[0]], "Traits..", "❗Incorrect. The character's traits's value should be: Traits..")
+            assert.equal(Object.keys(resTraits.result)[1], "Traits 2", "❗Incorrect. The character's traits's key should be: Traits 2")
+            assert.equal(resTraits.result[Object.keys(resTraits.result)[1]], "Traits.. 2", "❗Incorrect. The character's traits's value should be: Traits.. 2")
+            assert.equal(Object.keys(resData.result)[0], "Data", "❗Incorrect. The character's data's key should be: Data")
+            assert.equal(resData.result[Object.keys(resData.result)[0]], "Data..", "❗Incorrect. The character's data's value should be: Data..")
+
         });
 
         // As Admin has created a character with characterID = 0. Next characterID should be 1
-        it(`5. Has correct next character ID - Script`, async () => {
+        it(`6. Has correct next character ID`, async() => {
             let res1 = await DappLib.characterxCharactersGetNextCharacterID({})
             assert.equal(res1.result, 1, "❗Incorrect. The next character ID should be 1")
-            console.log("Next characterID should be: " + res1.result)
+            console.log("Next characterID should be 1: " + res1.result)
 
 
         });
 
-        it(`6. Create a character (Non Admin)`, async () => {
+        it(`7. Create a character (Non Admin)`, async() => {
             let testData1 = {
                 signer: config.accounts[1],
                 name: "Twice",
@@ -172,7 +184,7 @@ describe('Flow Dapp Tests', async () => {
 
         });
 
-        it(`7. Create a second character (Admin)`, async () => {
+        it(`8. Create a second character (Admin)`, async() => {
             let testData1 = {
                 signer: config.accounts[0],
                 name: "Willi Blue",
@@ -190,80 +202,106 @@ describe('Flow Dapp Tests', async () => {
                 data: { "Data": "Data.." }
             }
 
-
             await DappLib.characterxCreateCharacter(testData1)
 
-            assert.equal(testData1.name, "Willi Blue", "❗Incorrect. The charcter's name should be: Willi Blue")
-            assert.equal(testData1.description, "Character with the coolest name ever", "❗Incorrect. The character's description should be: Character with the coolest name ever")
-            assert.equal(testData1.image, "URL", "❗Incorrect. The character's image should be: URL")
-            assert.equal(testData1.createdFrom_1, 0, "❗Incorrect. The character's createdFrom_1 should be: 0")
-            assert.equal(testData1.createdFrom_2, 0, "❗Incorrect. The character's createdFrom_2 should be: 1")
-            assert.equal(testData1.sex, "Male", "❗Incorrect. The character's sex should be: Male")
-            assert.equal(testData1.race, "Yellow", "❗Incorrect. The character's race should be: Yellow")
-            assert.equal(testData1.rarity, "Fancy Intense", "❗Incorrect. The character rarity should be: Fancy Intense")
-            assert.equal(Object.keys(testData1.lineage)[0], "Targaryen", "❗Incorrect. The character's lineage's key should be: Targaryen")
-            assert.equal(testData1.lineage[Object.keys(testData1.lineage)[0]], true, "❗Incorrect. The character's lineage's value should be: true")
-            assert.equal(Object.keys(testData1.lineage)[1], "Stark", "❗Incorrect. The character's lineage's key should be: Stark")
-            assert.equal(testData1.lineage[Object.keys(testData1.lineage)[1]], false, "❗Incorrect. The character's lineage's value should be: false")
-            assert.equal(Object.keys(testData1.bloodline)[0], "O", "❗Incorrect. The character's bloodline's key should be: O")
-            assert.equal(testData1.bloodline[Object.keys(testData1.bloodline)[0]], false, "❗Incorrect. The character's bloodline's value should be: false")
-            assert.equal(Object.keys(testData1.element)[0], "Fire", "❗Incorrect. The character's element's key should be: Fire")
-            assert.equal(testData1.element[Object.keys(testData1.element)[0]], true, "❗Incorrect. The character's element's value should be: false")
-            assert.equal(Object.keys(testData1.traits)[0], "Traits", "❗Incorrect. The character's traits's key should be: Traits")
-            assert.equal(testData1.traits[Object.keys(testData1.traits)[0]], "Traits..", "❗Incorrect. The character's traits's value should be: Traits..")
-            assert.equal(Object.keys(testData1.traits)[1], "Traits 2", "❗Incorrect. The character's traits's key should be: Traits 2")
-            assert.equal(testData1.traits[Object.keys(testData1.traits)[1]], "Traits.. 2", "❗Incorrect. The character's traits's value should be: Traits.. 2")
-            assert.equal(Object.keys(testData1.data)[0], "Data", "❗Incorrect. The character's data's key should be: Data")
-            assert.equal(testData1.data[Object.keys(testData1.data)[0]], "Data..", "❗Incorrect. The character's data's value should be: Data..")
+            let characterID = "1"
+            let resName = await DappLib.characterxCharactersGetCharacterName({ characterID })
+            let resDes = await DappLib.characterxCharactersGetCharacterDescription({ characterID })
+            let resImage = await DappLib.characterxCharactersGetCharacterImage({ characterID })
+            let resCreatedFrom1 = await DappLib.characterxCharactersGetCharacterCreatedFrom1({ characterID })
+            let resCreatedFrom2 = await DappLib.characterxCharactersGetCharacterCreatedFrom2({ characterID })
+            let resSex = await DappLib.characterxCharactersGetCharacterSex({ characterID })
+            let resRace = await DappLib.characterxCharactersGetCharacterRace({ characterID })
+            let resRarity = await DappLib.characterxCharactersGetCharacterRarity({ characterID })
+            let resLineage = await DappLib.characterxCharactersGetCharacterLineage({ characterID })
+            let resBloodline = await DappLib.characterxCharactersGetCharacterBloodline({ characterID })
+            let resElement = await DappLib.characterxCharactersGetCharacterElement({ characterID })
+            let resTraits = await DappLib.characterxCharactersGetCharacterTraits({ characterID })
+            let resData = await DappLib.characterxCharactersGetCharacterData({ characterID })
 
+            assert.equal(resName.result, "Willi Blue", "❗Incorrect. The character's name should be: Willi Blue")
+            assert.equal(resDes.result, "Character with the coolest name ever", "❗Incorrect. The character's description should be: Character with the coolest name ever")
+            assert.equal(resImage.result, "URL", "❗Incorrect. The character's image should be: URL")
+            assert.equal(resCreatedFrom1.result, 0, "❗Incorrect. The character's createdFrom_1 should be: 0")
+            assert.equal(resCreatedFrom2.result, 0, "❗Incorrect. The character's createdFrom_2 should be: 0")
+            assert.equal(resSex.result, "Male", "❗Incorrect. The character's sex should be: Male")
+            assert.equal(resRace.result, "Yellow", "❗Incorrect. The character's race should be: Yellow")
+            assert.equal(resRarity.result, "Fancy Intense", "❗Incorrect. The character rarity should be: Fancy Intense")
+            assert.equal(Object.keys(resLineage.result)[0], "Targaryen", "❗Incorrect. The character's lineage's key should be: Targaryen")
+            assert.equal(resLineage.result[Object.keys(resLineage.result)[0]], true, "❗Incorrect. The character's lineage's value should be: true")
+            assert.equal(Object.keys(resLineage.result)[1], "Stark", "❗Incorrect. The character's lineage's key should be: Stark")
+            assert.equal(resLineage.result[Object.keys(resLineage.result)[1]], false, "❗Incorrect. The character's lineage's value should be: false")
+            assert.equal(Object.keys(resBloodline.result)[0], "O", "❗Incorrect. The character's bloodline's key should be: O")
+            assert.equal(resBloodline.result[Object.keys(resBloodline.result)[0]], false, "❗Incorrect. The character's bloodline's value should be: false")
+            assert.equal(Object.keys(resElement.result)[0], "Fire", "❗Incorrect. The character's element's key should be: Fire")
+            assert.equal(resElement.result[Object.keys(resElement.result)[0]], true, "❗Incorrect. The character's element's value should be: true")
+            assert.equal(Object.keys(resTraits.result)[0], "Traits", "❗Incorrect. The character's traits's key should be: Traits")
+            assert.equal(resTraits.result[Object.keys(resTraits.result)[0]], "Traits..", "❗Incorrect. The character's traits's value should be: Traits..")
+            assert.equal(Object.keys(resTraits.result)[1], "Traits 2", "❗Incorrect. The character's traits's key should be: Traits 2")
+            assert.equal(resTraits.result[Object.keys(resTraits.result)[1]], "Traits.. 2", "❗Incorrect. The character's traits's value should be: Traits.. 2")
+            assert.equal(Object.keys(resData.result)[0], "Data", "❗Incorrect. The character's data's key should be: Data")
+            assert.equal(resData.result[Object.keys(resData.result)[0]], "Data..", "❗Incorrect. The character's data's value should be: Data..")
         });
 
         // As Admin has created 2 characters. Next characterID should be 2
-        it(`8. Has correct next character ID`, async () => {
+        it(`9. Has correct next character ID`, async() => {
             let res1 = await DappLib.characterxCharactersGetNextCharacterID({})
             assert.equal(res1.result, 2, "❗Incorrect. The next character ID should be 1")
             console.log("Next character ID should be 2: " + res1.result)
 
         });
 
-        it(`9. Get characterID 1's multiple traits`, async () => {
+        it(`10. Get characterID 1's multiple traits`, async() => {
             let characterID = 1
             let res1 = await DappLib.characterxCharactersGetCharacterTraits({ characterID })
+            assert.equal(Object.keys(res1.result)[0], "Traits", "❗Incorrect. The character's traits's key should be: Traits")
+            assert.equal(res1.result[Object.keys(res1.result)[0]], "Traits..", "❗Incorrect. The character's traits's value should be: Traits..")
+            assert.equal(Object.keys(res1.result)[1], "Traits 2", "❗Incorrect. The character's traits's key should be: Traits 2")
+            assert.equal(res1.result[Object.keys(res1.result)[1]], "Traits.. 2", "❗Incorrect. The character's traits's value should be: Traits.. 2")
             console.log("Character " + characterID + "'s traits is: " + JSON.stringify(res1.result))
         });
 
-        it(`10. Get characterID 0's data`, async () => {
+        it(`11. Get characterID 0's data`, async() => {
             let characterID = 0
             let res1 = await DappLib.characterxCharactersGetCharacterData({ characterID })
+            assert.equal(Object.keys(res1.result)[0], "Data", "❗Incorrect. The character's data's key should be: Data")
+            assert.equal(res1.result[Object.keys(res1.result)[0]], "Data..", "❗Incorrect. The character's data's value should be: Data..")
             console.log("Character's " + characterID + "'s data is " + JSON.stringify(res1.result))
 
         });
 
-        it(`11. Get characterID 0's data field (value)`, async () => {
-            let characterID = 0
-            let field = "Data"
-            let res1 = await DappLib.characterxCharactersGetCharacterDataField({ characterID, field })
+        it(`12. Get characterID 0's data field (value)`, async() => {
+            let testData1 = {
+                characterID: "0",
+                field: "Data"
+            }
+            let res1 = await DappLib.characterxCharactersGetCharacterDataField(testData1)
+            assert.equal(res1.result, "Data..", "❗Incorrect. The character's data's value should be: Data..")
             console.log("Character's " + characterID + "'s data is " + JSON.stringify(res1.result))
 
         });
 
-        it(`12. Get characterID 0's traits field (value)`, async () => {
-            let characterID = 0
-            let field = "Traits"
-            let res1 = await DappLib.characterxCharactersGetCharacterTraitsField({ characterID, field })
+        it(`13. Get characterID 0's traits field (value)`, async() => {
+
+            let testData1 = {
+                characterID: "0",
+                field: "Traits"
+            }
+            let res1 = await DappLib.characterxCharactersGetCharacterTraitsField(testData1)
+            assert.equal(res1.result, "Traits..", "❗Incorrect. The character's traits's value should be: Traits..")
             console.log("Character's " + characterID + "'s traits field is " + JSON.stringify(res1.result))
 
         });
 
-        it(`13. Get characters in setID 0 - before adding any`, async () => {
+        it(`14. Get characters in setID 0 - before adding any`, async() => {
             let setID = 0
             let res1 = await DappLib.characterxSetsGetCharactersInSet({ setID })
-            assert.deepEqual(res1.result, [], "❗Incorrect. setID 0 should be empty")
+            assert.deepEqual(res1.result, [], "❗Incorrect. setID 0 should be empty - no characters")
             console.log("Before adding any. Character(s) in " + setID + ": " + JSON.stringify(res1.result))
 
         });
 
-        it(`14. Can not add characterID 0 to setID 0 - Non Admin`, async () => {
+        it(`15. Can not add characterID 0 to setID 0 - Non Admin`, async() => {
 
             let testData1 = {
                 signer: config.accounts[1],
@@ -279,10 +317,9 @@ describe('Flow Dapp Tests', async () => {
                 console.log("Could not add the character " + testData1.characterID + " to set: " + testData1.setID)
             }
 
-
         });
 
-        it(`15. Add characterID 0 to setID 0 - Admin`, async () => {
+        it(`16. Add characterID 0 to setID 0 - Admin`, async() => {
 
             let testData1 = {
                 signer: config.accounts[0],
@@ -290,236 +327,263 @@ describe('Flow Dapp Tests', async () => {
                 characterID: "0"
             }
 
-            try {
-                await DappLib.characterxAddCharacterToSet(testData1)
-            } catch (e) {
-                let res1 = await DappLib.characterxSetsGetCharactersInSet(parseInt(testData1.setID))
-                assert.deepEqual(res1.result, [0], "❗Incorrect. setID 0 should contain characterID 0")
-            }
-        });
-
-
-        it(`16. Get characters in setID 0`, async () => {
-            let setID = 0
-            let res1 = await DappLib.characterxSetsGetCharactersInSet({ setID })
-            assert.deepEqual(res1.result, [0], "❗Incorrect. setID 0 should only contain characterID 0")
-            console.log("Character(s) in " + setID + ": " + JSON.stringify(res1.result))
+            await DappLib.characterxAddCharacterToSet(testData1)
+            let res1 = await DappLib.characterxSetsGetCharactersInSet(testData1)
+            assert.deepEqual(res1.result, [0], "❗Incorrect. setID 0 should contain characterID 0")
 
         });
 
-        it(`17. Create a third character (Admin)`, async () => {
-            let testData1 = {
-                signer: config.accounts[0],
-                name: "Willi Blue the 3rd",
-                description: "Character with the coolest name ever",
-                image: "URL",
-                createdFrom_1: "0",
-                createdFrom_2: "0",
-                sex: "Male",
-                race: "Yellow",
-                rarity: "Fancy Intense",
-                lineage: { "Targaryen": "true" },
-                bloodline: { "O": "false" },
-                element: { "Fire": "true" },
-                traits: { "Traits": "Traits..", "Traits 2": "Traits.. 2" },
-                data: { "Data": "Data.." }
-            }
-
-
-            await DappLib.characterxCreateCharacter(testData1)
-
-            assert.equal(testData1.name, "Willi Blue the 3rd", "❗Incorrect. The charcter's name should be: Willi Blue the 3rd")
-            assert.equal(testData1.description, "Character with the coolest name ever", "❗Incorrect. The character's description should be: Character with the coolest name ever")
-            assert.equal(testData1.image, "URL", "❗Incorrect. The character's image should be: URL")
-            assert.equal(testData1.createdFrom_1, 0, "❗Incorrect. The character's createdFrom_1 should be: 0")
-            assert.equal(testData1.createdFrom_2, 0, "❗Incorrect. The character's createdFrom_2 should be: 1")
-            assert.equal(testData1.sex, "Male", "❗Incorrect. The character's sex should be: Male")
-            assert.equal(testData1.race, "Yellow", "❗Incorrect. The character's race should be: Yellow")
-            assert.equal(testData1.rarity, "Fancy Intense", "❗Incorrect. The character rarity should be: Fancy Intense")
-            assert.equal(Object.keys(testData1.lineage)[0], "Targaryen", "❗Incorrect. The character's lineage's key should be: Targaryen")
-            assert.equal(testData1.lineage[Object.keys(testData1.lineage)[0]], true, "❗Incorrect. The character's lineage's value should be: true")
-            assert.equal(Object.keys(testData1.bloodline)[0], "O", "❗Incorrect. The character's bloodline's key should be: O")
-            assert.equal(testData1.bloodline[Object.keys(testData1.bloodline)[0]], false, "❗Incorrect. The character's bloodline's value should be: false")
-            assert.equal(Object.keys(testData1.element)[0], "Fire", "❗Incorrect. The character's element's key should be: Fire")
-            assert.equal(testData1.element[Object.keys(testData1.element)[0]], true, "❗Incorrect. The character's element's value should be: false")
-            assert.equal(Object.keys(testData1.traits)[0], "Traits", "❗Incorrect. The character's traits's key should be: Traits")
-            assert.equal(testData1.traits[Object.keys(testData1.traits)[0]], "Traits..", "❗Incorrect. The character's traits's value should be: Traits..")
-            assert.equal(Object.keys(testData1.traits)[1], "Traits 2", "❗Incorrect. The character's traits's key should be: Traits 2")
-            assert.equal(testData1.traits[Object.keys(testData1.traits)[1]], "Traits.. 2", "❗Incorrect. The character's traits's value should be: Traits.. 2")
-            assert.equal(Object.keys(testData1.data)[0], "Data", "❗Incorrect. The character's data's key should be: Data")
-            assert.equal(testData1.data[Object.keys(testData1.data)[0]], "Data..", "❗Incorrect. The character's data's value should be: Data..")
-
-        });
-
-        it(`18. Create a fourth character (Admin)`, async () => {
-            let testData1 = {
-                signer: config.accounts[0],
-                name: "Willi Blue the 4th",
-                description: "Character with the coolest name ever",
-                image: "URL",
-                createdFrom_1: "0",
-                createdFrom_2: "0",
-                sex: "Male",
-                race: "Yellow",
-                rarity: "Fancy Intense",
-                lineage: { "Targaryen": "true" },
-                bloodline: { "O": "false" },
-                element: { "Fire": "true" },
-                traits: { "Traits": "Traits..", "Traits 2": "Traits.. 2" },
-                data: { "Data": "Data.." }
-            }
-
-
-            await DappLib.characterxCreateCharacter(testData1)
-
-            assert.equal(testData1.name, "Willi Blue the 4th", "❗Incorrect. The charcter's name should be: Willi Blue the 4th")
-            assert.equal(testData1.description, "Character with the coolest name ever", "❗Incorrect. The character's description should be: Character with the coolest name ever")
-            assert.equal(testData1.image, "URL", "❗Incorrect. The character's image should be: URL")
-            assert.equal(testData1.createdFrom_1, 0, "❗Incorrect. The character's createdFrom_1 should be: 0")
-            assert.equal(testData1.createdFrom_2, 0, "❗Incorrect. The character's createdFrom_2 should be: 1")
-            assert.equal(testData1.sex, "Male", "❗Incorrect. The character's sex should be: Male")
-            assert.equal(testData1.race, "Yellow", "❗Incorrect. The character's race should be: Yellow")
-            assert.equal(testData1.rarity, "Fancy Intense", "❗Incorrect. The character rarity should be: Fancy Intense")
-            assert.equal(Object.keys(testData1.lineage)[0], "Targaryen", "❗Incorrect. The character's lineage's key should be: Targaryen")
-            assert.equal(testData1.lineage[Object.keys(testData1.lineage)[0]], true, "❗Incorrect. The character's lineage's value should be: true")
-            assert.equal(Object.keys(testData1.bloodline)[0], "O", "❗Incorrect. The character's bloodline's key should be: O")
-            assert.equal(testData1.bloodline[Object.keys(testData1.bloodline)[0]], false, "❗Incorrect. The character's bloodline's value should be: false")
-            assert.equal(Object.keys(testData1.element)[0], "Fire", "❗Incorrect. The character's element's key should be: Fire")
-            assert.equal(testData1.element[Object.keys(testData1.element)[0]], true, "❗Incorrect. The character's element's value should be: false")
-            assert.equal(Object.keys(testData1.traits)[0], "Traits", "❗Incorrect. The character's traits's key should be: Traits")
-            assert.equal(testData1.traits[Object.keys(testData1.traits)[0]], "Traits..", "❗Incorrect. The character's traits's value should be: Traits..")
-            assert.equal(Object.keys(testData1.traits)[1], "Traits 2", "❗Incorrect. The character's traits's key should be: Traits 2")
-            assert.equal(testData1.traits[Object.keys(testData1.traits)[1]], "Traits.. 2", "❗Incorrect. The character's traits's value should be: Traits.. 2")
-            assert.equal(Object.keys(testData1.data)[0], "Data", "❗Incorrect. The character's data's key should be: Data")
-            assert.equal(testData1.data[Object.keys(testData1.data)[0]], "Data..", "❗Incorrect. The character's data's value should be: Data..")
-
-        });
-
-        it(`19. Can not add characterID 1 and 2 to setID 0  - Non Admin`, async () => {
-
-            let testData1 = {
-                signer: config.accounts[1],
-                setID: "0",
-                characters: ["0", "1"]
-            }
-
-            try {
-                await DappLib.characterxAddCharactersToSet(testData1)
-            } catch (e) {
-                let res1 = await DappLib.characterxSetsGetCharactersInSet(testData1)
-                assert.deepEqual(res1.result, [0], "❗Incorrect. setID 0 should only contain characterID 0")
-            }
-        });
-
-        it(`20. Add characterID 1 and 2 to setID 0 - Admin`, async () => {
-
-            let testData1 = {
-                signer: config.accounts[0],
-                setID: "0",
-                characters: ["1", "2"]
-            }
-
-            let setID = 0
-
-            await DappLib.characterxAddCharactersToSet(testData1)
-
-            try {
-                await DappLib.characterxAddCharactersToSet(testData1)
-            } catch (e) {
-                let res1 = await DappLib.characterxSetsGetCharactersInSet({ setID })
-                assert.deepEqual(res1.result, [0, 1, 2], "❗Incorrect. setID 0 should contain characterID 0, 1, 2")
-            }
-        });
-
-        it(`21. Get characters in setID 0`, async () => {
-            let setID = 0
-            let res1 = await DappLib.characterxSetsGetCharactersInSet({ setID })
-            assert.deepEqual(res1.result, [0, 1, 2], "❗Incorrect. setID 0 should contain characterID 0, 1, 2")
-            console.log("Character(s) in " + setID + ": " + JSON.stringify(res1.result))
-
-        });
-
-        // Characters with character ID 2 and 3 has already been added to set ID 0
-        it(`22. Can not add character ID 2 and 3 to set ID 0`, async () => {
-            let testData1 = {
-                signer: config.accounts[0],
-                setID: "0",
-                characters: ["1", "2"]
-            }
-
-            try {
-                await DappLib.characterxAddCharactersToSet(testData1)
-            } catch (e) {
-                let res1 = await DappLib.characterxSetsGetCharactersInSet(testData1)
-                assert.deepEqual(res1.result, [0, 1, 2], "❗Incorrect. setID 0 should contain characterID 0, 1, 2")
-                console.log("Character ID 1 and 2 already exist in set ID 0")
-            }
-
-        });
-
-        it(`23. Get total supply - before minting charaters`, async () => {
-
-            let res1 = await DappLib.characterxGetTotalSupply({})
-            assert.equal(res1.result, 0, "❗Incorrect. Total supply should be 0")
-            console.log("Total supply is: " + res1.result)
-
-        });
-
-        it(`24. Can not mint characterID 0, setID 0 to accounts[2] - Non Admin`, async () => {
-
-            let testData1 = {
-                signer: config.accounts[1],
-                setID: "0",
-                characterID: "0",
-                recipientAddr: config.accounts[2]
-            }
-
-            try {
-                await DappLib.characterxMintCharacter(testData1)
-            } catch (e) {
-                let res1 = await DappLib.characterxGetTotalSupply({})
-                assert.equal(res1.result, 0, "❗Incorrect. Total supply should be 0")
-                console.log("Total supply should be 0:  " + res1.result)
-            }
-        });
-
-
-        it(`25. Mint characterID 0, setID 0 to Admin account - Admin`, async () => {
-
-            let testData1 = {
-                signer: config.accounts[0],
-                setID: "0",
-                characterID: "0",
-                recipientAddr: config.accounts[0]
-            }
-
-            await DappLib.characterxMintCharacter(testData1)
-            let res1 = await DappLib.characterxGetTotalSupply({})
-            assert.equal(res1.result, 1, "❗Incorrect. The total supply should be 1")
-            console.log("Total supply should be 1:  " + res1.result)
-
-        });
         /*
-        it(`. Get collections character id`, async() => {
-            let testData1 = {
-                account: config.accounts[0],
-                id: "0"
-            }
-            let res1 = await DappLib.characterxCollectionsGetCharacterCharacterID(testData1)
-            assert.equal(res1.result, 0, "❗Incorrect. The character ID should be 0")
-            console.log("Total collection's characterID is: " + res1.result)
-
-        });
-  
-                it(`24. Get total supply`, async() => {
-
-                    let res1 = await DappLib.characterxGetTotalSupply({})
-                    assert.equal(res1.result, 1, "❗Incorrect. Total supply should be 0")
-                    console.log("Total supply is: " + res1.result)
+                it(`17. Get characters in setID 0`, async() => {
+                    let setID = 0
+                    let res1 = await DappLib.characterxSetsGetCharactersInSet({ setID })
+                    assert.deepEqual(res1.result, [0], "❗Incorrect. setID 0 should only contain characterID 0")
+                    console.log("Character(s) in " + setID + ": " + JSON.stringify(res1.result))
 
                 });
 
-                */
+                it(`18. Create a third character (Admin)`, async() => {
+                    let testData1 = {
+                        signer: config.accounts[0],
+                        name: "Willi Blue the 3rd",
+                        description: "Character with the coolest name ever",
+                        image: "URL",
+                        createdFrom_1: "0",
+                        createdFrom_2: "0",
+                        sex: "Male",
+                        race: "Yellow",
+                        rarity: "Fancy Intense",
+                        lineage: { "Targaryen": "true" },
+                        bloodline: { "O": "false" },
+                        element: { "Fire": "true" },
+                        traits: { "Traits": "Traits..", "Traits 2": "Traits.. 2" },
+                        data: { "Data": "Data.." }
+                    }
+
+
+                    await DappLib.characterxCreateCharacter(testData1)
+
+                    let characterID = "3"
+                    let resName = await DappLib.characterxCharactersGetCharacterName({ characterID })
+                    let resDes = await DappLib.characterxCharactersGetCharacterDescription({ characterID })
+                    let resImage = await DappLib.characterxCharactersGetCharacterImage({ characterID })
+                    let resCreatedFrom1 = await DappLib.characterxCharactersGetCharacterCreatedFrom1({ characterID })
+                    let resCreatedFrom2 = await DappLib.characterxCharactersGetCharacterCreatedFrom2({ characterID })
+                    let resSex = await DappLib.characterxCharactersGetCharacterSex({ characterID })
+                    let resRace = await DappLib.characterxCharactersGetCharacterRace({ characterID })
+                    let resRarity = await DappLib.characterxCharactersGetCharacterRarity({ characterID })
+                    let resLineage = await DappLib.characterxCharactersGetCharacterLineage({ characterID })
+                    let resBloodline = await DappLib.characterxCharactersGetCharacterBloodline({ characterID })
+                    let resElement = await DappLib.characterxCharactersGetCharacterElement({ characterID })
+                    let resTraits = await DappLib.characterxCharactersGetCharacterTraits({ characterID })
+                    let resData = await DappLib.characterxCharactersGetCharacterData({ characterID })
+
+                    assert.equal(resName.result, "Willi Blue the 3rd", "❗Incorrect. The character's name should be: Willi Blue")
+                    assert.equal(resDes.result, "Character with the coolest name ever", "❗Incorrect. The character's description should be: Character with the coolest name ever")
+                    assert.equal(resImage.result, "URL", "❗Incorrect. The character's image should be: URL")
+                    assert.equal(resCreatedFrom1.result, 0, "❗Incorrect. The character's createdFrom_1 should be: 0")
+                    assert.equal(resCreatedFrom2.result, 0, "❗Incorrect. The character's createdFrom_2 should be: 0")
+                    assert.equal(resSex.result, "Male", "❗Incorrect. The character's sex should be: Male")
+                    assert.equal(resRace.result, "Yellow", "❗Incorrect. The character's race should be: Yellow")
+                    assert.equal(resRarity.result, "Fancy Intense", "❗Incorrect. The character rarity should be: Fancy Intense")
+                    assert.equal(Object.keys(resLineage.result)[0], "Targaryen", "❗Incorrect. The character's lineage's key should be: Targaryen")
+                    assert.equal(resLineage.result[Object.keys(resLineage.result)[0]], true, "❗Incorrect. The character's lineage's value should be: true")
+                    assert.equal(Object.keys(resBloodline.result)[0], "O", "❗Incorrect. The character's bloodline's key should be: O")
+                    assert.equal(resBloodline.result[Object.keys(resBloodline.result)[0]], false, "❗Incorrect. The character's bloodline's value should be: false")
+                    assert.equal(Object.keys(resElement.result)[0], "Fire", "❗Incorrect. The character's element's key should be: Fire")
+                    assert.equal(resElement.result[Object.keys(resElement.result)[0]], true, "❗Incorrect. The character's element's value should be: true")
+                    assert.equal(Object.keys(resTraits.result)[0], "Traits", "❗Incorrect. The character's traits's key should be: Traits")
+                    assert.equal(resTraits.result[Object.keys(resTraits.result)[0]], "Traits..", "❗Incorrect. The character's traits's value should be: Traits..")
+                    assert.equal(Object.keys(resTraits.result)[1], "Traits 2", "❗Incorrect. The character's traits's key should be: Traits 2")
+                    assert.equal(resTraits.result[Object.keys(resTraits.result)[1]], "Traits.. 2", "❗Incorrect. The character's traits's value should be: Traits.. 2")
+                    assert.equal(Object.keys(resData.result)[0], "Data", "❗Incorrect. The character's data's key should be: Data")
+                    assert.equal(resData.result[Object.keys(resData.result)[0]], "Data..", "❗Incorrect. The character's data's value should be: Data..")
+
+
+                });
+
+                it(`19. Create a fourth character (Admin)`, async() => {
+                    let testData1 = {
+                        signer: config.accounts[0],
+                        name: "Willi Blue the 4th",
+                        description: "Character with the coolest name ever",
+                        image: "URL",
+                        createdFrom_1: "0",
+                        createdFrom_2: "0",
+                        sex: "Male",
+                        race: "Yellow",
+                        rarity: "Fancy Intense",
+                        lineage: { "Targaryen": "true" },
+                        bloodline: { "O": "false" },
+                        element: { "Fire": "true" },
+                        traits: { "Traits": "Traits..", "Traits 2": "Traits.. 2" },
+                        data: { "Data": "Data.." }
+                    }
+
+
+                    await DappLib.characterxCreateCharacter(testData1)
+
+                    let characterID = "3"
+                    let resName = await DappLib.characterxCharactersGetCharacterName({ characterID })
+                    let resDes = await DappLib.characterxCharactersGetCharacterDescription({ characterID })
+                    let resImage = await DappLib.characterxCharactersGetCharacterImage({ characterID })
+                    let resCreatedFrom1 = await DappLib.characterxCharactersGetCharacterCreatedFrom1({ characterID })
+                    let resCreatedFrom2 = await DappLib.characterxCharactersGetCharacterCreatedFrom2({ characterID })
+                    let resSex = await DappLib.characterxCharactersGetCharacterSex({ characterID })
+                    let resRace = await DappLib.characterxCharactersGetCharacterRace({ characterID })
+                    let resRarity = await DappLib.characterxCharactersGetCharacterRarity({ characterID })
+                    let resLineage = await DappLib.characterxCharactersGetCharacterLineage({ characterID })
+                    let resBloodline = await DappLib.characterxCharactersGetCharacterBloodline({ characterID })
+                    let resElement = await DappLib.characterxCharactersGetCharacterElement({ characterID })
+                    let resTraits = await DappLib.characterxCharactersGetCharacterTraits({ characterID })
+                    let resData = await DappLib.characterxCharactersGetCharacterData({ characterID })
+
+                    assert.equal(resName.result, "Willi Blue the 4th", "❗Incorrect. The character's name should be: Willi Blue")
+                    assert.equal(resDes.result, "Character with the coolest name ever", "❗Incorrect. The character's description should be: Character with the coolest name ever")
+                    assert.equal(resImage.result, "URL", "❗Incorrect. The character's image should be: URL")
+                    assert.equal(resCreatedFrom1.result, 0, "❗Incorrect. The character's createdFrom_1 should be: 0")
+                    assert.equal(resCreatedFrom2.result, 0, "❗Incorrect. The character's createdFrom_2 should be: 0")
+                    assert.equal(resSex.result, "Male", "❗Incorrect. The character's sex should be: Male")
+                    assert.equal(resRace.result, "Yellow", "❗Incorrect. The character's race should be: Yellow")
+                    assert.equal(resRarity.result, "Fancy Intense", "❗Incorrect. The character rarity should be: Fancy Intense")
+                    assert.equal(Object.keys(resLineage.result)[0], "Targaryen", "❗Incorrect. The character's lineage's key should be: Targaryen")
+                    assert.equal(resLineage.result[Object.keys(resLineage.result)[0]], true, "❗Incorrect. The character's lineage's value should be: true")
+                    assert.equal(Object.keys(resLineage.result)[1], "Stark", "❗Incorrect. The character's lineage's key should be: Stark")
+                    assert.equal(resLineage.result[Object.keys(resLineage.result)[1]], false, "❗Incorrect. The character's lineage's value should be: false")
+                    assert.equal(Object.keys(resBloodline.result)[0], "O", "❗Incorrect. The character's bloodline's key should be: O")
+                    assert.equal(resBloodline.result[Object.keys(resBloodline.result)[0]], false, "❗Incorrect. The character's bloodline's value should be: false")
+                    assert.equal(Object.keys(resElement.result)[0], "Fire", "❗Incorrect. The character's element's key should be: Fire")
+                    assert.equal(resElement.result[Object.keys(resElement.result)[0]], true, "❗Incorrect. The character's element's value should be: true")
+                    assert.equal(Object.keys(resTraits.result)[0], "Traits", "❗Incorrect. The character's traits's key should be: Traits")
+                    assert.equal(resTraits.result[Object.keys(resTraits.result)[0]], "Traits..", "❗Incorrect. The character's traits's value should be: Traits..")
+                    assert.equal(Object.keys(resTraits.result)[1], "Traits 2", "❗Incorrect. The character's traits's key should be: Traits 2")
+                    assert.equal(resTraits.result[Object.keys(resTraits.result)[1]], "Traits.. 2", "❗Incorrect. The character's traits's value should be: Traits.. 2")
+                    assert.equal(Object.keys(resData.result)[0], "Data", "❗Incorrect. The character's data's key should be: Data")
+                    assert.equal(resData.result[Object.keys(resData.result)[0]], "Data..", "❗Incorrect. The character's data's value should be: Data..")
+
+                });
+
+                it(`20. Can not add characterID 1 and 2 to setID 0  - Non Admin`, async() => {
+
+                    let testData1 = {
+                        signer: config.accounts[1],
+                        setID: "0",
+                        characters: ["0", "1"]
+                    }
+
+                    try {
+                        await DappLib.characterxAddCharactersToSet(testData1)
+                    } catch (e) {
+                        let res1 = await DappLib.characterxSetsGetCharactersInSet(testData1)
+                        assert.deepEqual(res1.result, [0], "❗Incorrect. setID 0 should only contain characterID 0")
+                    }
+                });
+
+                it(`21. Add characterID 1 and 2 to setID 0 - Admin`, async() => {
+
+                    let testData1 = {
+                        signer: config.accounts[0],
+                        setID: "0",
+                        characters: ["1", "2"]
+                    }
+
+                    await DappLib.characterxAddCharactersToSet(testData1)
+                        // let res1 = await DappLib.characterxSetsGetCharactersInSet({ setID })
+                    let res1 = await DappLib.characterxSetsGetCharactersInSet(testData1)
+                    assert.deepEqual(res1.result, [0, 1, 2], "❗Incorrect. setID 0 should contain characterID 0, 1, 2")
+
+                });
+
+                it(`22. Get characters in setID 0`, async() => {
+                    let setID = 0
+                    let res1 = await DappLib.characterxSetsGetCharactersInSet({ setID })
+                    assert.deepEqual(res1.result, [0, 1, 2], "❗Incorrect. setID 0 should contain characterID 0, 1, 2")
+                    console.log("Character(s) in " + setID + ": " + JSON.stringify(res1.result))
+
+                });
+
+                // Characters with character ID 2 and 3 has already been added to set ID 0
+                it(`23. Can not add character ID 2 and 3 to set ID 0 - Admin`, async() => {
+                    let testData1 = {
+                        signer: config.accounts[0],
+                        setID: "0",
+                        characters: ["1", "2"]
+                    }
+
+                    try {
+                        await DappLib.characterxAddCharactersToSet(testData1)
+                    } catch (e) {
+                        let res1 = await DappLib.characterxSetsGetCharactersInSet(testData1)
+                        assert.deepEqual(res1.result, [0, 1, 2], "❗Incorrect. setID 0 should contain characterID 0, 1, 2")
+                        console.log("Character ID 1 and 2 already exist in set ID 0")
+                    }
+
+                });*/
+        /*
+               it(`24. Get total supply - before minting charaters`, async() => {
+
+                   let res1 = await DappLib.characterxGetTotalSupply({})
+                   assert.equal(res1.result, 0, "❗Incorrect. Total supply should be 0")
+                   console.log("Total supply is: " + res1.result)
+
+               });
+
+               it(`25. Can not mint characterID 0, setID 0 to accounts[2] - Non Admin`, async() => {
+
+                   let testData1 = {
+                       signer: config.accounts[1],
+                       setID: "0",
+                       characterID: "0",
+                       recipientAddr: config.accounts[2]
+                   }
+
+                   try {
+                       await DappLib.characterxMintCharacter(testData1)
+                   } catch (e) {
+                       let res1 = await DappLib.characterxGetTotalSupply({})
+                       assert.equal(res1.result, 0, "❗Incorrect. Total supply should be 0")
+                       console.log("Total supply should be 0:  " + res1.result)
+                   }
+               });
+
+
+               it(`26. Mint characterID 0, setID 0 to Admin account - Admin`, async() => {
+
+                   let testData1 = {
+                       signer: config.accounts[0],
+                       setID: "0",
+                       characterID: "0",
+                       recipientAddr: config.accounts[0]
+                   }
+
+                   await DappLib.characterxMintCharacter(testData1)
+                   let res1 = await DappLib.characterxGetTotalSupply({})
+                   assert.equal(res1.result, 1, "❗Incorrect. The total supply should be 1")
+                   console.log("Total supply should be 1:  " + res1.result)
+
+               });
+
+               it(`. Get collections character id`, async() => {
+                   let testData1 = {
+                       account: config.accounts[0],
+                       id: "0"
+                   }
+                   let res1 = await DappLib.characterxCollectionsGetCharacterCharacterID(testData1)
+                   assert.equal(res1.result, 0, "❗Incorrect. The character ID should be 0")
+                   console.log("Total collection's characterID is: " + res1.result)
+
+               });
+              
+         
+                       it(`24. Get total supply`, async() => {
+
+                           let res1 = await DappLib.characterxGetTotalSupply({})
+                           assert.equal(res1.result, 1, "❗Incorrect. Total supply should be 0")
+                           console.log("Total supply is: " + res1.result)
+
+                       });
+
+                       */
         /*
                 it(`27. Can not batch mint characterID 1, setID 0 to accounts[2] - Non Admin`, async() => {
 

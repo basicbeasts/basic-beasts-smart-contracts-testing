@@ -507,6 +507,50 @@ pub contract CharacterX: NonFungibleToken {
         }
     } 
 
+    pub fun getCharacterName(characterID: UInt32): String? {
+        return self.characters[characterID]?.name
+    }
+
+    pub fun getCharacterDescription(characterID: UInt32): String? {
+        return self.characters[characterID]?.description
+    }
+
+    pub fun getCharacterImage(characterID: UInt32): String? {
+        return self.characters[characterID]?.image
+    }
+
+    pub fun getCharacterCreatedFrom_1(characterID: UInt32): UInt64? {
+        return self.characters[characterID]?.createdFrom_1
+    }
+
+    pub fun getCharacterCreatedFrom_2(characterID: UInt32): UInt64? {
+        return self.characters[characterID]?.createdFrom_2
+    }
+
+    pub fun getCharacterSex(characterID: UInt32): String? {
+        return self.characters[characterID]?.sex
+    }
+
+    pub fun getCharacterRace(characterID: UInt32): String? {
+        return self.characters[characterID]?.race
+    }
+
+    pub fun getCharacterRarity(characterID: UInt32): String? {
+        return self.characters[characterID]?.rarity
+    }
+
+    pub fun getCharacterLineage(characterID: UInt32): {String: Bool}? {
+        return self.characters[characterID]?.lineage
+    }
+    
+    pub fun getCharacterBloodline(characterID: UInt32): {String: Bool}? {
+        return self.characters[characterID]?.bloodline
+    }
+
+    pub fun getCharacterElement(characterID: UInt32): {String: Bool}? {
+        return self.characters[characterID]?.element
+    }
+
     pub fun getCharacterData(characterID: UInt32): {String: String}? {
         return self.characters[characterID]?.data
     }

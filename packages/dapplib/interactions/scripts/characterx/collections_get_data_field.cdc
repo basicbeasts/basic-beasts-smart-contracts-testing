@@ -1,6 +1,6 @@
 //TODO: Write more scripts that get the rest of a character's data. We have more separated data than NBATS' metadata
 //in case we don't write getters for each field in contract we might do like setdata script
-import CharacterX from Project.CharacterX
+import CharacterX from "../../../contracts/Project/CharacterX.cdc"
 
 pub fun main(account: Address, characterID: UInt64, fieldToSearch: String): String {
     let collectionRef = getAccount(account).getCapability(CharacterX.CollectionPublicPath)

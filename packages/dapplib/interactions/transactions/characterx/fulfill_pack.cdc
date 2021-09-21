@@ -1,5 +1,5 @@
-import NonFungibleToken from Flow.NonFungibleToken
-import CharacterX from Project.CharacterX
+import NonFungibleToken from "../../../contracts/Flow/NonFungibleToken.cdc"
+import CharacterX from "../../../contracts/Project/CharacterX.cdc"
 
 transaction(recipientAddr: Address, characterIDs: [UInt64]) {
     

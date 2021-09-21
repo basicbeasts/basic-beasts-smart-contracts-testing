@@ -1,4 +1,4 @@
-import CharacterX from Project.CharacterX
+import CharacterX from "../../../contracts/Project/CharacterX.cdc"
 
 pub fun main(account: Address, id: UInt64): UInt32 {
 

@@ -1,4 +1,4 @@
-import CharacterX from Project.CharacterX
+import CharacterX from "../../../contracts/Project/CharacterX.cdc"
 
 transaction(setID: UInt32) {
     let adminRef: &CharacterX.Admin

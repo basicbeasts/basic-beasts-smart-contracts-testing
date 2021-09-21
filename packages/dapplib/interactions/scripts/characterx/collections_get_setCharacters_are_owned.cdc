@@ -1,4 +1,4 @@
-import CharacterX from Project.CharacterX
+import CharacterX from "../../../contracts/Project/CharacterX.cdc"
 
 pub fun main(account: Address, setIDs: [UInt32], characterIDs: [UInt32]): Bool {
     assert(setIDs.length == characterIDs.length, 
