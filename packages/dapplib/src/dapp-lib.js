@@ -9,13 +9,158 @@ const t = require('@onflow/types');
 
 module.exports = class DappLib {
 
+
+    /********** FUSD **********/
+
+    // FUSDSetupAccount
+    // calls transactions/FUSD/create_FUSD_vault.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async FUSDCreateFUSDVault(data) {
+
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'FUSD_create_FUSD_vault'
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+    // FUSDMintTokens
+    // calls transactions/FUSD/mint_FUSDs.cdc
+    //
+    // signer/proposer/authorizer: config.accounts[0]
+    //
+    static async FUSDMintFUSDs(data) {
+
+        let config = DappLib.getConfig()
+        let result = await Blockchain.post({
+                config: config,
+                roles: {
+                    proposer: config.accounts[0]
+                }
+            },
+            'FUSD_mint_FUSDs', {
+                to: { value: data.to, type: t.Address },
+                amount: { value: data.amount, type: t.UFix64 }
+            }
+        );
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+    }
+
+    // FUSDCreateMinter
+    // calls transactions/FUSD/create_FUSD_minter.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async FUSDCreateMinter(data) {
+
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'FUSD_create_FUSD_minter', {}
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+    // FUSDGetFUSDBalance
+    // calls scripts/FUSD/get_FUSD_balance.cdc
+    //
+    // signer/proposer/authorizer: none
+    //
+    static async FUSDGetFUSDBalance(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'FUSD_get_FUSD_balance', {
+                address: { value: data.address, type: t.Address }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'FUSD Balance',
+            result: result.callData
+        }
+
+    }
+
+    // FUSDGetFUSDSupply
+    // calls scripts/FUSD/get_FUSD_supply.cdc
+    //
+    // signer/proposer/authorizer: none
+    //
+    static async FUSDGetFUSDSupply(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'FUSD_get_FUSD_supply'
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'FUSD Supply',
+            result: result.callData
+        }
+    }
+
     /********** CHARACTREX **********/
 
-    // characterxCreateCharacter
-    // calls transactions/characterx/create_character.cdc
+
+    // characterxAddLineageKeyValuePair
+    // calls transactions/characterx/add_lineage_key_value_pair.cdc
     //
-    // signer/proposer/authorizer: ??
+    // signer/proposer/authorizer: data.signer
     //
+    static async characterxAddLineageKeyValuePair(data) {
+
+        let config = DappLib.getConfig()
+        let result = await Blockchain.post({
+                config: config,
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_add_lineage_key_value_pair', {
+                lineageKey: { value: data.lineageKey, type: t.String },
+                lineageValue: { value: data.lineageValue, type: t.Bool },
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
 
 
     // characterxCreateSet
@@ -207,13 +352,39 @@ module.exports = class DappLib {
                 }
             },
             'characterx_batch_mint_character', {
-                setID: { value: data.setID, type: t.UInt32 },
-                characterID: { value: data.characterID, type: t.UInt32 },
-                quantity: { value: data.quantity, type: t.UInt64 },
+                setID: { value: parseInt(data.setID), type: t.UInt32 },
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 },
+                quantity: { value: parseInt(data.quantity), type: t.UInt64 },
                 recipientAddr: { value: data.recipientAddr, type: t.Address }
             }
         );
 
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+    // characterxFulfillSingle
+    // calls transactions/characterx/fulfill_single.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxFulfillSingle(data) {
+        let config = DappLib.getConfig()
+        let result = await Blockchain.post({
+                config: config,
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_fulfill_single', {
+                recipientAddr: { value: data.recipientAddr, type: t.Address },
+                characterID: { value: parseInt(data.characterID), type: t.UInt64 }
+            }
+        );
         return {
             type: DappLib.DAPP_RESULT_TX_HASH,
             label: 'Transaction Hash',
@@ -229,7 +400,6 @@ module.exports = class DappLib {
     //
     static async characterxFulfillPack(data) {
         let config = DappLib.getConfig()
-        let characterIDs = [data.characterID1, data.characterID2, data.characterID3].map(t => parseInt(t))
         let result = await Blockchain.post({
                 config: config,
                 roles: {
@@ -238,7 +408,7 @@ module.exports = class DappLib {
             },
             'characterx_fulfill_pack', {
                 recipientAddr: { value: data.recipientAddr, type: t.Address },
-                characterIDs: { value: data.characterIDs, type: t.Arrays(t.UInt64) }
+                characterIDs: DappLib.formatFlowArray(data.characterIDs, t.UInt64)
             }
         );
 
@@ -355,32 +525,6 @@ module.exports = class DappLib {
 
     }
 
-    // characterxTransferAdmin
-    // calls transactions/characterx/transfer_admin.cdc
-    //
-    // signer/proposer/authorizer: data.signer
-    //
-    static async characterxTransferAdmin(data) {
-
-        let result = await Blockchain.post({
-                config: DappLib.getConfig(),
-                roles: {
-                    proposer: data.signer
-                }
-            },
-            'characterx_transfer_admin', {
-
-            }
-        );
-
-        return {
-            type: DappLib.DAPP_RESULT_TX_HASH,
-            label: 'Transaction Hash',
-            result: result.callData.transactionId
-        }
-
-    }
-
 
     // characterxBuyingNFTWithReferral
     // calls transactions/characterx/buying_NFT_with_referral.cdc
@@ -392,7 +536,7 @@ module.exports = class DappLib {
         let result = await Blockchain.post({
                 config: DappLib.getConfig(),
                 roles: {
-                    //proposer: data.signer
+                    proposer: data.signer
                 }
             },
             'characterx_buying_NFT_with_referral', {
@@ -521,12 +665,13 @@ module.exports = class DappLib {
             'characterx_characters_get_all_characters', {}
         );
 
+        console.log(result)
+
         return {
-            type: DappLib.DAPP_RESULT_ARRAY,
+            type: DappLib.DAPP_RESULT_STRING,
             label: 'All characters (array)',
             result: result.callData
         }
-
     }
 
     // characterxCharactersGetNextCharacterID
@@ -568,7 +713,20 @@ module.exports = class DappLib {
         );
 
         return {
-            type: DappLib.DAPP_RESULT_STRING,
+            type: DappLib.DAPP_RESULT_STRING
+
+
+
+
+
+
+
+
+
+
+
+
+            ,
             label: 'Name for the requested character',
             result: result.callData
         }
@@ -760,7 +918,7 @@ module.exports = class DappLib {
         );
 
         return {
-            type: DappLib.DAPP_RESULT_STRING,
+            type: DappLib.DAPP_RESULT_OBJECT,
             label: 'Lineage for the requested character',
             result: result.callData
         }
@@ -784,7 +942,7 @@ module.exports = class DappLib {
         );
 
         return {
-            type: DappLib.DAPP_RESULT_STRING,
+            type: DappLib.DAPP_RESULT_OBJECT,
             label: 'Bloodline for the requested character',
             result: result.callData
         }
@@ -808,7 +966,7 @@ module.exports = class DappLib {
         );
 
         return {
-            type: DappLib.DAPP_RESULT_STRING,
+            type: DappLib.DAPP_RESULT_OBJECT,
             label: 'Element for the requested character',
             result: result.callData
         }
@@ -833,8 +991,7 @@ module.exports = class DappLib {
         );
 
         return {
-            //NOT SURE
-            type: DappLib.DAPP_RESULT_STRING,
+            type: DappLib.DAPP_RESULT_OBJECT,
             label: 'Data for the requested character',
             result: result.callData
         }
@@ -883,7 +1040,7 @@ module.exports = class DappLib {
         );
 
         return {
-            type: DappLib.DAPP_RESULT_STRING,
+            type: DappLib.DAPP_RESULT_OBJECT,
             label: 'The traits for the requested character is',
             result: result.callData
         }
@@ -1160,7 +1317,7 @@ module.exports = class DappLib {
         );
 
         return {
-            type: DappLib.DAPP_RESULT_ARRAY,
+            type: DappLib.DAPP_RESULT_OBJECT,
             label: 'The collections data',
             result: result.callData
         }
@@ -1343,8 +1500,8 @@ module.exports = class DappLib {
             },
             'characterx_collections_get_setCharacters_are_owned', {
                 account: { value: data.account, type: t.Address },
-                setIDs: { value: data.setIDs, type: t.Array(UInt32) },
-                characterIDs: { value: data.characterIDs, type: t.Array(UInt32) }
+                setIDs: DappLib.formatFlowArray(data.setIDs, t.UInt32),
+                characterIDs: DappLib.formatFlowArray(data.characterIDs, t.UInt32)
             }
         );
 

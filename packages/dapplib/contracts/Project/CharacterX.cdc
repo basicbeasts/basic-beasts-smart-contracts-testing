@@ -366,6 +366,20 @@ pub contract CharacterX: NonFungibleToken {
             return newID
         }
 
+
+        // add lineage key vaule pair - DOES NOT WORK
+        /* 
+        pub fun addLineageKeyVaulePair(lineageKey: String, lineageValue: Bool, characterID: UInt32){
+            let character = CharacterX.characters[characterID]
+            pre {
+                character.lineage?[lineageKey] == nil: "This lineage key already exist!"
+            }
+            
+            character.lineage[lineageKey] = lineageValue 
+               
+        }
+        */
+
         pub fun createSet(name: String) {
             var newSet <- create Set(name: name)
 
