@@ -1,7 +1,7 @@
 'use strict';
-const Blockchain = require( './blockchain');
-const dappConfig = require( './dapp-config.json');
-const ClipboardJS = require( 'clipboard');
+const Blockchain = require('./blockchain');
+const dappConfig = require('./dapp-config.json');
+const ClipboardJS = require('clipboard');
 const BN = require('bn.js'); // Required for injected code
 const manifest = require('../manifest.json');
 const t = require('@onflow/types');
@@ -9,411 +9,1961 @@ const t = require('@onflow/types');
 
 module.exports = class DappLib {
 
-  /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> NFT: PACK NFT  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
-  /********** Flow Token **********/
+    /********** FUSD **********/
 
-  static async mintFlowTokens(data) {
+    // FUSDSetupAccount
+    // calls transactions/FUSD/create_FUSD_vault.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async FUSDCreateFUSDVault(data) {
 
-    let config = DappLib.getConfig();
-    let result = await Blockchain.post({
-      config: config,
-      roles: {
-        proposer: "0xf8d6e0586b0a20c7",
-      }
-    },
-      'flowtoken_mint_flow_tokens',
-      {
-        recipient: { value: data.recipient, type: t.Address },
-        amount: { value: data.amount, type: t.UFix64 }
-      }
-    );
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'FUSD_create_FUSD_vault'
+        );
 
-    return {
-      type: DappLib.DAPP_RESULT_TX_HASH,
-      label: 'Transaction Hash',
-      result: result.callData.transactionId
-    }
-  }
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
 
-  static async getFlowBalance(data) {
-
-    let config = DappLib.getConfig();
-    let result = await Blockchain.get({
-      config: config,
-      roles: {
-      }
-    },
-      'flowtoken_get_flow_balance',
-      {
-        account: { value: data.account, type: t.Address }
-      }
-    );
-
-    return {
-      type: DappLib.DAPP_RESULT_BIG_NUMBER,
-      label: 'Collectible Type',
-      result: result.callData
-    }
-  }
-
-  /********** NFT **********/
-
-  static async provisionNFTs(data) {
-
-    let config = DappLib.getConfig();
-    let result = await Blockchain.post({
-      config: config,
-      roles: {
-        proposer: data.account,
-      }
-    },
-      'nft_provision_nfts'
-    );
-
-    return {
-      type: DappLib.DAPP_RESULT_TX_HASH,
-      label: 'Transaction Hash',
-      result: result.callData.transactionId
-    }
-  }
-
-  static async transferNFT(data) {
-
-    let config = DappLib.getConfig();
-    let result = await Blockchain.post({
-      config: config,
-      roles: {
-        proposer: data.giver,
-      }
-    },
-      'nft_transfer_nft',
-      {
-        id: { value: parseInt(data.id), type: t.UInt64 },
-        recipient: { value: data.recipient, type: t.Address }
-      }
-    );
-
-    return {
-      type: DappLib.DAPP_RESULT_TX_HASH,
-      label: 'Transaction Hash',
-      result: result.callData.transactionId
-    }
-  }
-
-  static async getNFTsInCollection(data) {
-
-    let config = DappLib.getConfig();
-    let result = await Blockchain.get({
-      config: config,
-      roles: {
-      }
-    },
-      'nft_get_nfts_in_collection',
-      {
-        acct: { value: data.account, type: t.Address }
-      }
-    );
-
-    return {
-      type: DappLib.DAPP_RESULT_ARRAY,
-      label: 'Collectible Type',
-      result: result.callData
-    }
-  }
-
-  static async getNFTInfo(data) {
-
-    let config = DappLib.getConfig();
-    let result = await Blockchain.get({
-      config: config,
-      roles: {
-      }
-    },
-      'nft_get_nft_info',
-      {
-        acct: { value: data.account, type: t.Address },
-        id: { value: parseInt(data.id), type: t.UInt64 }
-      }
-    );
-
-    return {
-      type: DappLib.DAPP_RESULT_OBJECT,
-      label: 'Collectible Type',
-      result: result.callData
-    }
-  }
-
-  /********** Packs **********/
-
-  static async provisionPacks(data) {
-
-    let config = DappLib.getConfig();
-    let result = await Blockchain.post({
-      config: config,
-      roles: {
-        proposer: data.account,
-      }
-    },
-      'packs_provision_packs'
-    );
-
-    return {
-      type: DappLib.DAPP_RESULT_TX_HASH,
-      label: 'Transaction Hash',
-      result: result.callData.transactionId
-    }
-  }
-
-  static async addPackType(data) {
-
-    let config = DappLib.getConfig();
-
-    let result = await Blockchain.post({
-      config: config,
-      roles: {
-        proposer: config.accounts[0]
-      }
-    },
-      'packs_add_pack_type',
-      {
-        packType: { value: parseInt(data.packType), type: t.UInt64 },
-        numberOfNFTs: { value: parseInt(data.numberOfNFTs), type: t.UInt64 }
-      }
-    );
-    return {
-      type: DappLib.DAPP_RESULT_TX_HASH,
-      label: 'Transaction Hash',
-      result: result.callData.transactionId
     }
 
-  }
+    // FUSDMintTokens
+    // calls transactions/FUSD/mint_FUSDs.cdc
+    //
+    // signer/proposer/authorizer: config.accounts[0]
+    //
+    static async FUSDMintFUSDs(data) {
 
-  static async mintPacks(data) {
-
-    let config = DappLib.getConfig();
-    let result = await Blockchain.post({
-      config: config,
-      roles: {
-        proposer: config.accounts[0],
-      }
-    },
-      'packs_mint_pack',
-      {
-        packType: { value: parseInt(data.packType), type: t.UInt64 },
-        numberOfPacks: { value: parseInt(data.numberOfPacks), type: t.UInt64 }
-      }
-    );
-    return {
-      type: DappLib.DAPP_RESULT_TX_HASH,
-      label: 'Transaction Hash',
-      result: result.callData.transactionId
+        let config = DappLib.getConfig()
+        let result = await Blockchain.post({
+                config: config,
+                roles: {
+                    proposer: config.accounts[0]
+                }
+            },
+            'FUSD_mint_FUSDs', {
+                to: { value: data.to, type: t.Address },
+                amount: { value: data.amount, type: t.UFix64 }
+            }
+        );
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
     }
 
-  }
+    // FUSDCreateMinter
+    // calls transactions/FUSD/create_FUSD_minter.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async FUSDCreateMinter(data) {
 
-  static async transferPack(data) {
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'FUSD_create_FUSD_minter', {}
+        );
 
-    let config = DappLib.getConfig();
-    let result = await Blockchain.post({
-      config: config,
-      roles: {
-        proposer: data.giver,
-      }
-    },
-      'packs_transfer_pack',
-      {
-        id: { value: parseInt(data.id), type: t.UInt64 },
-        recipient: { value: data.recipient, type: t.Address }
-      }
-    );
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
 
-    return {
-      type: DappLib.DAPP_RESULT_TX_HASH,
-      label: 'Transaction Hash',
-      result: result.callData.transactionId
-    }
-  }
-
-  static async openPack(data) {
-
-    let config = DappLib.getConfig();
-    let result = await Blockchain.post({
-      config: config,
-      roles: {
-        proposer: config.accounts[0],
-      }
-    },
-      'packs_open_pack',
-      {
-        id: { value: parseInt(data.id), type: t.UInt64 },
-        recipient: { value: data.recipient, type: t.Address }
-      }
-    );
-
-    return {
-      type: DappLib.DAPP_RESULT_TX_HASH,
-      label: 'Transaction Hash',
-      result: result.callData.transactionId
-    }
-  }
-
-  static async getPackInfo(data) {
-
-    let config = DappLib.getConfig();
-    let result = await Blockchain.get({
-      config: config,
-      roles: {
-      }
-    },
-      'packs_get_pack_info',
-      {
-        id: { value: parseInt(data.id), type: t.UInt64 },
-        acct: { value: data.acct, type: t.Address }
-      }
-    );
-
-    return {
-      type: DappLib.DAPP_RESULT_OBJECT,
-      label: 'Pack Info',
-      result: result.callData
-    }
-  }
-
-  static async getPackTypeInfo(data) {
-
-    let config = DappLib.getConfig();
-
-    let result = await Blockchain.get({
-      config: config,
-      roles: {
-      }
-    },
-      'packs_get_pack_type_info',
-      {
-        packType: { value: parseInt(data.packType), type: t.UInt64 }
-      }
-    );
-
-    return {
-      type: DappLib.DAPP_RESULT_OBJECT,
-      label: 'Pack Type Info',
-      result: result.callData
-    }
-  }
-
-  static async getOwnedPacks(data) {
-    let config = DappLib.getConfig();
-    let result = await Blockchain.get({
-      config: config,
-      roles: {
-      }
-    },
-      'packs_get_owned_packs',
-      {
-        acct: { value: data.account, type: t.Address }
-      }
-    );
-
-    return {
-      type: DappLib.DAPP_RESULT_ARRAY,
-      label: 'Collectible Type',
-      result: result.callData
-    }
-  }
-
-  /********** Marketplace **********/
-
-  static async provisionMarketplace(data) {
-
-    let config = DappLib.getConfig();
-    let result = await Blockchain.post({
-      config: config,
-      roles: {
-        proposer: data.account,
-      }
-    },
-      'marketplace_provision_marketplace'
-    );
-
-    return {
-      type: DappLib.DAPP_RESULT_TX_HASH,
-      label: 'Transaction Hash',
-      result: result.callData.transactionId
-    }
-  }
-
-  static async listPacksForSale(data) {
-
-    let config = DappLib.getConfig();
-    let result = await Blockchain.post({
-      config: config,
-      roles: {
-        proposer: config.accounts[0],
-      }
-    },
-      "marketplace_list_packs_for_sale",
-      {
-        ids: { value: [4, 5], type: t.Array(t.UInt64) },
-        price: { value: data.price, type: t.UFix64 }
-      }
-    );
-    return {
-      type: DappLib.DAPP_RESULT_TX_HASH,
-      label: 'Transaction Hash',
-      result: result.callData.transactionId
     }
 
-  }
+    // FUSDGetFUSDBalance
+    // calls scripts/FUSD/get_FUSD_balance.cdc
+    //
+    // signer/proposer/authorizer: none
+    //
+    static async FUSDGetFUSDBalance(data) {
 
-  static async getPacksAvailable(data) {
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'FUSD_get_FUSD_balance', {
+                address: { value: data.address, type: t.Address }
+            }
+        );
 
-    let config = DappLib.getConfig();
-    let result = await Blockchain.get({
-      config: config,
-      roles: {
-      }
-    },
-      'marketplace_get_packs_available',
-      {
-        admin: { value: config.accounts[0], type: t.Address }
-      }
-    );
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'FUSD Balance',
+            result: result.callData
+        }
 
-    return {
-      type: DappLib.DAPP_RESULT_OBJECT,
-      label: 'Pack ID | Price',
-      result: result.callData
     }
-  }
 
-  static async buyPack(data) {
+    // FUSDGetFUSDSupply
+    // calls scripts/FUSD/get_FUSD_supply.cdc
+    //
+    // signer/proposer/authorizer: none
+    //
+    static async FUSDGetFUSDSupply(data) {
 
-    let config = DappLib.getConfig();
-    let result = await Blockchain.post({
-      config: config,
-      roles: {
-        proposer: data.recipient,
-      }
-    },
-      'marketplace_buy_pack',
-      {
-        id: { value: parseInt(data.id), type: t.UInt64 },
-        admin: { value: config.accounts[0], type: t.Address }
-      }
-    );
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'FUSD_get_FUSD_supply'
+        );
 
-    return {
-      type: DappLib.DAPP_RESULT_TX_HASH,
-      label: 'Transaction Hash',
-      result: result.callData.transactionId
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'FUSD Supply',
+            result: result.callData
+        }
     }
-  }
+
+    /********** CHARACTREX **********/
+
+
+    // characterxAddLineageKeyValuePair
+    // calls transactions/characterx/add_lineage_key_value_pair.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxAddLineageKeyValuePair(data) {
+
+        let config = DappLib.getConfig()
+        let result = await Blockchain.post({
+                config: config,
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_add_lineage_key_value_pair', {
+                lineageKey: { value: data.lineageKey, type: t.String },
+                lineageValue: { value: data.lineageValue, type: t.Bool },
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+
+    // characterxCreateSet
+    // calls transactions/characterx/create_set.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxCreateSet(data) {
+
+        let config = DappLib.getConfig()
+        let result = await Blockchain.post({
+                config: config,
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_create_set', {
+                setName: { value: data.setName, type: t.String }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+    // characterxGetSetName
+    // calls scripts/characterx/sets_get_setName.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxGetSetName(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_sets_get_setName', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_STRING,
+            label: 'Set name is',
+            result: result.callData
+        }
+
+    }
+
+
+    // characterxMintCharacter
+    // calls transactions/characterx/mint_character.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxMintCharacter(data) {
+
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_mint_character', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 },
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 },
+                recipientAddr: { value: data.recipientAddr, type: t.Address }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+    // characterxCreateCharacter
+    // calls transactions/characterx/create_character.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxCreateCharacter(data) {
+
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_create_character', {
+
+                name: { value: data.name, type: t.String },
+                description: { value: data.description, type: t.String },
+                image: { value: data.image, type: t.String },
+                createdFrom_1: { value: parseInt(data.createdFrom_1), type: t.UInt64 },
+                createdFrom_2: { value: parseInt(data.createdFrom_2), type: t.UInt64 },
+                sex: { value: data.sex, type: t.String },
+                race: { value: data.race, type: t.String },
+                rarity: { value: data.rarity, type: t.String },
+                lineage: DappLib.formatFlowDictionary(data.lineage, { key: t.String, value: t.Bool }),
+                bloodline: DappLib.formatFlowDictionary(data.bloodline, { key: t.String, value: t.Bool }),
+                element: DappLib.formatFlowDictionary(data.element, { key: t.String, value: t.Bool }),
+                traits: DappLib.formatFlowDictionary(data.traits, { key: t.String, value: t.String }),
+                data: DappLib.formatFlowDictionary(data.data, { key: t.String, value: t.String })
+
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+    // characterxAddCharacterToSet
+    // calls transactions/characterx/add_character_to_set.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxAddCharacterToSet(data) {
+
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_add_character_to_set', {
+                setID: { value: parseInt(data.setID), type: (t.UInt32) },
+                characterID: { value: parseInt(data.characterID), type: (t.UInt32) }
+
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+    // characterxAddCharactersToSet
+    // calls transactions/characterx/add_characters_to_set.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxAddCharactersToSet(data) {
+
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_add_characters_to_set', {
+                setID: { value: parseInt(data.setID), type: (t.UInt32) },
+                characters: DappLib.formatFlowArray(data.characters, t.UInt32)
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+    // characterxBatchMintCharacter
+    // calls transactions/characterx/batch_mint_character.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxBatchMintCharacter(data) {
+
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_batch_mint_character', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 },
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 },
+                quantity: { value: parseInt(data.quantity), type: t.UInt64 },
+                recipientAddr: { value: data.recipientAddr, type: t.Address }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+    // characterxFulfillSingle
+    // calls transactions/characterx/fulfill_single.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxFulfillSingle(data) {
+        let config = DappLib.getConfig()
+        let result = await Blockchain.post({
+                config: config,
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_fulfill_single', {
+                recipientAddr: { value: data.recipientAddr, type: t.Address },
+                characterID: { value: parseInt(data.characterID), type: t.UInt64 }
+            }
+        );
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+    // characterxFulfillPack
+    // calls transactions/characterx/fulfill_pack.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxFulfillPack(data) {
+        let config = DappLib.getConfig()
+        let result = await Blockchain.post({
+                config: config,
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_fulfill_pack', {
+                recipientAddr: { value: data.recipientAddr, type: t.Address },
+                characterIDs: DappLib.formatFlowArray(data.characterIDs, t.UInt64)
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+    // characterxLockSet
+    // calls transactions/characterx/lock_set.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxLockSet(data) {
+
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_lock_set', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+    // characterxRetireAllCharactersFromSet
+    // calls transactions/characterx/retireAll_characters_from_set.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxRetireAllCharactersFromSet(data) {
+
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_retireAll_characters_from_set', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+    // characterxRetireCharacterFromSet
+    // calls transactions/characterx/retire_character_from_set.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxRetireCharacterFromSet(data) {
+
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_retire_character_from_set', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 },
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+    // characterxStartNewSeries
+    // calls transactions/characterx/start_new_series.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxStartNewSeries(data) {
+
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_start_new_series', {
+
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+
+    // characterxBuyingNFTWithReferral
+    // calls transactions/characterx/buying_NFT_with_referral.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxBuyingNFTWithReferral(data) {
+
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_buying_NFT_with_referral', {
+                amount: { value: data.amount, type: t.UFix64 },
+                to: { value: data.to, type: t.Address },
+                referrer: { value: data.referrer, type: t.Address }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+    // characterxBuyingNFTWithoutReferral
+    // calls transactions/characterx/buying_NFT_without_referral.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxBuyingNFTWithoutReferral(data) {
+
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_buying_NFT_without_referral', {
+                amount: { value: data.amount, type: t.UFix64 },
+                to: { value: data.to, type: t.Address }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+    // characterxSetupAccount
+    // calls transactions/characterx/setup_account.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async characterxSetupAccount(data) {
+
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer
+                }
+            },
+            'characterx_setup_account'
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId
+        }
+
+    }
+
+    /********** Scripts **********/
+
+    // characterxGetCurrentSeries
+    // calls scripts/characterx/get_currentSeries.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxGetCurrentSeries(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_get_currentSeries', {}
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'The current series is',
+            result: result.callData
+        }
+
+    }
+
+    // characterxGetTotalSupply
+    // calls scripts/characterx/get_totalSupply.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxGetTotalSupply(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_get_totalSupply', {}
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'The total supply is',
+            result: result.callData
+        }
+
+    }
+
+    // characterxCharactersGetAllCharacters
+    // calls scripts/characterx/characters_get_all_characters.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCharactersGetAllCharacters(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_characters_get_all_characters', {}
+        );
+
+        console.log(result)
+
+        return {
+            type: DappLib.DAPP_RESULT_STRING,
+            label: 'All characters (array)',
+            result: result.callData
+        }
+    }
+
+    // characterxCharactersGetNextCharacterID
+    // calls scripts/characterx/characters_get_nextCharacterID.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCharactersGetNextCharacterID(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_characters_get_nextCharacterID', {}
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'The next character ID is',
+            result: result.callData
+        }
+
+    }
+
+    // characterxCharactersGetCharacterName
+    // calls scripts/characterx/characters_get_character_name.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCharactersGetCharacterName(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_characters_get_character_name', {
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_STRING
 
 
 
 
-/*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> DAPP LIBRARY  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+
+
+
+
+
+
+
+            ,
+            label: 'Name for the requested character',
+            result: result.callData
+        }
+
+    }
+
+    // characterxCharactersGetCharacterDescription
+    // calls scripts/characterx/characters_get_character_description.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCharactersGetCharacterDescription(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_characters_get_character_description', {
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_STRING,
+            label: 'Description for the requested character',
+            result: result.callData
+        }
+
+    }
+
+    // characterxCharactersGetCharacterImage
+    // calls scripts/characterx/characters_get_character_image.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCharactersGetCharacterImage(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_characters_get_character_image', {
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_STRING,
+            label: 'Image for the requested character',
+            result: result.callData
+        }
+
+    }
+
+    // characterxCharactersGetCharacterCreatedFrom_1
+    // calls scripts/characterx/characters_get_character_created_from_1.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCharactersGetCharacterCreatedFrom1(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_characters_get_character_created_from_1', {
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'Created From 1 for the requested character',
+            result: result.callData
+        }
+
+    }
+
+    // characterxCharactersGetCharacterCreatedFrom_2
+    // calls scripts/characterx/characters_get_character_created_from_2.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCharactersGetCharacterCreatedFrom2(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_characters_get_character_created_from_2', {
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'Created From 2 for the requested character',
+            result: result.callData
+        }
+
+    }
+
+    // characterxCharactersGetCharacterSex
+    // calls scripts/characterx/characters_get_character_sex.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCharactersGetCharacterSex(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_characters_get_character_sex', {
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_STRING,
+            label: 'Sex for the requested character',
+            result: result.callData
+        }
+
+    }
+
+    // characterxCharactersGetCharacterRace
+    // calls scripts/characterx/characters_get_character_race.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCharactersGetCharacterRace(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_characters_get_character_race', {
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_STRING,
+            label: 'Race for the requested character',
+            result: result.callData
+        }
+
+    }
+
+    // characterxCharactersGetCharacterRarity
+    // calls scripts/characterx/characters_get_character_rarity.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCharactersGetCharacterRarity(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_characters_get_rarity', {
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_STRING,
+            label: 'Rarity for the requested character',
+            result: result.callData
+        }
+
+    }
+
+    // characterxCharactersGetCharacterLineage
+    // calls scripts/characterx/characters_get_character_lineage.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCharactersGetCharacterLineage(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_characters_get_character_lineage', {
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_OBJECT,
+            label: 'Lineage for the requested character',
+            result: result.callData
+        }
+
+    }
+
+    // characterxCharactersGetCharacterBloodline
+    // calls scripts/characterx/characters_get_character_bloodline.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCharactersGetCharacterBloodline(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_characters_get_character_bloodline', {
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_OBJECT,
+            label: 'Bloodline for the requested character',
+            result: result.callData
+        }
+
+    }
+
+    // characterxCharactersGetCharacterElement
+    // calls scripts/characterx/characters_get_character_element.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCharactersGetCharacterElement(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_characters_get_character_element', {
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_OBJECT,
+            label: 'Element for the requested character',
+            result: result.callData
+        }
+
+    }
+
+
+    // characterxCharactersGetCharacterData
+    // calls scripts/characterx/characters_get_character_data.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCharactersGetCharacterData(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_characters_get_character_data', {
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_OBJECT,
+            label: 'Data for the requested character',
+            result: result.callData
+        }
+
+    }
+
+    // characterxCharactersGetCharacterDataField
+    // calls scripts/characterx/characters_get_character_data_field.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCharactersGetCharacterDataField(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_characters_get_character_data_field', {
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 },
+                field: { value: data.field, type: t.String }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_STRING,
+            label: 'The data field for the requested character is',
+            result: result.callData
+        }
+
+    }
+
+    // characterxCharactersGetCharacterTraits
+    // calls scripts/characterx/characters_get_character_traits.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCharactersGetCharacterTraits(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_characters_get_character_traits', {
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_OBJECT,
+            label: 'The traits for the requested character is',
+            result: result.callData
+        }
+
+    }
+
+    // characterxCharactersGetCharacterTraitsField
+    // calls scripts/characterx/characters_get_character_traits_field.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCharactersGetCharacterTraitsField(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_characters_get_character_traits_field', {
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 },
+                field: { value: data.field, type: t.String }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_STRING,
+            label: 'The traits field for the requested character is',
+            result: result.callData
+        }
+
+    }
+
+
+    // characterxSetsGetEditionRetired
+    // calls scripts/characterx/sets_get_edition_retired.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxSetsGetEditionRetired(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_sets_get_edition_retired', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 },
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BOOLEAN,
+            label: 'The set edition is retired',
+            result: result.callData
+        }
+
+    }
+
+
+    // characterxSetsGetNextSetID
+    // calls scripts/characterx/sets_get_nextSetID.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxSetsGetNextSetID(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_sets_get_nextSetID', {}
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'The next set ID is',
+            result: result.callData
+        }
+
+    }
+
+
+    // characterxSetsGetNumCharactersInEdition
+    // calls scripts/characterx/sets_get_numCharacters_in_edition.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxSetsGetNumCharactersInEdition(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_sets_get_numCharacters_in_edition', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 },
+                characterID: { value: parseInt(data.characterID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'The number of the request character in edition is',
+            result: result.callData
+        }
+
+    }
+
+    // characterxSetsGetCharactersInSet
+    // calls scripts/characterx/sets_get_characters_in_set.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxSetsGetCharactersInSet(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_sets_get_characters_in_set', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_ARRAY,
+            label: 'The character ID(s) in the set',
+            result: result.callData
+        }
+
+    }
+
+    // characterxSetsGetSetIDsByName
+    // calls scripts/characterx/sets_get_setIDs_by_name.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxSetsGetSetIDsByName(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_sets_get_setIDs_by_name', {
+                setName: { value: data.setName, type: t.String }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_ARRAY,
+            label: 'The set IDs by name',
+            result: result.callData
+        }
+
+    }
+
+
+    // characterxSetsGetSetSeries
+    // calls scripts/characterx/sets_get_setSeries.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxSetsGetSetSeries(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_sets_get_setSeries', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'Get set series',
+            result: result.callData
+        }
+
+    }
+
+    // characterxSetsGetSetLocked
+    // calls scripts/characterx/sets_get_set_locked.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxSetsGetSetLocked(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_sets_get_set_locked', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 }
+
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BOOLEAN,
+            label: 'The set is locked',
+            result: result.callData
+        }
+
+    }
+
+
+
+    // characterxCollectionsGetCollectionIds
+    // calls scripts/characterx/collections_get_collection_ids.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCollectionsGetCollectionIds(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_collections_get_collection_ids', {
+                account: { value: data.account, type: t.Address }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_ARRAY,
+            label: 'The account collection IDs',
+            result: result.callData
+        }
+
+    }
+
+
+
+    // characterxCollectionsGetIdInCollection
+    // calls scripts/characterx/collections_get_id_in_Collection.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCollectionsGetIdInCollection(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_collections_get_id_in_Collection', {
+                account: { value: data.account, type: t.Address },
+                id: { value: parseInt(data.id), type: t.UInt64 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BOOLEAN,
+            label: 'The Id is in collection',
+            result: result.callData
+        }
+
+    }
+
+
+    // characterxCollectionsGetData 
+    // calls scripts/characterx/collections_get_data.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCollectionsGetData(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_collections_get_data', {
+                account: { value: data.account, type: t.Address },
+                id: { value: parseInt(data.id), type: t.UInt64 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_OBJECT,
+            label: 'The collections data',
+            result: result.callData
+        }
+
+    }
+
+
+
+    // characterxCollectionsGetDataField
+    // calls scripts/characterx/collections_get_data_field.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCollectionsGetDataField(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_collections_get_data_field', {
+                account: { value: data.account, type: t.Address },
+                characterID: { value: parseInt(data.characterID), type: t.UInt64 },
+                fieldToSearch: { value: data.fieldToSearch, type: t.String }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_STRING,
+            label: 'The collection data field',
+            result: result.callData
+        }
+
+    }
+
+
+
+    // characterxCollectionsGetCharacterCharacterID 
+    // calls scripts/characterx/collections_get_character_characterID.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCollectionsGetCharacterCharacterID(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_collections_get_character_characterID', {
+                account: { value: data.account, type: t.Address },
+                id: { value: parseInt(data.id), type: t.UInt64 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: '',
+            result: result.callData
+        }
+
+    }
+
+
+    // characterxCollectionsGetCharacterSerialNum
+    // calls scripts/characterx/collections_get_character_serialNum.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCollectionsGetCharacterSerialNum(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_collections_get_character_serialNum', {
+                account: { value: data.account, type: t.Address },
+                id: { value: parseInt(data.id), type: t.UInt64 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'The collection character serial number is',
+            result: result.callData
+        }
+
+    }
+
+
+
+    // characterxCollectionsGetCharacterSeries
+    // calls scripts/characterx/collections_get_character_series.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCollectionsGetCharacterSeries(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_collections_get_character_series', {
+                account: { value: data.account, type: t.Address },
+                id: { value: parseInt(data.id), type: t.UInt64 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'Collection character series',
+            result: result.callData
+        }
+
+    }
+
+
+    // characterxCollectionsGetCharacterSetID
+    // calls scripts/characterx/collections_get_character_setID.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCollectionsGetCharacterSetID(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_collections_get_character_setID', {
+                account: { value: data.account, type: t.Address },
+                id: { value: parseInt(data.id), type: t.UInt64 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'Collection character set ID',
+            result: result.callData
+        }
+
+    }
+
+
+
+    // characterxCollectionsGetCharacterSetName
+    // calls scripts/characterx/collections_get_character_setName.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCollectionsGetCharacterSetName(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_collections_get_character_setName', {
+                account: { value: data.account, type: t.Address },
+                id: { value: parseInt(data.id), type: t.UInt64 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_STRING,
+            label: 'Collection character set name',
+            result: result.callData
+        }
+
+    }
+
+
+
+    // characterxCollectionsGetSetCharactersAreOwned
+    // calls scripts/characterx/collections_get_setCharacters_are_owned.cdc
+    //
+    // signer/proposer/authorizer: 
+    //
+    static async characterxCollectionsGetSetCharactersAreOwned(data) {
+
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {}
+            },
+            'characterx_collections_get_setCharacters_are_owned', {
+                account: { value: data.account, type: t.Address },
+                setIDs: DappLib.formatFlowArray(data.setIDs, t.UInt32),
+                characterIDs: DappLib.formatFlowArray(data.characterIDs, t.UInt32)
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BOOLEAN,
+            label: 'The collection set character are owned',
+            result: result.callData
+        }
+
+    }
+
+
+
+    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> NFT: PACK NFT  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+
+    /********** Flow Token **********/
+    /*
+      static async mintFlowTokens(data) {
+
+        let config = DappLib.getConfig();
+        let result = await Blockchain.post({
+          config: config,
+          roles: {
+            proposer: "0xf8d6e0586b0a20c7",
+          }
+        },
+          'flowtoken_mint_flow_tokens',
+          {
+            recipient: { value: data.recipient, type: t.Address },
+            amount: { value: data.amount, type: t.UFix64 }
+          }
+        );
+
+        return {
+          type: DappLib.DAPP_RESULT_TX_HASH,
+          label: 'Transaction Hash',
+          result: result.callData.transactionId
+        }
+      }
+
+      static async getFlowBalance(data) {
+
+        let config = DappLib.getConfig();
+        let result = await Blockchain.get({
+          config: config,
+          roles: {
+          }
+        },
+          'flowtoken_get_flow_balance',
+          {
+            account: { value: data.account, type: t.Address }
+          }
+        );
+
+        return {
+          type: DappLib.DAPP_RESULT_BIG_NUMBER,
+          label: 'Collectible Type',
+          result: result.callData
+        }
+      }
+    */
+    /********** NFT **********/
+    /*
+      static async provisionNFTs(data) {
+
+        let config = DappLib.getConfig();
+        let result = await Blockchain.post({
+          config: config,
+          roles: {
+            proposer: data.account,
+          }
+        },
+          'nft_provision_nfts'
+        );
+
+        return {
+          type: DappLib.DAPP_RESULT_TX_HASH,
+          label: 'Transaction Hash',
+          result: result.callData.transactionId
+        }
+      }
+
+      static async transferNFT(data) {
+
+        let config = DappLib.getConfig();
+        let result = await Blockchain.post({
+          config: config,
+          roles: {
+            proposer: data.giver,
+          }
+        },
+          'nft_transfer_nft',
+          {
+            id: { value: parseInt(data.id), type: t.UInt64 },
+            recipient: { value: data.recipient, type: t.Address }
+          }
+        );
+
+        return {
+          type: DappLib.DAPP_RESULT_TX_HASH,
+          label: 'Transaction Hash',
+          result: result.callData.transactionId
+        }
+      }
+
+      static async getNFTsInCollection(data) {
+
+        let config = DappLib.getConfig();
+        let result = await Blockchain.get({
+          config: config,
+          roles: {
+          }
+        },
+          'nft_get_nfts_in_collection',
+          {
+            acct: { value: data.account, type: t.Address }
+          }
+        );
+
+        return {
+          type: DappLib.DAPP_RESULT_ARRAY,
+          label: 'Collectible Type',
+          result: result.callData
+        }
+      }
+
+      static async getNFTInfo(data) {
+
+        let config = DappLib.getConfig();
+        let result = await Blockchain.get({
+          config: config,
+          roles: {
+          }
+        },
+          'nft_get_nft_info',
+          {
+            acct: { value: data.account, type: t.Address },
+            id: { value: parseInt(data.id), type: t.UInt64 }
+          }
+        );
+
+        return {
+          type: DappLib.DAPP_RESULT_OBJECT,
+          label: 'Collectible Type',
+          result: result.callData
+        }
+      }
+    */
+    /********** Packs **********/
+    /*
+      static async provisionPacks(data) {
+
+        let config = DappLib.getConfig();
+        let result = await Blockchain.post({
+          config: config,
+          roles: {
+            proposer: data.account,
+          }
+        },
+          'packs_provision_packs'
+        );
+
+        return {
+          type: DappLib.DAPP_RESULT_TX_HASH,
+          label: 'Transaction Hash',
+          result: result.callData.transactionId
+        }
+      }
+
+      static async addPackType(data) {
+
+        let config = DappLib.getConfig();
+
+        let result = await Blockchain.post({
+          config: config,
+          roles: {
+            proposer: config.accounts[0]
+          }
+        },
+          'packs_add_pack_type',
+          {
+            packType: { value: parseInt(data.packType), type: t.UInt64 },
+            numberOfNFTs: { value: parseInt(data.numberOfNFTs), type: t.UInt64 }
+          }
+        );
+        return {
+          type: DappLib.DAPP_RESULT_TX_HASH,
+          label: 'Transaction Hash',
+          result: result.callData.transactionId
+        }
+
+      }
+
+      static async mintPacks(data) {
+
+        let config = DappLib.getConfig();
+        let result = await Blockchain.post({
+          config: config,
+          roles: {
+            proposer: config.accounts[0],
+          }
+        },
+          'packs_mint_pack',
+          {
+            packType: { value: parseInt(data.packType), type: t.UInt64 },
+            numberOfPacks: { value: parseInt(data.numberOfPacks), type: t.UInt64 }
+          }
+        );
+        return {
+          type: DappLib.DAPP_RESULT_TX_HASH,
+          label: 'Transaction Hash',
+          result: result.callData.transactionId
+        }
+
+      }
+
+      static async transferPack(data) {
+
+        let config = DappLib.getConfig();
+        let result = await Blockchain.post({
+          config: config,
+          roles: {
+            proposer: data.giver,
+          }
+        },
+          'packs_transfer_pack',
+          {
+            id: { value: parseInt(data.id), type: t.UInt64 },
+            recipient: { value: data.recipient, type: t.Address }
+          }
+        );
+
+        return {
+          type: DappLib.DAPP_RESULT_TX_HASH,
+          label: 'Transaction Hash',
+          result: result.callData.transactionId
+        }
+      }
+
+      static async openPack(data) {
+
+        let config = DappLib.getConfig();
+        let result = await Blockchain.post({
+          config: config,
+          roles: {
+            proposer: config.accounts[0],
+          }
+        },
+          'packs_open_pack',
+          {
+            id: { value: parseInt(data.id), type: t.UInt64 },
+            recipient: { value: data.recipient, type: t.Address }
+          }
+        );
+
+        return {
+          type: DappLib.DAPP_RESULT_TX_HASH,
+          label: 'Transaction Hash',
+          result: result.callData.transactionId
+        }
+      }
+
+      static async getPackInfo(data) {
+
+        let config = DappLib.getConfig();
+        let result = await Blockchain.get({
+          config: config,
+          roles: {
+          }
+        },
+          'packs_get_pack_info',
+          {
+            id: { value: parseInt(data.id), type: t.UInt64 },
+            acct: { value: data.acct, type: t.Address }
+          }
+        );
+
+        return {
+          type: DappLib.DAPP_RESULT_OBJECT,
+          label: 'Pack Info',
+          result: result.callData
+        }
+      }
+
+      static async getPackTypeInfo(data) {
+
+        let config = DappLib.getConfig();
+
+        let result = await Blockchain.get({
+          config: config,
+          roles: {
+          }
+        },
+          'packs_get_pack_type_info',
+          {
+            packType: { value: parseInt(data.packType), type: t.UInt64 }
+          }
+        );
+
+        return {
+          type: DappLib.DAPP_RESULT_OBJECT,
+          label: 'Pack Type Info',
+          result: result.callData
+        }
+      }
+
+      static async getOwnedPacks(data) {
+        let config = DappLib.getConfig();
+        let result = await Blockchain.get({
+          config: config,
+          roles: {
+          }
+        },
+          'packs_get_owned_packs',
+          {
+            acct: { value: data.account, type: t.Address }
+          }
+        );
+
+        return {
+          type: DappLib.DAPP_RESULT_ARRAY,
+          label: 'Collectible Type',
+          result: result.callData
+        }
+      }
+    */
+    /********** Marketplace **********/
+    /*
+      static async provisionMarketplace(data) {
+
+        let config = DappLib.getConfig();
+        let result = await Blockchain.post({
+          config: config,
+          roles: {
+            proposer: data.account,
+          }
+        },
+          'marketplace_provision_marketplace'
+        );
+
+        return {
+          type: DappLib.DAPP_RESULT_TX_HASH,
+          label: 'Transaction Hash',
+          result: result.callData.transactionId
+        }
+      }
+
+      static async listPacksForSale(data) {
+
+        let config = DappLib.getConfig();
+        let result = await Blockchain.post({
+          config: config,
+          roles: {
+            proposer: config.accounts[0],
+          }
+        },
+          "marketplace_list_packs_for_sale",
+          {
+            ids: { value: [4, 5], type: t.Array(t.UInt64) },
+            price: { value: data.price, type: t.UFix64 }
+          }
+        );
+        return {
+          type: DappLib.DAPP_RESULT_TX_HASH,
+          label: 'Transaction Hash',
+          result: result.callData.transactionId
+        }
+
+      }
+
+      static async getPacksAvailable(data) {
+
+        let config = DappLib.getConfig();
+        let result = await Blockchain.get({
+          config: config,
+          roles: {
+          }
+        },
+          'marketplace_get_packs_available',
+          {
+            admin: { value: config.accounts[0], type: t.Address }
+          }
+        );
+
+        return {
+          type: DappLib.DAPP_RESULT_OBJECT,
+          label: 'Pack ID | Price',
+          result: result.callData
+        }
+      }
+
+      static async buyPack(data) {
+
+        let config = DappLib.getConfig();
+        let result = await Blockchain.post({
+          config: config,
+          roles: {
+            proposer: data.recipient,
+          }
+        },
+          'marketplace_buy_pack',
+          {
+            id: { value: parseInt(data.id), type: t.UInt64 },
+            admin: { value: config.accounts[0], type: t.Address }
+          }
+        );
+
+        return {
+          type: DappLib.DAPP_RESULT_TX_HASH,
+          label: 'Transaction Hash',
+          result: result.callData.transactionId
+        }
+      }
+
+
+
+    */
+
+    /*
+      data - an object of key value pairs
+      ex. { number: 2, id: 15 }
+
+      types - an object that holds the type of the key 
+      and value using the FCL types
+      ex. { key: t.String, value: t.Int }
+    */
+    static formatFlowDictionary(data, types) {
+        let newData = []
+        let dataKeys = Object.keys(data)
+
+        for (let key of dataKeys) {
+            if (types.key.label.includes("Int")) key = parseInt(key)
+            else if (types.key == t.Bool) key = (key === 'true');
+
+            if (types.value.label.includes("Int")) data[key] = parseInt(data[key])
+            else if (types.value == t.Bool) data[key] = (data[key] === 'true');
+            newData.push({ key: key, value: data[key] })
+        }
+        return { value: newData, type: t.Dictionary(types) }
+    }
+
+    /*
+      data - an array of values
+      ex. ["Hello", "World", "!"]
+  
+      type - the type of the values using the FCL type
+      ex. t.String
+    */
+    static formatFlowArray(data, type) {
+        if (type == t.String) return { value: data, type: t.Array(type) }
+
+        let newData = []
+        for (let element of data) {
+            if (type.label.includes("Int")) element = parseInt(element)
+            else if (type == t.Bool) element = (element === 'true');
+
+            newData.push(element)
+        }
+        return { value: newData, type: t.Array(type) }
+    }
+
+    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> DAPP LIBRARY  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 
     static get DAPP_STATE_CONTRACT() {
         return 'dappStateContract'
@@ -466,40 +2016,40 @@ module.exports = class DappLib {
     }
 
     static async addEventHandler(contract, event, params, callback) {
-            Blockchain.handleEvent({
+        Blockchain.handleEvent({
                 config: DappLib.getConfig(),
                 contract: contract,
                 params: params || {}
-            }, 
-            event, 
+            },
+            event,
             (error, result) => {
-                                if (error) {
-                                    callback({
-                                        event: event,
-                                        type: DappLib.DAPP_RESULT_ERROR,
-                                        label: 'Error Message',
-                                        result: error
-                                    });    
-                                } else {
-                                    callback({
-                                        event: event,
-                                        type: DappLib.DAPP_RESULT_OBJECT,
-                                        label: 'Event ' + event,
-                                        result: DappLib.getObjectNamedProperties(result)
-                                    });    
-                                }
-                            }
-            );
+                if (error) {
+                    callback({
+                        event: event,
+                        type: DappLib.DAPP_RESULT_ERROR,
+                        label: 'Error Message',
+                        result: error
+                    });
+                } else {
+                    callback({
+                        event: event,
+                        type: DappLib.DAPP_RESULT_OBJECT,
+                        label: 'Event ' + event,
+                        result: DappLib.getObjectNamedProperties(result)
+                    });
+                }
+            }
+        );
     }
 
     static getTransactionHash(t) {
         if (!t) { return ''; }
         let value = '';
-        if (typeof t === 'string') {                
+        if (typeof t === 'string') {
             value = t;
-        } else if (typeof t === 'object') {    
+        } else if (typeof t === 'object') {
             if (t.hasOwnProperty('transactionHash')) {
-                    value = t.transactionHash;       // Ethereum                
+                value = t.transactionHash; // Ethereum                
             } else {
                 value = JSON.stringify(t);
             }
@@ -522,12 +2072,12 @@ module.exports = class DappLib {
     }
 
     static formatAccount(a) {
-        return `<strong class="green accent-1 p-1 blue-grey-text number copy-target" title="${a}">${DappLib.toCondensed(a, 6, 4)}</strong>${ DappLib.addClippy(a)}`;
+        return `<strong class="green accent-1 p-1 blue-grey-text number copy-target" title="${a}">${DappLib.toCondensed(a, 6, 4)}</strong>${DappLib.addClippy(a)}`;
     }
 
     static formatTxHash(a) {
         let value = DappLib.getTransactionHash(a);
-        return `<strong class="teal lighten-5 p-1 blue-grey-text number copy-target" title="${value}">${DappLib.toCondensed(value, 6, 4)}</strong>${ DappLib.addClippy(value)}`;
+        return `<strong class="teal lighten-5 p-1 blue-grey-text number copy-target" title="${value}">${DappLib.toCondensed(value, 6, 4)}</strong>${DappLib.addClippy(value)}`;
     }
 
     static formatBoolean(a) {
@@ -552,14 +2102,14 @@ module.exports = class DappLib {
 
     static formatObject(a) {
         let data = [];
-        let labels = [ 'Item', 'Value' ];
-        let keys = [ 'item', 'value' ];
-        let formatters = [ 'Strong', 'Text-20-5' ]; // 'Strong': Bold, 'Text-20-5': Compress a 20 character long string down to 5
+        let labels = ['Item', 'Value'];
+        let keys = ['item', 'value'];
+        let formatters = ['Strong', 'Text-20-5']; // 'Strong': Bold, 'Text-20-5': Compress a 20 character long string down to 5
         let reg = new RegExp('^\\d+$'); // only digits
-        for(let key in a) {
+        for (let key in a) {
             if (!reg.test(key)) {
                 data.push({
-                    item: key.substr(0,1).toUpperCase() + key.substr(1),
+                    item: key.substr(0, 1).toUpperCase() + key.substr(1),
                     value: a[key]
                 });
             }
@@ -573,17 +2123,17 @@ module.exports = class DappLib {
 
         if (dataLabels) {
             output += '<thead><tr>';
-            for(let d=0; d<dataLabels.length; d++) {
+            for (let d = 0; d < dataLabels.length; d++) {
                 output += `<th scope="col">${dataLabels[d]}</th>`;
-            }    
+            }
             output += '</tr></thead>';
         }
         output += '<tbody>';
         h.map((item) => {
             output += '<tr>';
-            for(let d=0; d<dataFormatters.length; d++) {
+            for (let d = 0; d < dataFormatters.length; d++) {
                 let text = String(dataKeys && dataKeys[d] ? item[dataKeys[d]] : item);
-                let copyText =  dataKeys && dataKeys[d] ? item[dataKeys[d]] : item;
+                let copyText = dataKeys && dataKeys[d] ? item[dataKeys[d]] : item;
                 if (text.startsWith('<')) {
                     output += (d == 0 ? '<th scope="row">' : '<td>') + text + (d == 0 ? '</th>' : '</td>');
                 } else {
@@ -595,11 +2145,11 @@ module.exports = class DappLib {
                         } else if (formatterFrags.length === 2) {
                             text = DappLib.toCondensed(text, Number(formatterFrags[1]));
                         }
-                        formatter = formatterFrags[0];    
+                        formatter = formatterFrags[0];
                     }
-                    output += (d == 0 ? '<th scope="row">' : '<td>') + DappLib[formatter](text, copyText) + (d == 0 ? '</th>' : '</td>');                        
+                    output += (d == 0 ? '<th scope="row">' : '<td>') + DappLib[formatter](text, copyText) + (d == 0 ? '</th>' : '</td>');
                 }
-            }    
+            }
             output += '</tr>';
         })
         output += '</tbody></table>';
@@ -628,16 +2178,14 @@ module.exports = class DappLib {
                 break;
             case DappLib.DAPP_RESULT_IPFS_HASH_ARRAY:
                 formatted = DappLib.formatArray(
-                    retVal[returnKey],
-                    ['TxHash', 'IpfsHash', 'Text-10-5'], //Formatter
+                    retVal[returnKey], ['TxHash', 'IpfsHash', 'Text-10-5'], //Formatter
                     ['Transaction', 'IPFS URL', 'Doc Id'], //Label
                     ['transactionHash', 'ipfsHash', 'docId'] //Values
                 );
                 break;
             case DappLib.DAPP_RESULT_SIA_HASH_ARRAY:
                 formatted = DappLib.formatArray(
-                    retVal[returnKey],
-                    ['TxHash', 'SiaHash', 'Text-10-5'], //Formatter
+                    retVal[returnKey], ['TxHash', 'SiaHash', 'Text-10-5'], //Formatter
                     ['Transaction', 'Sia URL', 'Doc Id'], //Label
                     ['transactionHash', 'docId', 'docId'] //Values
                 );
@@ -664,12 +2212,12 @@ module.exports = class DappLib {
         }
 
         let resultNode = document.createElement('div');
-        resultNode.className = `note text-xs ${retVal.type === DappLib.DAPP_RESULT_ERROR ? 'bg-red-400' : 'bg-green-400'} m-3 p-3`; 
-        let closeMarkup = '<div class="float-right" onclick="this.parentNode.parentNode.removeChild(this.parentNode)" title="Dismiss" class="text-right mb-1 mr-2" style="cursor:pointer;">X</div>';    
+        resultNode.className = `note text-xs ${retVal.type === DappLib.DAPP_RESULT_ERROR ? 'bg-red-400' : 'bg-green-400'} m-3 p-3`;
+        let closeMarkup = '<div class="float-right" onclick="this.parentNode.parentNode.removeChild(this.parentNode)" title="Dismiss" class="text-right mb-1 mr-2" style="cursor:pointer;">X</div>';
         resultNode.innerHTML = closeMarkup + `${retVal.type === DappLib.DAPP_RESULT_ERROR ? '☹️' : '👍️'} ` + (Array.isArray(retVal[returnKey]) ? 'Result' : retVal.label) + ': ' + formatted + DappLib.formatHint(retVal.hint);
         // Wire-up clipboard copy
         new ClipboardJS('.copy-target', {
-            text: function (trigger) {
+            text: function(trigger) {
                 return trigger.getAttribute('data-copy');
             }
         });
@@ -680,14 +2228,14 @@ module.exports = class DappLib {
     static getObjectNamedProperties(a) {
         let reg = new RegExp('^\\d+$'); // only digits
         let newObj = {};
-        for(let key in a) {
+        for (let key in a) {
             if (!reg.test(key)) {
                 newObj[key] = a[key];
             }
         }
         return newObj;
     }
-    
+
     static addClippy(data) {
         return `
         <svg data-copy="${data}" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -729,7 +2277,7 @@ module.exports = class DappLib {
             var n = code.toString(16);
             hex += n.length < 2 ? '0' + n : n;
         }
-        return hex + '0'.repeat(padding*2 - hex.length + 2);
+        return hex + '0'.repeat(padding * 2 - hex.length + 2);
     };
 
 
@@ -740,17 +2288,17 @@ module.exports = class DappLib {
         if (hex.substring(0, 2) === '0x') {
             i = 2;
         }
-        for (; i < l; i+=2) {
+        for (; i < l; i += 2) {
             var code = parseInt(hex.substr(i, 2), 16);
             if (code === 0) continue; // this is added
             str += String.fromCharCode(code);
         }
         return str;
     };
-    
+
     static arrayToHex(bytes) {
         if (Array.isArray(bytes)) {
-            return '0x' + 
+            return '0x' +
                 Array.prototype.map.call(bytes, function(byte) {
                     return ('0' + (byte & 0xFF).toString(16)).slice(-2);
                 }).join('')
@@ -758,12 +2306,12 @@ module.exports = class DappLib {
             return bytes;
         }
     }
-    
+
     static hexToArray(hex) {
         if ((typeof hex === 'string') && (hex.beginsWith('0x'))) {
             let bytes = [];
             for (let i = 0; i < hex.length; i += 2) {
-              bytes.push(parseInt(hex.substr(i, 2), 16));
+                bytes.push(parseInt(hex.substr(i, 2), 16));
             }
             return bytes;
         } else {
@@ -777,7 +2325,7 @@ module.exports = class DappLib {
             return s;
         } else {
             if (end) {
-                return `${s.substr(0, begin)}...${s.substr(s.length-end, end)}`;
+                return `${s.substr(0, begin)}...${s.substr(s.length - end, end)}`;
             } else {
                 return `${s.substr(0, begin)}...`;
             }
@@ -791,11 +2339,12 @@ module.exports = class DappLib {
     // https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
     static getUniqueId() {
         return 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'.replace(/[x]/g, function(c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            var r = Math.random() * 16 | 0,
+                v = c == 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         });
     }
-    
+
     static getConfig() {
         return dappConfig;
     }
@@ -807,10 +2356,8 @@ module.exports = class DappLib {
     //  DappLib.getConfig = Function(`return ${ JSON.stringify(DappLib.getTestConfig(testDappStateContract, testDappContract, testAccounts))}`);
     static getTestConfig(testDappStateContract, testDappContract, testAccounts) {
 
-        return Object.assign(
-            {}, 
-            dappConfig,
-            {
+        return Object.assign({},
+            dappConfig, {
                 dappStateContractAddress: testDappStateContract.address,
                 dappContractAddress: testDappContract.address,
                 accounts: testAccounts,
@@ -821,13 +2368,13 @@ module.exports = class DappLib {
                     testAccounts[3]
                 ],
                 users: [
-                    testAccounts[4],
-                    testAccounts[5],
-                    testAccounts[6],
-                    testAccounts[7],
-                    testAccounts[8]
-                ]
-///+test
+                        testAccounts[4],
+                        testAccounts[5],
+                        testAccounts[6],
+                        testAccounts[7],
+                        testAccounts[8]
+                    ]
+                    ///+test
             }
         );
     }
