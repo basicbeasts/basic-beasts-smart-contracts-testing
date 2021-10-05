@@ -42,16 +42,9 @@
         Special thanks to: 
         Jacob, Morgan and the rest of the Decentology team for teaching us how to write cadence and build Dapps.
         Josh, Dieter and the rest of the Flow and Dapper Labs team for making TopShot and Flow Blockchain great and available to everyone.
-        You are the best teachers, mentors, and friends one could ever ask for.
+        You are the best partners, teachers, mentors, and friends one could ever ask for.
 
 */
-
-//TODO: What should be put as access(self) and access(contract) instead of public 
-// Check if those fields are used outside of the resource to see which access modifier
-//TODO: Test if getters should be made in the Contract for character fields although they are already public
-//TODO: Check for grammer
-//TODO: How much can we change the Struct's metadata after it has been created?
-//TODO: Run UNIT TEST that are really mean to break the contract.
 
 import NonFungibleToken from  "../Flow/NonFungibleToken.cdc"
 
@@ -64,6 +57,28 @@ pub contract Hero: NonFungibleToken {
     // Emitted when the contract is created
     pub event ContractInitialized()
 
+    // Events for Set-related actions
+    //
+    // Emitted when a new Set is created
+    pub event SetCreated(setID: UInt32, series: UInt32)
+    // Emitted when a new HeroStruct is added to a Set
+    pub event HeroStructAddedToSet(setID: UInt32, heroStructID: UInt32)
+    // Emitted when a HeroStruct is retired from a Set and cannot be used to mint
+    pub event HeroStructRetiredFromSet(setID: UInt32, heroStructID: UInt32, numHeroes: UInt32)
+    // Emitted when a Set is locked, meaning HeroStructs cannot be added
+    pub event SetLocked(setID: UInt32)
+    // Emitted when a Hero is minted from a Set
+    pub event HeroMinted(heroID: UInt64, heroStructID: UInt32, setID: UInt32, serialNumber: UInt32)
+
+    // Events for Hero-related actions
+    //
+    // Emitted when a beneficiary has been set to a Hero
+    pub event HeroBeneficiaryIsSet(id: UInt64, beneficiary: Address?)
+    // Emitted when a Hero is destroyed
+    pub event HeroDestroyed(id: UInt64)
+
+    // Events for Admin-related actions
+    //
     // Emitted when a new HeroStruct is created
     pub event HeroStructCreated(
                                 id: UInt32, 
@@ -81,19 +96,10 @@ pub contract Hero: NonFungibleToken {
     
     // Emitted when a new series has been triggered by an admin
     pub event NewSeriesStarted(newCurrentSeries: UInt32)
-
-    // Events for Set-related actions
-    //
-    // Emitted when a new Set is created
-    pub event SetCreated(setID: UInt32, series: UInt32)
-    // Emitted when a new HeroStruct is added to a Set
-    pub event HeroStructAddedToSet(setID: UInt32, heroStructID: UInt32)
-    // Emitted when a HeroStruct is retired from a Set and cannot be used to mint
-    pub event HeroStructRetiredFromSet(setID: UInt32, heroStructID: UInt32, numHeroes: UInt32)
-    // Emitted when a Set is locked, meaning HeroStructs cannot be added
-    pub event SetLocked(setID: UInt32)
-    // Emitted when a Hero is minted from a Set
-    pub event HeroMinted(heroID: UInt64, heroStructID: UInt32, setID: UInt32, serialNumber: UInt32)
+    // Emitted when a new key-value-pair of HeroStruct's data has been added
+    pub event NewHeroStructDataFieldAdded(heroStructID: UInt32, key: String, value: String)
+    // Emitted when a key of a HeroStruct's data has been removed
+    pub event HeroStructDataFieldRemoved(heroStructID: UInt32, key: String)
 
     // Events for Collection-related actions
     //
@@ -101,13 +107,6 @@ pub contract Hero: NonFungibleToken {
     pub event Withdraw(id: UInt64, from: Address?)
     // Emitted when a Hero is deposited into a Collection
     pub event Deposit(id: UInt64, to: Address?)
-
-    // Events for Hero-related actions
-    //
-    // Emitted when a beneficiary has been set to a Hero
-    pub event HeroBeneficiaryIsSet(id: UInt64, beneficiary: Address?)
-    // Emitted when a Hero is destroyed
-    pub event HeroDestroyed(id: UInt64)
 
     // -----------------------------------------------------------------------
     // Hero contract-level Named Paths
@@ -621,9 +620,13 @@ pub contract Hero: NonFungibleToken {
         // sex: The HeroStruct's physical characteristics at birth. "Female" or "Male"
         // race: The race of the HeroStruct. e.g. "Human" or "Beast"
         // rarity: The rarity of the HeroStruct. e.g. "Legendary" or "Mythic"
-        // createdAt: The unix timestamp of when this HeroStruct was created.
-        // createdFrom: The 
-        // data: A dictionary mapping other types of metadata titles to their data
+        // createdAt: The unix timestamp of when this HeroStruct was created
+        // createdFrom: The array of HeroStruct IDs this HeroStruct was created from
+        // lineages: A dictionary mapping of lineages to check which lineages the HeroStruct belongs to
+        // bloodlines: A dictionary mapping of bloodlines to check which bloodlines the HeroStruct belongs to
+        // elements: A dictionary mapping of elements to check which elements the HeroStruct has
+        // traits: A dictionary mapping of traits of the HeroStruct's traits
+        // data: A dictionary mapping of other types of metadata
         // 
         // Returns: the ID of the new HeroStruct object
         //
@@ -674,6 +677,15 @@ pub contract Hero: NonFungibleToken {
             Hero.sets[newSet.setID] <-! newSet
         }
 
+        // borrowSet returns a reference to a set in the Hero
+        // contract so that the admin can call methods on it
+        //
+        // Parameters: setID: The ID of the set that you want to
+        // get a reference to
+        //
+        // Returns: A reference to the set with all of the fields
+        // and methods exposed
+        //
         pub fun borrowSet(setID: UInt32): &Set {
             pre {
                 Hero.sets[setID] != nil: "Cannot borrow Set: The Set doesn't exist."
@@ -683,7 +695,15 @@ pub contract Hero: NonFungibleToken {
             return &Hero.sets[setID] as &Set
         }
 
+        // startNewSeries ends the current series by incrementing
+        // the series number, meaning that heroes will be using the 
+        // new series number from now on
+        //
+        // Returns: The new series number
+        //
         pub fun startNewSeries(): UInt32 {
+            // end the current series and start a new one
+            // by incrementing the series number
             Hero.currentSeries = Hero.currentSeries + 1 as UInt32
 
             emit NewSeriesStarted(newCurrentSeries: Hero.currentSeries)
@@ -691,6 +711,16 @@ pub contract Hero: NonFungibleToken {
             return Hero.currentSeries
         }
 
+        // updateHeroStructDataByField updates a HeroStruct's data
+        // by adding a new key value pair to the data dictionary
+        //
+        // Parameters: 
+        // heroStructID: The id of the HeroStruct to update
+        // key: The new key to insert into data
+        // value: The value that is to be inserted with the key
+        //
+        // Returns: The data as a String to String mapping optional
+        //
         pub fun updateHeroStructDataByField(heroStructID: UInt32, key: String, value: String): {String: String}? {
             pre {
                 Hero.heroStructs[heroStructID] != nil: "Cannot update HeroStruct: The HeroStruct doesn't exist."
@@ -698,9 +728,20 @@ pub contract Hero: NonFungibleToken {
 
             let old = Hero.heroStructs[heroStructID]?.data?.insert(key: key, value)
 
+            emit NewHeroStructDataFieldAdded(heroStructID: heroStructID, key: key, value: value)
+
             return Hero.heroStructs[heroStructID]?.data
         }
 
+        // removeHeroStructDataByField removes a key from 
+        // a HeroStruct's data dictionary
+        //
+        // Parameters: 
+        // heroStructID: The id of the HeroStruct to update
+        // key: The key that is to be removed from the data dictionary
+        //
+        // Returns: The removed key as a String optional
+        //
         pub fun removeHeroStructDataByField(heroStructID: UInt32, key: String): String??  {
             pre {
                 Hero.heroStructs[heroStructID] != nil: "Cannot change HeroStruct data: The HeroStruct doesn't exist."
@@ -708,9 +749,13 @@ pub contract Hero: NonFungibleToken {
 
             let removedKey = Hero.heroStructs[heroStructID]?.data?.remove(key: key)
 
+            emit HeroStructDataFieldRemoved(heroStructID: heroStructID, key: key)
+
             return removedKey
         }
 
+        // createNewAdmin creates a new Admin Resource
+        //
         pub fun createNewAdmin(): @Admin {
             return <-create Admin()
         }
