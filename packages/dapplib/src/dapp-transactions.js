@@ -76,6 +76,25 @@ transaction (to: Address, amount: UFix64) {
 		`;
 	}
 
+	static hero_Buying_a_NBATS_Pack() {
+		return fcl.transaction`
+import FungibleToken from 0xee82856bf20e2aa6
+
+transaction(amount: UFix64, to: Address) {
+    let vault: @FungibleToken.Vault
+
+    prepare(signer: AuthAccount) {
+        self.vault <- signer.borrow<&{FungibleToken.Provider}>(from: /storage/flowTokenVault)!.withdraw(amount: amount)
+    }
+
+    execute {
+        getAccount(to).getCapability(/public/flowTokenReceiver)!.borrow<&{FungibleToken.Receiver}>()!
+            .deposit(from: <-self.vault)
+    }
+}
+		`;
+	}
+
 	static flowtoken_mint_flow_tokens() {
 		return fcl.transaction`
 import FlowToken from 0x0ae53cb6e3f42a79
@@ -111,6 +130,463 @@ transaction(recipient: Address, amount: UFix64) {
         self.tokenReceiver.deposit(from: <-mintedVault)
 
         destroy minter
+    }
+}
+		`;
+	}
+
+	static hero_add_characters_to_set() {
+		return fcl.transaction`
+import CharacterX from 0x01cf0e2f2f715450
+
+transaction(setID: UInt32, characters: [UInt32]) {
+
+    let adminRef: &CharacterX.Admin
+    
+    prepare(acct: AuthAccount) {
+
+        self.adminRef = acct.borrow<&CharacterX.Admin>(from: CharacterX.AdminStoragePath)!
+
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowSet(setID: setID)
+
+        setRef.addCharacters(characterIDs: characters)
+    }
+}
+		`;
+	}
+
+	static hero_add_hero_struct_to_set() {
+		return fcl.transaction`
+//TODO: Do this for all transactions check flowscan how it is used and whether improvements have been made.
+
+import Hero from 0x01cf0e2f2f715450
+
+transaction(setID: UInt32, heroStructID: UInt32) {
+    let adminRef: &Hero.Admin
+
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&Hero.Admin>(from: Hero.AdminStoragePath) 
+            ?? panic("Could not borrow a reference to the Admin resource")
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowSet(setID: setID)
+
+        setRef.addHeroStruct(heroStructID: heroStructID)
+    }
+
+    post {
+        Hero.getCharactersInSet(setID: setID)!.contains(heroStructID):
+            "Set does not contain heroStructID"
+    }
+}
+		`;
+	}
+
+	static hero_add_lineage_key_value_pair() {
+		return fcl.transaction`
+import Hero from 0x01cf0e2f2f715450
+
+transaction(lineage: {String: Bool}, heroStructID: UInt32) {
+
+  let adminRef: &Hero.Admin
+
+  prepare(acct: AuthAccount) {
+    
+    self.adminRef = acct.borrow<&Hero.Admin>(from: Hero.AdminStoragePath) 
+            ?? panic("Could not borrow a reference to the Admin resource")
+  
+  }
+  execute {
+    self.adminRef.addLineageKeyValuePair(lineage: lineage, heroStructID: heroStructID)
+  }
+
+}
+
+		`;
+	}
+
+	static hero_buying_NFT_with_referral() {
+		return fcl.transaction`
+import FungibleToken from 0xee82856bf20e2aa6
+import FUSD from 0x01cf0e2f2f715450
+
+transaction(amount: UFix64, to: Address, referrer: Address) {
+
+    let vault: @FungibleToken.Vault
+    let referrerBonus: @FungibleToken.Vault
+    
+
+    prepare(signer: AuthAccount) {
+        
+       if   {
+            self.vault <- signer.borrow<&FUSD.Vault>(from: /storage/fusdVault)!.withdraw(amount: amount)
+
+            //amount is 95% of actual price as 5% has been subtracted due to referral 
+            //referrerBonus is 5% of the actual price
+            let referrerBonusAmount = amount / 0.95 * 0.05
+
+            self.referrerBonus <- self.vault.withdraw(amount: referrerBonusAmount)
+        } //?? panic("You can not referer to yourself")
+    }
+
+    execute {
+
+        getAccount(referrer).getCapability(/public/fusdReceiver)!.borrow<&{FungibleToken.Receiver}>()!
+            .deposit(from: <-self.referrerBonus)
+
+        getAccount(to).getCapability(/public/fusdReceiver)!.borrow<&{FungibleToken.Receiver}>()!
+            .deposit(from: <-self.vault)
+    }
+}
+
+		`;
+	}
+
+	static hero_batch_mint_character() {
+		return fcl.transaction`
+import CharacterX from 0x01cf0e2f2f715450
+
+transaction(setID: UInt32, characterID: UInt32, quantity: UInt64, recipientAddr: Address) {
+    
+    let adminRef: &CharacterX.Admin
+
+    prepare(acct: AuthAccount) {
+
+        self.adminRef = acct.borrow<&CharacterX.Admin>(from: CharacterX.AdminStoragePath)!
+
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowSet(setID: setID)
+
+        let collection <- setRef.batchMintCharacter(characterID: characterID, quantity: quantity)
+
+        let recipient = getAccount(recipientAddr)
+
+        let receiverRef = recipient.getCapability(CharacterX.CollectionPublicPath).borrow<&{CharacterX.CharacterCollectionPublic}>()
+            ?? panic("Cannot borrow a reference to the recipient's collection")
+
+        receiverRef.batchDeposit(tokens: <-collection)
+    }
+}
+		`;
+	}
+
+	static hero_buying_NFT_without_referral() {
+		return fcl.transaction`
+import FungibleToken from 0xee82856bf20e2aa6
+import FUSD from 0x01cf0e2f2f715450
+
+transaction(amount: UFix64, to: Address) {
+
+    let vault: @FungibleToken.Vault
+
+    prepare(signer: AuthAccount) {
+        self.vault <- signer.borrow<&FUSD.Vault>(from: /storage/fusdVault)!.withdraw(amount: amount)
+    }
+
+    execute {
+        getAccount(to).getCapability(/public/fusdReceiver)!.borrow<&{FungibleToken.Receiver}>()!
+            .deposit(from: <-self.vault)
+    }
+}
+
+/* 
+
+import FungibleToken from 0xee82856bf20e2aa6
+
+transaction(amount: UFix64, to: Address) {
+
+    let vault: @FungibleToken.Vault
+
+    prepare(signer: AuthAccount) {
+        self.vault <- signer.borrow<&{FungibleToken.Provider}>(from: /storage/flowTokenVault)!.withdraw(amount: amount)
+    }
+
+    execute {
+        getAccount(to).getCapability(/public/flowTokenReceiver)!.borrow<&{FungibleToken.Receiver}>()!
+            .deposit(from: <-self.vault)
+    }
+}
+
+ */
+		`;
+	}
+
+	static hero_create_set() {
+		return fcl.transaction`
+import Hero from 0x01cf0e2f2f715450
+
+transaction(setName: String) {
+    let adminRef: &Hero.Admin
+    let currentSetID: UInt32
+    
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&Hero.Admin>(from: Hero.AdminStoragePath)
+            ?? panic("Couldn't borrow a reference to the Admin resource")
+            self.currentSetID = Hero.nextSetID;
+    }
+
+    execute {
+        self.adminRef.createSet(name: setName)
+    }
+
+    post {
+        Hero.getSetName(setID: self.currentSetID) == setName:
+            "Couldn't find the specified set"
+    }
+}
+		`;
+	}
+
+	static hero_create_hero_struct() {
+		return fcl.transaction`
+import Hero from 0x01cf0e2f2f715450
+
+transaction(
+            name: String, 
+            sex: String,
+            race: String,
+            rarity: String, 
+            createdAt: UInt64,
+            createdFrom: [UInt64],
+            lineages: {String: Bool},
+            bloodlines: {String: Bool},
+            elements: {String: Bool},
+            traits: {String: String}, 
+            data: {String: String}
+            ) {
+    let adminRef: &Hero.Admin
+    let currentHeroStructID: UInt32
+
+    prepare(acct: AuthAccount) {
+        self.currentHeroStructID = Hero.nextHeroStructID;
+        self.adminRef = acctç.borrow<&Hero.Admin>(from: Hero.AdminStoragePath)
+            ?? panic("No admin resource in storage")
+    }
+    execute {
+        self.adminRef.createHeroStruct(name: name, 
+                                        sex: sex, 
+                                        race: race, 
+                                        rarity: rarity, 
+                                        createdAt: createdAt, 
+                                        createdFrom: createdFrom, 
+                                        lineages: lineages, 
+                                        bloodlines: bloodlines, 
+                                        elements: elements, 
+                                        traits: traits, 
+                                        data: data)
+    }
+
+    post {
+        Hero.getHeroStruct(heroStructID: currentHeroStructID) != nil:
+            "currentHeroStructID doesn't exist"
+    
+            }
+		`;
+	}
+
+	static hero_fulfill_pack() {
+		return fcl.transaction`
+import NonFungibleToken from 0x01cf0e2f2f715450
+import CharacterX from 0x01cf0e2f2f715450
+
+transaction(recipientAddr: Address, characterIDs: [UInt64]) {
+    
+    prepare(acct: AuthAccount) {
+        let recipient = getAccount(recipientAddr)
+
+        let receiverRef = recipient.getCapability(CharacterX.CollectionPublicPath)
+            .borrow<&{CharacterX.CharacterCollectionPublic}>()
+                ?? panic("Couldn't borrow reference to Receiver's collection")
+    
+
+        if let collection = acct.borrow<&CharacterX.Collection>(from: CharacterX.CollectionStoragePath) {
+            receiverRef.batchDeposit(tokens: <-collection.batchWithdraw(ids: characterIDs))
+        }
+
+    }
+}
+		`;
+	}
+
+	static hero_fulfill_single() {
+		return fcl.transaction`
+import NonFungibleToken from 0x01cf0e2f2f715450
+import CharacterX from 0x01cf0e2f2f715450
+
+transaction(recipientAddr: Address, characterID: UInt64) {
+    
+    prepare(acct: AuthAccount) {
+        let recipient = getAccount(recipientAddr)
+
+        let receiverRef = recipient.getCapability(CharacterX.CollectionPublicPath)
+            .borrow<&{CharacterX.CharacterCollectionPublic}>()
+                ?? panic("Couldn't borrow reference to Receiver's collection")
+    
+
+        if let collection = acct.borrow<&CharacterX.Collection>(from: CharacterX.CollectionStoragePath) {
+            receiverRef.deposit(token: <-collection.withdraw(withdrawID: characterID))
+        }
+
+    }
+}
+		`;
+	}
+
+	static hero_lock_set() {
+		return fcl.transaction`
+//Does not seem to wo
+
+import CharacterX from 0x01cf0e2f2f715450
+
+transaction(setID: UInt32) {
+    let adminRef: &CharacterX.Admin
+
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&CharacterX.Admin>(from: CharacterX.AdminStoragePath)
+            ?? panic("No Admin resource in storage")
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowSet(setID: setID)
+        setRef.lock()
+    }
+
+    post {
+        CharacterX.isSetLocked(setID: setID)!:
+            "Set didn't lock"
+    }
+}
+		`;
+	}
+
+	static hero_retireAll_characters_from_set() {
+		return fcl.transaction`
+import CharacterX from 0x01cf0e2f2f715450
+
+transaction(setID: UInt32) {
+    let adminRef: &CharacterX.Admin
+
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&CharacterX.Admin>(from: CharacterX.AdminStoragePath)
+            ?? panic("No Admin resource in storage")
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowSet(setID: setID)
+
+        setRef.retireAllCharacters()
+    }
+}
+		`;
+	}
+
+	static hero_mint_hero() {
+		return fcl.transaction`
+import Hero from 0x01cf0e2f2f715450
+
+transaction(setID: UInt32, heroStructID: UInt32, recipientAddr: Address) {
+    let adminRef: &Hero.Admin
+
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&Hero.Admin>(from: Hero.AdminStoragePath)!
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowSet(setID: setID)
+
+        let newMintedHero <- setRef.mintHero(heroStructID: heroStructID)
+
+        let recipient = getAccount(recipientAddr)
+
+        let receiverRef = recipient.getCapability(Hero.CollectionPublicPath).borrow<&{Hero.HeroCollectionPublic}>()
+            ?? panic("Can't borrow a reference to the Recipient's Character collection")
+
+        receiverRef.deposit(token: <-newMintedHero)
+    }
+}
+		`;
+	}
+
+	static hero_retire_character_from_set() {
+		return fcl.transaction`
+import CharacterX from 0x01cf0e2f2f715450
+
+transaction(setID: UInt32, characterID: UInt32) {
+    let adminRef: &CharacterX.Admin
+
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&CharacterX.Admin>(from: CharacterX.AdminStoragePath)
+            ?? panic("No Admin resource in storage")
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowSet(setID: setID)
+
+        setRef.retireCharacter(characterID: characterID)
+    }
+
+    post {
+        CharacterX.isEditionRetired(setID: setID, characterID: characterID) == true:
+            "Character is not retired"
+    }
+}
+		`;
+	}
+
+	static hero_setup_account() {
+		return fcl.transaction`
+import Hero from 0x01cf0e2f2f715450
+
+transaction() {
+
+    prepare(acct: AuthAccount) {
+
+        if acct.borrow<&Hero.Collection>(from: Hero.CollectionStoragePath) == nil {
+
+            let collection <- Hero.createEmptyCollection() as! @Hero.Collection
+
+            acct.save(<- collection, to: Hero.CollectionStoragePath)
+
+            acct.link<&{Hero.HeroCollectionPublic}>(Hero.CollectionPublicPath, target: Hero.CollectionStoragePath)
+        }
+
+    }
+}
+
+
+		`;
+	}
+
+	static hero_start_new_series() {
+		return fcl.transaction`
+import CharacterX from 0x01cf0e2f2f715450
+
+transaction {
+
+    let adminRef: &CharacterX.Admin
+    let currentSeries: UInt32
+
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&CharacterX.Admin>(from: CharacterX.AdminStoragePath)
+            ?? panic("No Admin resource in storage")
+
+        self.currentSeries = CharacterX.currentSeries
+
+    }
+
+    execute {
+        self.adminRef.startNewSeries()
+    }
+
+    post {
+        CharacterX.currentSeries == self.currentSeries + 1 as UInt32:
+            "New Series is not started"
     }
 }
 		`;
@@ -182,129 +658,6 @@ transaction(id: UInt64, recipient: Address) {
       self.recipientNFTCollectionRef.deposit(token: <-nft)
 
       log("Transfered the NFT from the giver to the recipient")
-  }
-}
-		`;
-	}
-
-	static marketplace_buy_pack() {
-		return fcl.transaction`
-import FungibleToken from 0xee82856bf20e2aa6
-import MarketplaceContract from 0x01cf0e2f2f715450
-import NonFungibleToken from 0x01cf0e2f2f715450
-import FlowToken from 0x0ae53cb6e3f42a79
-
-// Buys a Pack from the admin's Pack Collection
-
-transaction(id: UInt64, admin: Address) {
-
-    let packSaleCollection: &MarketplaceContract.SaleCollection{MarketplaceContract.SalePublic}
-
-    let userVaultRef: &{FungibleToken.Provider}
-
-    let userCollection: &{NonFungibleToken.CollectionPublic}
-    
-    prepare(user: AuthAccount) {
-        // Borrows the Admin's public SaleCollection so we can purchase from it
-        self.packSaleCollection = getAccount(admin).getCapability(/public/packSaleCollection)
-            .borrow<&MarketplaceContract.SaleCollection{MarketplaceContract.SalePublic}>()
-            ?? panic("Could not borrow from the Admin's saleCollection")
-
-        // Borrow the user's FlowToken Vault
-        self.userVaultRef = user.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)
-            ?? panic("Could not borrow reference to the owner's Vault!")
-
-        // Borrows the user's Pack Collection so we can deposit the newly purchased Pack
-        // into it
-        self.userCollection = user.getCapability(/public/packCollection)
-            .borrow<&{NonFungibleToken.CollectionPublic}>()
-            ?? panic("Could not borrow from the user's PackCollection")
-
-    }
-
-    execute {
-        // Checks the price of the Pack we want to purchase
-        let cost = self.packSaleCollection.idPrice(id: id) ?? panic("A Pack with this id is not up for sale")
-        // Withdraw the correct amount of tokens from the user's FlowToken Vault
-        let vault <- self.userVaultRef.withdraw(amount: cost)
-
-        // Purchase the Pack
-        self.packSaleCollection.purchase(id: id, recipient: self.userCollection, buyTokens: <-vault)
-    }
-}
-
-		`;
-	}
-
-	static marketplace_list_packs_for_sale() {
-		return fcl.transaction`
-import MarketplaceContract from 0x01cf0e2f2f715450
-
-// This should be called by the admin to list Packs for sale in 
-// their SaleCollection
-
-transaction(ids: [UInt64], price: UFix64) {
-
-  let packSaleCollection: &MarketplaceContract.SaleCollection
-
-  prepare(admin: AuthAccount) {
-      // Borrows the admin's SaleCollection
-      self.packSaleCollection = admin.borrow<&MarketplaceContract.SaleCollection>(from: /storage/packSaleCollection) 
-          ?? panic("Could not borrow the admin's Pack SaleCollection")
-  }
-
-  execute {
-      // Lists Packs for sale
-      self.packSaleCollection.listForSale(ids: ids, price: price)
-
-      log("Listed Pack(s) for sale")
-  }
-}
-
-		`;
-	}
-
-	static marketplace_provision_marketplace() {
-		return fcl.transaction`
-import MarketplaceContract from 0x01cf0e2f2f715450
-import FungibleToken from 0xee82856bf20e2aa6
-import NonFungibleToken from 0x01cf0e2f2f715450
-
-// Sets up the admin to list Packs for sale by giving them a SaleCollection
-
-transaction {
-
-  prepare(acct: AuthAccount) {
-    if acct.borrow<&MarketplaceContract.SaleCollection>(from: /storage/packSaleCollection) == nil && acct.borrow<&NonFungibleToken.Collection>(from: /storage/packCollection) != nil {
-      // same as doing <&FlowToken.Vault{FungibleToken.Receiver}> but we don't have
-      // to import FlowToken this way
-      let ownerVault = acct.getCapability<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
-      assert(ownerVault.borrow() != nil, message: "Missing or mis-typed Token Vault")
-
-      /** The reason we do this part is because we cannot do getCapability for something
-      in storage, so because we need a Capability specifically we just put it in a private
-      path and get it from there. By making it private its also only available to us **/
-      acct.link<&NonFungibleToken.Collection>(/private/packCollection, target: /storage/packCollection)
-      
-      let ownerPackCollection = acct.getCapability<&NonFungibleToken.Collection>(/private/packCollection)
-      assert(ownerPackCollection.borrow() != nil, message: "Missing or mis-typed PackCollection")
-      /** **/
-      
-      // create a new empty collection
-      let packSaleCollection <- MarketplaceContract.createSaleCollection(ownerVault: ownerVault, ownerCollection: ownerPackCollection)
-            
-      // save it to the account
-      acct.save(<-packSaleCollection, to: /storage/packSaleCollection)
-
-      // create a public capability for the collection
-      acct.link<&MarketplaceContract.SaleCollection{MarketplaceContract.SalePublic}>(/public/packSaleCollection, target: /storage/packSaleCollection)
-    
-      log("Gave account a sale collection")
-    }
-  }
-
-  execute {
-    
   }
 }
 		`;
@@ -404,40 +757,6 @@ transaction(id: UInt64, recipient: Address) {
 		`;
 	}
 
-	static packs_provision_packs() {
-		return fcl.transaction`
-import PackContract from 0x01cf0e2f2f715450
-import NonFungibleToken from 0x01cf0e2f2f715450
-
-// Sets up an account to handle Packs. Must be called by an account before
-// interacting with Packs or an error will be thrown.
-
-transaction {
-
-  prepare(acct: AuthAccount) {
-    // if the account doesn't already have a pack collection
-    if (acct.borrow<&PackContract.Collection>(from: /storage/packCollection) == nil) {
-
-      // create a new empty collection
-      let packCollection <- PackContract.createEmptyCollection()
-            
-      // save it to the account
-      acct.save(<-packCollection, to: /storage/packCollection)
-
-      // create a public capability for the collection
-      acct.link<&PackContract.Collection{PackContract.IPackCollectionPublic, PackContract.IPackCollectionAdminAccessible, NonFungibleToken.CollectionPublic}>(/public/packCollection, target: /storage/packCollection)
-    
-      log("Gave account a pack collection")
-    }
-  }
-
-  execute {
-    
-  }
-}
-		`;
-	}
-
 	static packs_transfer_pack() {
 		return fcl.transaction`
 import PackContract from 0x01cf0e2f2f715450
@@ -481,6 +800,40 @@ transaction(id: UInt64, recipient: Address) {
 		`;
 	}
 
+	static packs_provision_packs() {
+		return fcl.transaction`
+import PackContract from 0x01cf0e2f2f715450
+import NonFungibleToken from 0x01cf0e2f2f715450
+
+// Sets up an account to handle Packs. Must be called by an account before
+// interacting with Packs or an error will be thrown.
+
+transaction {
+
+  prepare(acct: AuthAccount) {
+    // if the account doesn't already have a pack collection
+    if (acct.borrow<&PackContract.Collection>(from: /storage/packCollection) == nil) {
+
+      // create a new empty collection
+      let packCollection <- PackContract.createEmptyCollection()
+            
+      // save it to the account
+      acct.save(<-packCollection, to: /storage/packCollection)
+
+      // create a public capability for the collection
+      acct.link<&PackContract.Collection{PackContract.IPackCollectionPublic, PackContract.IPackCollectionAdminAccessible, NonFungibleToken.CollectionPublic}>(/public/packCollection, target: /storage/packCollection)
+    
+      log("Gave account a pack collection")
+    }
+  }
+
+  execute {
+    
+  }
+}
+		`;
+	}
+
 	static characterx_Buying_a_NBATS_Pack() {
 		return fcl.transaction`
 import FungibleToken from 0xee82856bf20e2aa6
@@ -495,6 +848,29 @@ transaction(amount: UFix64, to: Address) {
     execute {
         getAccount(to).getCapability(/public/flowTokenReceiver)!.borrow<&{FungibleToken.Receiver}>()!
             .deposit(from: <-self.vault)
+    }
+}
+		`;
+	}
+
+	static characterx_add_characters_to_set() {
+		return fcl.transaction`
+import CharacterX from 0x01cf0e2f2f715450
+
+transaction(setID: UInt32, characters: [UInt32]) {
+
+    let adminRef: &CharacterX.Admin
+    
+    prepare(acct: AuthAccount) {
+
+        self.adminRef = acct.borrow<&CharacterX.Admin>(from: CharacterX.AdminStoragePath)!
+
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowSet(setID: setID)
+
+        setRef.addCharacters(characterIDs: characters)
     }
 }
 		`;
@@ -523,29 +899,6 @@ transaction(setID: UInt32, characterID: UInt32) {
     post {
         CharacterX.getCharactersInSet(setID: setID)!.contains(characterID):
             "Set does not contain characterID"
-    }
-}
-		`;
-	}
-
-	static characterx_add_characters_to_set() {
-		return fcl.transaction`
-import CharacterX from 0x01cf0e2f2f715450
-
-transaction(setID: UInt32, characters: [UInt32]) {
-
-    let adminRef: &CharacterX.Admin
-    
-    prepare(acct: AuthAccount) {
-
-        self.adminRef = acct.borrow<&CharacterX.Admin>(from: CharacterX.AdminStoragePath)!
-
-    }
-
-    execute {
-        let setRef = self.adminRef.borrowSet(setID: setID)
-
-        setRef.addCharacters(characterIDs: characters)
     }
 }
 		`;
@@ -947,6 +1300,129 @@ transaction {
         CharacterX.currentSeries == self.currentSeries + 1 as UInt32:
             "New Series is not started"
     }
+}
+		`;
+	}
+
+	static marketplace_buy_pack() {
+		return fcl.transaction`
+import FungibleToken from 0xee82856bf20e2aa6
+import MarketplaceContract from 0x01cf0e2f2f715450
+import NonFungibleToken from 0x01cf0e2f2f715450
+import FlowToken from 0x0ae53cb6e3f42a79
+
+// Buys a Pack from the admin's Pack Collection
+
+transaction(id: UInt64, admin: Address) {
+
+    let packSaleCollection: &MarketplaceContract.SaleCollection{MarketplaceContract.SalePublic}
+
+    let userVaultRef: &{FungibleToken.Provider}
+
+    let userCollection: &{NonFungibleToken.CollectionPublic}
+    
+    prepare(user: AuthAccount) {
+        // Borrows the Admin's public SaleCollection so we can purchase from it
+        self.packSaleCollection = getAccount(admin).getCapability(/public/packSaleCollection)
+            .borrow<&MarketplaceContract.SaleCollection{MarketplaceContract.SalePublic}>()
+            ?? panic("Could not borrow from the Admin's saleCollection")
+
+        // Borrow the user's FlowToken Vault
+        self.userVaultRef = user.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)
+            ?? panic("Could not borrow reference to the owner's Vault!")
+
+        // Borrows the user's Pack Collection so we can deposit the newly purchased Pack
+        // into it
+        self.userCollection = user.getCapability(/public/packCollection)
+            .borrow<&{NonFungibleToken.CollectionPublic}>()
+            ?? panic("Could not borrow from the user's PackCollection")
+
+    }
+
+    execute {
+        // Checks the price of the Pack we want to purchase
+        let cost = self.packSaleCollection.idPrice(id: id) ?? panic("A Pack with this id is not up for sale")
+        // Withdraw the correct amount of tokens from the user's FlowToken Vault
+        let vault <- self.userVaultRef.withdraw(amount: cost)
+
+        // Purchase the Pack
+        self.packSaleCollection.purchase(id: id, recipient: self.userCollection, buyTokens: <-vault)
+    }
+}
+
+		`;
+	}
+
+	static marketplace_list_packs_for_sale() {
+		return fcl.transaction`
+import MarketplaceContract from 0x01cf0e2f2f715450
+
+// This should be called by the admin to list Packs for sale in 
+// their SaleCollection
+
+transaction(ids: [UInt64], price: UFix64) {
+
+  let packSaleCollection: &MarketplaceContract.SaleCollection
+
+  prepare(admin: AuthAccount) {
+      // Borrows the admin's SaleCollection
+      self.packSaleCollection = admin.borrow<&MarketplaceContract.SaleCollection>(from: /storage/packSaleCollection) 
+          ?? panic("Could not borrow the admin's Pack SaleCollection")
+  }
+
+  execute {
+      // Lists Packs for sale
+      self.packSaleCollection.listForSale(ids: ids, price: price)
+
+      log("Listed Pack(s) for sale")
+  }
+}
+
+		`;
+	}
+
+	static marketplace_provision_marketplace() {
+		return fcl.transaction`
+import MarketplaceContract from 0x01cf0e2f2f715450
+import FungibleToken from 0xee82856bf20e2aa6
+import NonFungibleToken from 0x01cf0e2f2f715450
+
+// Sets up the admin to list Packs for sale by giving them a SaleCollection
+
+transaction {
+
+  prepare(acct: AuthAccount) {
+    if acct.borrow<&MarketplaceContract.SaleCollection>(from: /storage/packSaleCollection) == nil && acct.borrow<&NonFungibleToken.Collection>(from: /storage/packCollection) != nil {
+      // same as doing <&FlowToken.Vault{FungibleToken.Receiver}> but we don't have
+      // to import FlowToken this way
+      let ownerVault = acct.getCapability<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+      assert(ownerVault.borrow() != nil, message: "Missing or mis-typed Token Vault")
+
+      /** The reason we do this part is because we cannot do getCapability for something
+      in storage, so because we need a Capability specifically we just put it in a private
+      path and get it from there. By making it private its also only available to us **/
+      acct.link<&NonFungibleToken.Collection>(/private/packCollection, target: /storage/packCollection)
+      
+      let ownerPackCollection = acct.getCapability<&NonFungibleToken.Collection>(/private/packCollection)
+      assert(ownerPackCollection.borrow() != nil, message: "Missing or mis-typed PackCollection")
+      /** **/
+      
+      // create a new empty collection
+      let packSaleCollection <- MarketplaceContract.createSaleCollection(ownerVault: ownerVault, ownerCollection: ownerPackCollection)
+            
+      // save it to the account
+      acct.save(<-packSaleCollection, to: /storage/packSaleCollection)
+
+      // create a public capability for the collection
+      acct.link<&MarketplaceContract.SaleCollection{MarketplaceContract.SalePublic}>(/public/packSaleCollection, target: /storage/packSaleCollection)
+    
+      log("Gave account a sale collection")
+    }
+  }
+
+  execute {
+    
+  }
 }
 		`;
 	}

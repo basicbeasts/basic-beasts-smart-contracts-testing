@@ -66,14 +66,14 @@ export default class PackNFTHarness extends LitElement {
       
       <!-- CHARACTERX -->
       
-        <!-- SETUP ACCOUNT (POST) -->
-        <action-card title="Setup account" description="Setup account to handle CharacterX NFTs"
-          action="characterxSetupAccount" method="post" fields="signer">
+        <!-- SETUP ACCOUNT HERO (POST) -->
+        <action-card title="Setup account - Hero" description="Setup account to handle Hero NFTs"
+          action="heroSetupAccount" method="post" fields="signer">
           <account-widget field="signer" label="Signer"></account-widget>
         </action-card>
       
         <!-- CREATE SET (POST) -->
-        <action-card title="Create a set" description="Create a set for characters. *Only admin." action="characterxCreateSet"
+        <action-card title="Create a set" description="Create a set for heroes. *Only admin." action="heroCreateSet"
           method="post" fields="signer setName">
           <account-widget field="signer" label="Signer"></account-widget>
           <text-widget field="setName" label="Set Name" placeholder="Set Legendaries"></text-widget>
@@ -85,25 +85,23 @@ export default class PackNFTHarness extends LitElement {
           <text-widget field="setID" label="setID" placeholder="0"></text-widget>
         </action-card>
       
-        <!-- CREATE CHARACTER (POST) -->
-        <action-card title="Create a character"
-          description="Enter the required fields to create a character. *Only admin."
-          action="characterxCreateCharacter" method="post"
-          fields="signer name description image createdFrom_1 createdFrom_2 sex race rarity lineage bloodline element traits data">
+        <!-- CREATE HERO (POST) -->
+        <action-card title="Create a hero"
+          description="Enter the required fields to create a hero. *Only admin."
+          action="heroCreateHero" method="post"
+          fields="signer name sex race rarity createdAt createdFrom lineages bloodlines elements traits data">
           <account-widget field="signer" label="Signer"></account-widget>
           <text-widget field="name" label="Name" placeholder="Willi Blue"></text-widget>
-          <text-widget field="description" label="Description" placeholder="Legendary with the coolest name"></text-widget>
-          <text-widget field="image" label="Image" placeholder="Image url Standard for OpenSea"></text-widget>
-          <text-widget field="createdFrom_1" label="Ancestor 1" placeholder="Character ID"></text-widget>
-          <text-widget field="createdFrom_2" label="Ancestor 2" placeholder="Character ID"></text-widget>
           <text-widget field="sex" label="Sex" placeholder="Male or female"></text-widget>
           <text-widget field="race" label="Race" placeholder="Yellow"></text-widget>
           <text-widget field="rarity" label="Rarity" placeholder="Fancy Intense"></text-widget>
-          <dictionary-widget field="lineage" label="Lineage" objectLabel="Lineage Object" keyplaceholder="Lineage Name"
+          <text-widget field="createdAt" label="Date created" placeholder="Timestamp"></text-widget>
+          <array-widget field="createdFrom" label="Ancestors" valueLabel="createdFrom" placeholder="0"></array-widget>
+          <dictionary-widget field="lineages" label="Lineages" objectLabel="Lineage Object" keyplaceholder="Lineage Name"
             valueplaceholder="false"></dictionary-widget>
-          <dictionary-widget field="bloodline" label="Bloodline" objectLabel="Bloodline Object"
+          <dictionary-widget field="bloodlines" label="Bloodlines" objectLabel="Bloodline Object"
             keyplaceholder="Bloodline Name" valueplaceholder="false"></dictionary-widget>
-          <dictionary-widget field="element" label="Element" objectLabel="Element Object" keyplaceholder="Element Name"
+          <dictionary-widget field="elements" label="Elements" objectLabel="Element Object" keyplaceholder="Element Name"
             valueplaceholder="false"></dictionary-widget>
           <dictionary-widget field="traits" label="Traits" objectLabel="Traits Object" keyplaceholder="Colour Hair"
             valueplaceholder="Red"></dictionary-widget>
@@ -112,19 +110,21 @@ export default class PackNFTHarness extends LitElement {
         </action-card>
 
         <!-- ADD LINEAGE KEY VALUE PAIR TO STRUCT  (POST) -->
-        <action-card title="Add lineage key value pair to struct" description="*Only admin" action="characterxAddLineageKeyValuePair"
-          method="post" fields="signer lineageKey lineageValue">
+        <action-card title="Add lineage key value pair to struct" description="*Only admin" action="heroAddLineageKeyValuePair"
+          method="post" fields="signer lineage heroStructID">
           <account-widget field="signer" label="Signer"></account-widget>
-          <text-widget field="lineageKey" label="Targaryen" placeholder="0"></text-widget>
-          <text-widget field="lineageValue" label="true" placeholder="0"></text-widget>
+          <dictionary-widget field="lineage" label="New lineage" objectLabel="Lineage Object"
+            keyplaceholder="Lineage Name" valueplaceholder="false"></dictionary-widget>
+            <text-widget field="heroStructID" label="Hero struct ID" placeholder="0"></text-widget>
+
         </action-card>
 
-        <!-- ADD CHARACTER TO SET (POST) -->
-        <action-card title="Add a character to a set" description="*Only admin" action="characterxAddCharacterToSet"
-          method="post" fields="signer setID characterID">
+        <!-- ADD HERO STRUCT TO SET (POST) -->
+        <action-card title="Add a hero struct to a set" description="*Only admin" action="heroAddHeroStructToSet"
+          method="post" fields="signer setID heroStructID">
           <account-widget field="signer" label="Signer"></account-widget>
           <text-widget field="setID" label="Set ID" placeholder="0"></text-widget>
-          <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
+          <text-widget field="heroStructID" label="Hero struct ID" placeholder="0"></text-widget>
         </action-card>
 
         <!-- ADD CHARACTERS TO SET (POST) -->
@@ -135,12 +135,12 @@ export default class PackNFTHarness extends LitElement {
           <array-widget field="characters" label="Characters" valueLabel="CharacterID" placeholder="0"></array-widget>
         </action-card>
       
-        <!-- MINT CHARACTER (POST) -->
-        <action-card title="Mint a character" description="Mint a character. *Only admin." action="characterxMintCharacter"
-          method="post" fields="signer setID characterID recipientAddr">
+        <!-- MINT HERO (POST) -->
+        <action-card title="Mint a hero" description="Mint a hero. *Only admin." action="heroMintHero"
+          method="post" fields="signer setID heroStructID recipientAddr">
           <account-widget field="signer" label="Signer"></account-widget>
           <text-widget field="setID" label="Set ID" placeholder="0"></text-widget>
-          <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
+          <text-widget field="heroStructID" label="Hero struct ID" placeholder="0"></text-widget>
           <account-widget field="recipientAddr" label="Recipient Address"></account-widget>
         </action-card>
 
@@ -267,10 +267,10 @@ export default class PackNFTHarness extends LitElement {
          <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
         </action-card>
 
-        <!-- GET CHARACTER'S LINEAGE (GET) -->
-        <action-card title="Get character's lineage" description="Enter characterID" action="characterxCharactersGetCharacterLineage" method="get"
-         fields="characterID">
-         <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
+        <!-- GET HERO'S LINEAGE (GET) -->
+        <action-card title="Get hero's lineage" description="Enter heroID" action="heroHeroesGetHeroLineages" method="get"
+         fields="heroStructID">
+         <text-widget field="heroStructID" label="Hero ID" placeholder="1"></text-widget>
         </action-card>
 
         <!-- GET CHARACTER'S BLOODLINE (GET) -->
@@ -289,8 +289,8 @@ export default class PackNFTHarness extends LitElement {
         <action-card title="Get current supply" description="Total minted characters" action="characterxGetTotalSupply" method="get" fields="">
         </action-card>
       
-        <!-- CHARATERS GET ALL CHARACTERS (GET) -->
-        <action-card title="Get all characters" description="Return with array containing struct. See the result in the browser console" action="characterxCharactersGetAllCharacters"
+        <!-- CHARATERS GET ALL HEROES (GET) -->
+        <action-card title="Get all heroes" description="Return with array containing struct. See the result in the browser console" action="heroHeroesGetAllHeroes"
           method="get" fields="">
         </action-card>
       

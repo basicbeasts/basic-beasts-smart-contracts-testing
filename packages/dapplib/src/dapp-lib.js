@@ -131,15 +131,15 @@ module.exports = class DappLib {
         }
     }
 
-    /********** CHARACTREX **********/
+    /********** HERO **********/
 
 
-    // characterxAddLineageKeyValuePair
-    // calls transactions/characterx/add_lineage_key_value_pair.cdc
+    // heroAddLineageKeyValuePair
+    // calls transactions/hero/add_lineage_key_value_pair.cdc
     //
     // signer/proposer/authorizer: data.signer
     //
-    static async characterxAddLineageKeyValuePair(data) {
+    static async heroAddLineageKeyValuePair(data) {
 
         let config = DappLib.getConfig()
         let result = await Blockchain.post({
@@ -148,9 +148,9 @@ module.exports = class DappLib {
                     proposer: data.signer
                 }
             },
-            'characterx_add_lineage_key_value_pair', {
-                lineageKey: { value: data.lineageKey, type: t.String },
-                lineageValue: { value: data.lineageValue, type: t.Bool },
+            'hero_add_lineage_key_value_pair', {
+                lineage: DappLib.formatFlowDictionary(data.lineage, { key: t.String, value: t.Bool }),
+                heroStructID: { value: parseInt(data.heroStructID), type: t.UInt32 }
             }
         );
 
@@ -163,12 +163,12 @@ module.exports = class DappLib {
     }
 
 
-    // characterxCreateSet
-    // calls transactions/characterx/create_set.cdc
+    // heroCreateSet
+    // calls transactions/hero/create_set.cdc
     //
     // signer/proposer/authorizer: data.signer
     //
-    static async characterxCreateSet(data) {
+    static async heroCreateSet(data) {
 
         let config = DappLib.getConfig()
         let result = await Blockchain.post({
@@ -177,7 +177,7 @@ module.exports = class DappLib {
                     proposer: data.signer
                 }
             },
-            'characterx_create_set', {
+            'hero_create_set', {
                 setName: { value: data.setName, type: t.String }
             }
         );
@@ -215,12 +215,12 @@ module.exports = class DappLib {
     }
 
 
-    // characterxMintCharacter
-    // calls transactions/characterx/mint_character.cdc
+    // heroMintHero
+    // calls transactions/hero/mint_hero.cdc
     //
     // signer/proposer/authorizer: data.signer
     //
-    static async characterxMintCharacter(data) {
+    static async heroMintHero(data) {
 
         let result = await Blockchain.post({
                 config: DappLib.getConfig(),
@@ -228,9 +228,9 @@ module.exports = class DappLib {
                     proposer: data.signer
                 }
             },
-            'characterx_mint_character', {
+            'hero_mint_hero', {
                 setID: { value: parseInt(data.setID), type: t.UInt32 },
-                characterID: { value: parseInt(data.characterID), type: t.UInt32 },
+                heroStructID: { value: parseInt(data.heroStructID), type: t.UInt32 },
                 recipientAddr: { value: data.recipientAddr, type: t.Address }
             }
         );
@@ -243,12 +243,13 @@ module.exports = class DappLib {
 
     }
 
-    // characterxCreateCharacter
-    // calls transactions/characterx/create_character.cdc
+
+    // heroCreateHero
+    // calls transactions/hero/create_hero_struct.cdc
     //
     // signer/proposer/authorizer: data.signer
     //
-    static async characterxCreateCharacter(data) {
+    static async heroCreateHero(data) {
 
         let result = await Blockchain.post({
                 config: DappLib.getConfig(),
@@ -256,19 +257,17 @@ module.exports = class DappLib {
                     proposer: data.signer
                 }
             },
-            'characterx_create_character', {
+            'hero_create_hero_struct', {
 
                 name: { value: data.name, type: t.String },
-                description: { value: data.description, type: t.String },
-                image: { value: data.image, type: t.String },
-                createdFrom_1: { value: parseInt(data.createdFrom_1), type: t.UInt64 },
-                createdFrom_2: { value: parseInt(data.createdFrom_2), type: t.UInt64 },
                 sex: { value: data.sex, type: t.String },
                 race: { value: data.race, type: t.String },
                 rarity: { value: data.rarity, type: t.String },
-                lineage: DappLib.formatFlowDictionary(data.lineage, { key: t.String, value: t.Bool }),
-                bloodline: DappLib.formatFlowDictionary(data.bloodline, { key: t.String, value: t.Bool }),
-                element: DappLib.formatFlowDictionary(data.element, { key: t.String, value: t.Bool }),
+                createdAt: { value: parseInt(data.createdAt), type: t.UInt64 },
+                createdFrom: DappLib.formatFlowArray(data.createdFrom, t.UInt64),
+                lineages: DappLib.formatFlowDictionary(data.lineages, { key: t.String, value: t.Bool }),
+                bloodlines: DappLib.formatFlowDictionary(data.bloodlines, { key: t.String, value: t.Bool }),
+                elements: DappLib.formatFlowDictionary(data.elements, { key: t.String, value: t.Bool }),
                 traits: DappLib.formatFlowDictionary(data.traits, { key: t.String, value: t.String }),
                 data: DappLib.formatFlowDictionary(data.data, { key: t.String, value: t.String })
 
@@ -283,12 +282,12 @@ module.exports = class DappLib {
 
     }
 
-    // characterxAddCharacterToSet
-    // calls transactions/characterx/add_character_to_set.cdc
+    // heroAddHeroStructToSet
+    // calls transactions/hero/add_hero_struct_to_set.cdc
     //
     // signer/proposer/authorizer: data.signer
     //
-    static async characterxAddCharacterToSet(data) {
+    static async heroAddHeroStructToSet(data) {
 
         let result = await Blockchain.post({
                 config: DappLib.getConfig(),
@@ -296,9 +295,9 @@ module.exports = class DappLib {
                     proposer: data.signer
                 }
             },
-            'characterx_add_character_to_set', {
+            'hero_add_hero_struct_to_set', {
                 setID: { value: parseInt(data.setID), type: (t.UInt32) },
-                characterID: { value: parseInt(data.characterID), type: (t.UInt32) }
+                heroStructID: { value: parseInt(data.heroStructID), type: (t.UInt32) }
 
             }
         );
@@ -581,12 +580,12 @@ module.exports = class DappLib {
 
     }
 
-    // characterxSetupAccount
-    // calls transactions/characterx/setup_account.cdc
+    // heroSetupAccount
+    // calls transactions/hero/setup_account.cdc
     //
     // signer/proposer/authorizer: data.signer
     //
-    static async characterxSetupAccount(data) {
+    static async heroSetupAccount(data) {
 
         let result = await Blockchain.post({
                 config: DappLib.getConfig(),
@@ -594,7 +593,7 @@ module.exports = class DappLib {
                     proposer: data.signer
                 }
             },
-            'characterx_setup_account'
+            'hero_setup_account'
         );
 
         return {
@@ -651,25 +650,25 @@ module.exports = class DappLib {
 
     }
 
-    // characterxCharactersGetAllCharacters
-    // calls scripts/characterx/characters_get_all_characters.cdc
+    // heroHeroesGetAllHeroes
+    // calls scripts/hero/heroes_get_all_heroes.cdc
     //
     // signer/proposer/authorizer: 
     //
-    static async characterxCharactersGetAllCharacters(data) {
+    static async heroHeroesGetAllHeroes(data) {
 
         let result = await Blockchain.get({
                 config: DappLib.getConfig(),
                 roles: {}
             },
-            'characterx_characters_get_all_characters', {}
+            'hero_heroes_get_all_heroes', {}
         );
 
         console.log(result)
 
         return {
             type: DappLib.DAPP_RESULT_STRING,
-            label: 'All characters (array)',
+            label: 'All heroes',
             result: result.callData
         }
     }
@@ -901,19 +900,19 @@ module.exports = class DappLib {
 
     }
 
-    // characterxCharactersGetCharacterLineage
-    // calls scripts/characterx/characters_get_character_lineage.cdc
+    // heroHeroesGetHeroLineage
+    // calls scripts/hero/heroes_get_hero_lineages.cdc
     //
     // signer/proposer/authorizer: 
     //
-    static async characterxCharactersGetCharacterLineage(data) {
+    static async heroHeroesGetHeroLineages(data) {
 
         let result = await Blockchain.get({
                 config: DappLib.getConfig(),
                 roles: {}
             },
-            'characterx_characters_get_character_lineage', {
-                characterID: { value: parseInt(data.characterID), type: t.UInt32 }
+            'hero_heroes_get_hero_lineages', {
+                heroStructID: { value: parseInt(data.heroStructID), type: t.UInt32 }
             }
         );
 
