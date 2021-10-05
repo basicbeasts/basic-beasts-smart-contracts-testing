@@ -58,7 +58,7 @@ import NonFungibleToken from  "../Flow/NonFungibleToken.cdc"
 pub contract Hero: NonFungibleToken {
 
     // -----------------------------------------------------------------------
-    // Hero contract Events
+    // Hero contract-level Events
     // -----------------------------------------------------------------------
 
     // Emitted when the contract is created
@@ -78,6 +78,7 @@ pub contract Hero: NonFungibleToken {
                                 elements: {String: Bool},
                                 traits: {String: String},
                                 data: {String: String})
+    
     // Emitted when a new series has been triggered by an admin
     pub event NewSeriesStarted(newCurrentSeries: UInt32)
 
@@ -101,9 +102,16 @@ pub contract Hero: NonFungibleToken {
     // Emitted when a Hero is deposited into a Collection
     pub event Deposit(id: UInt64, to: Address?)
 
+    // Events for Hero-related actions
+    //
+    // Emitted when a beneficiary has been set to a Hero
+    pub event HeroBeneficiaryIsSet(id: UInt64, beneficiary: Address?)
     // Emitted when a Hero is destroyed
     pub event HeroDestroyed(id: UInt64)
 
+    // -----------------------------------------------------------------------
+    // Hero contract-level Named Paths
+    // -----------------------------------------------------------------------
     pub let CollectionStoragePath: StoragePath
     pub let CollectionPublicPath: PublicPath
     pub let AdminStoragePath: StoragePath
@@ -585,6 +593,11 @@ pub contract Hero: NonFungibleToken {
             }
 
             self.beneficiary = beneficiary
+            emit HeroBeneficiaryIsSet(id: self.id, beneficiary: self.beneficiary!)
+        }
+
+        pub fun getBeneficiary(): Address? {
+            return self.beneficiary
         }
 
         // If the Hero is destroyed, emit an event to indicate 
@@ -650,22 +663,6 @@ pub contract Hero: NonFungibleToken {
             return newID
         }
 
-
-        //Hey Jacob, in case you are reviewing from down here. 
-        //I still need to add some getters and functions that allow for changing heroStruct's fields. 
-        //My colleague has been playing around with trying to add new key-value pairs into a dic 
-        // But after that I think we are pretty much done and will run a few more test and then send it for review 
-        
-        // TODO: Change Data and Add Key Value Pair
-        pub fun addLineageKeyValuePair(lineageKey: String lineageValue: Bool, heroStructID: UInt32) {
-            pre {
-                Hero.heroStructs[heroStructID]?.lineages?.containsKey(lineageKey) == false: "Something"
-            }
-
-            Hero.heroStructs[heroStructID]?.lineages?.insert(key: lineageKey, lineageValue)
-
-    }
-
         // createSet creates a new Set resource and stores it
         // in the sets mapping in this contract
         // 
@@ -692,6 +689,26 @@ pub contract Hero: NonFungibleToken {
             emit NewSeriesStarted(newCurrentSeries: Hero.currentSeries)
 
             return Hero.currentSeries
+        }
+
+        pub fun updateHeroStructDataByField(heroStructID: UInt32, key: String, value: String): {String: String}? {
+            pre {
+                Hero.heroStructs[heroStructID] != nil: "Cannot update HeroStruct: The HeroStruct doesn't exist."
+            }
+
+            let old = Hero.heroStructs[heroStructID]?.data?.insert(key: key, value)
+
+            return Hero.heroStructs[heroStructID]?.data
+        }
+
+        pub fun removeHeroStructDataByField(heroStructID: UInt32, key: String): String??  {
+            pre {
+                Hero.heroStructs[heroStructID] != nil: "Cannot change HeroStruct data: The HeroStruct doesn't exist."
+            }
+
+            let removedKey = Hero.heroStructs[heroStructID]?.data?.remove(key: key)
+
+            return removedKey
         }
 
         pub fun createNewAdmin(): @Admin {
@@ -818,6 +835,7 @@ pub contract Hero: NonFungibleToken {
     //
     // Returns: The HeroStruct as a Hero.HeroStruct optional
     pub fun getHeroStruct(heroStructID: UInt32): Hero.HeroStruct? {
+        // Don't force a revert if the heroStructID is invalid
         return self.heroStructs[heroStructID]
     }
 
@@ -827,6 +845,7 @@ pub contract Hero: NonFungibleToken {
     //
     // Returns: The name as a String optional
     pub fun getHeroStructName(heroStructID: UInt32): String? {
+        // Don't force a revert if the heroStructID is invalid
         return self.heroStructs[heroStructID]?.name
     }
 
@@ -836,6 +855,7 @@ pub contract Hero: NonFungibleToken {
     //
     // Returns: The sex as a String optional
     pub fun getHeroStructSex(heroStructID: UInt32): String? {
+        // Don't force a revert if the heroStructID is invalid
         return self.heroStructs[heroStructID]?.sex
     }
 
@@ -845,6 +865,7 @@ pub contract Hero: NonFungibleToken {
     //
     // Returns: The race as a String optional
     pub fun getHeroStructRace(heroStructID: UInt32): String? {
+        // Don't force a revert if the heroStructID is invalid
         return self.heroStructs[heroStructID]?.race
     }
 
@@ -854,6 +875,7 @@ pub contract Hero: NonFungibleToken {
     //
     // Returns: The rarity as a String optional
     pub fun getHeroStructRarity(heroStructID: UInt32): String? {
+        // Don't force a revert if the heroStructID is invalid
         return self.heroStructs[heroStructID]?.rarity
     }
 
@@ -864,6 +886,7 @@ pub contract Hero: NonFungibleToken {
     //
     // Returns: The unix timestamp as a UInt64 optional
     pub fun getHeroStructCreatedAt(heroStructID: UInt32): UInt64? {
+        // Don't force a revert if the heroStructID is invalid
         return self.heroStructs[heroStructID]?.createdAt
     }
 
@@ -875,24 +898,27 @@ pub contract Hero: NonFungibleToken {
     //
     // Returns: The HeroStruct IDs as a UInt32 array optional
     pub fun getHeroStructCreatedFrom(heroStructID: UInt32): [UInt64]? {
+        // Don't force a revert if the heroStructID is invalid
         return self.heroStructs[heroStructID]?.createdFrom
     }
 
-    // getHeroStructLineages returns the an of String to Bool mapping
-    // of whether a specific HeroStruct belongs to a certain lineage
+    // getHeroStructLineages returns a mapping to check whether 
+    // a specific HeroStruct belongs to a certain lineage
     // 
     // Parameters: heroStructID: The id of the HeroStruct that is being searched
     //
-    // Returns: The sex as a String optional
+    // Returns: The lineages as a String to Bool mapping optional
     pub fun getHeroStructLineages(heroStructID: UInt32): {String: Bool}? {
+        // Don't force a revert if the heroStructID is invalid
         return self.heroStructs[heroStructID]?.lineages
     }
 
-    // getHeroStructSex returns the sex of a specific HeroStruct
+    // getHeroStructLineagesByField returns a Bool associated with
+    // a specific field of the lineages
     // 
     // Parameters: heroStructID: The id of the HeroStruct that is being searched
     //
-    // Returns: The sex as a String optional
+    // Returns: The lineage field as a Bool optional
     pub fun getHeroStructLineagesByField(heroStructID: UInt32, field: String): Bool? {
         // Don't force a revert if the heroStructID or field is invalid
         if let heroStruct = Hero.heroStructs[heroStructID] {
@@ -902,20 +928,23 @@ pub contract Hero: NonFungibleToken {
         }
     } 
     
-    // getHeroStructSex returns the sex of a specific HeroStruct
+    // getHeroStructBloodlines returns a mapping to check whether 
+    // a specific HeroStruct belongs to a certain bloodline
     // 
     // Parameters: heroStructID: The id of the HeroStruct that is being searched
     //
-    // Returns: The sex as a String optional
+    // Returns: The bloodlines as a String to Bool mapping optional
     pub fun getHeroStructBloodlines(heroStructID: UInt32): {String: Bool}? {
+        // Don't force a revert if the heroStructID is invalid
         return self.heroStructs[heroStructID]?.bloodlines
     }
 
-    // getHeroStructSex returns the sex of a specific HeroStruct
+    // getHeroStructBloodlinesByField returns a Bool associated with
+    // a specific field of the bloodlines
     // 
     // Parameters: heroStructID: The id of the HeroStruct that is being searched
     //
-    // Returns: The sex as a String optional
+    // Returns: The bloodline field as a Bool optional
     pub fun getHeroStructBloodlinesByField(heroStructID: UInt32, field: String): Bool? {
         // Don't force a revert if the heroStructID or field is invalid
         if let heroStruct = Hero.heroStructs[heroStructID] {
@@ -925,20 +954,23 @@ pub contract Hero: NonFungibleToken {
         }
     } 
 
-    // getHeroStructSex returns the sex of a specific HeroStruct
+    // getHeroStructElements returns a mapping to check whether 
+    // a specific HeroStruct has certain elements
     // 
     // Parameters: heroStructID: The id of the HeroStruct that is being searched
     //
-    // Returns: The sex as a String optional
+    // Returns: The elements as a String to Bool mapping optional
     pub fun getHeroStructElements(heroStructID: UInt32): {String: Bool}? {
+        // Don't force a revert if the heroStructID is invalid
         return self.heroStructs[heroStructID]?.elements
     }
 
-    // getHeroStructSex returns the sex of a specific HeroStruct
+    // getHeroStructElementsByField returns a Bool associated with
+    // a specific field of the elements
     // 
     // Parameters: heroStructID: The id of the HeroStruct that is being searched
     //
-    // Returns: The sex as a String optional
+    // Returns: The element field as a Bool optional
     pub fun getHeroStructElementsByField(heroStructID: UInt32, field: String): Bool? {
         // Don't force a revert if the heroStructID or field is invalid
         if let heroStruct = Hero.heroStructs[heroStructID] {
@@ -948,20 +980,22 @@ pub contract Hero: NonFungibleToken {
         }
     } 
 
-    // getHeroStructSex returns the sex of a specific HeroStruct
+    // getHeroStructTraits returns all the traits associated with a specific HeroStruct
     // 
     // Parameters: heroStructID: The id of the HeroStruct that is being searched
     //
-    // Returns: The sex as a String optional
+    // Returns: The traits as a String to String mapping optional
     pub fun getHeroStructTraits(heroStructID: UInt32): {String: String}? {
+        // Don't force a revert if the heroStructID is invalid
         return self.heroStructs[heroStructID]?.traits
     }
 
-    // getHeroStructSex returns the sex of a specific HeroStruct
+    // getHeroStructTraitsByField returns the trait associated with a 
+    // specific field of the traits
     // 
     // Parameters: heroStructID: The id of the HeroStruct that is being searched
     //
-    // Returns: The sex as a String optional
+    // Returns: The trait field as a String optional
     pub fun getHeroStructTraitsByField(heroStructID: UInt32, field: String): String? {
         // Don't force a revert if the heroStructID or field is invalid
         if let heroStruct = Hero.heroStructs[heroStructID] {
@@ -971,13 +1005,13 @@ pub contract Hero: NonFungibleToken {
         }
     }     
 
-    // getHeroStructSex returns the sex of a specific HeroStruct
+    // getHeroStructData returns all the other data associated with a specific HeroStruct
     // 
     // Parameters: heroStructID: The id of the HeroStruct that is being searched
     //
-    // Returns: The sex as a String optional
+    // Returns: The data as a String to String mapping optional
     pub fun getHeroStructData(heroStructID: UInt32): {String: String}? {
-        // Don't force a revert if the setID is invalid
+        // Don't force a revert if the heroStructID is invalid
         return self.heroStructs[heroStructID]?.data
     }
 
