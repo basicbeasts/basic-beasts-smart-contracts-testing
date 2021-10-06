@@ -712,11 +712,12 @@ pub contract Hero: NonFungibleToken {
         }
 
         // updateHeroStructDataByField updates a HeroStruct's data
-        // by adding a new key value pair to the data dictionary
+        // by adding a new key-value-pair or changing an existing key's 
+        // value in the data dictionary
         //
         // Parameters: 
         // heroStructID: The id of the HeroStruct to update
-        // key: The new key to insert into data
+        // key: The new key or existing key to insert into data
         // value: The value that is to be inserted with the key
         //
         // Returns: The data as a String to String mapping optional
@@ -1174,11 +1175,17 @@ pub contract Hero: NonFungibleToken {
         }
     }
 
+    // -----------------------------------------------------------------------
+    // Hero contract initialization function
+    // -----------------------------------------------------------------------
+    //
     init() {
+        // Initialize the named paths
         self.CollectionStoragePath = /storage/theEighthNoteHeroCollection
         self.CollectionPublicPath = /public/theEighthNoteHeroCollection
         self.AdminStoragePath = /storage/theEighthNoteHeroAdmin
 
+        // Initialize the fields
         self.currentSeries = 0
         self.heroStructs = {}
         self.sets <- {}

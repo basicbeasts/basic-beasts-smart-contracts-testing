@@ -45,13 +45,6 @@
 
 */
 
-//TODO: What should be put as access(self) and access(contract) instead of public 
-// Check if those fields are used outside of the resource to see which access modifier
-//TODO: Test if getters should be made in the Contract for character fields although they are already public
-//TODO: Check for grammer
-//TODO: How much can we change the Struct's metadata after it has been created?
-//TODO: Run UNIT TEST that are really mean to break the contract.
-
 import NonFungibleToken from "../Flow/NonFungibleToken.cdc"
 
 pub contract BasicBeast: NonFungibleToken {
