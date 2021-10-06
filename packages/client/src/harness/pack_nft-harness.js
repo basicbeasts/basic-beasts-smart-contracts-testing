@@ -13,35 +13,35 @@ import { LitElement, html, customElement, property } from "lit-element";
 
 @customElement('pack-nft-harness')
 export default class PackNFTHarness extends LitElement {
-    @property()
-    title;
-    @property()
-    category;
-    @property()
-    description;
+  @property()
+  title;
+  @property()
+  category;
+  @property()
+  description;
 
-    createRenderRoot() {
-        return this;
-    }
+  createRenderRoot() {
+    return this;
+  }
 
-    constructor(args) {
-        super(args);
-    }
+  constructor(args) {
+    super(args);
+  }
 
-    render() {
-        let content = html `
+  render() {
+    let content = html`
       <page-body title="${this.title}" category="${this.category}" description="${this.description}">
       
-      <!-- FUSD -->
+        <!-- FUSD -->
       
-      <action-card title="FUSD - Setup Account" description="Setup Account to handle FUSD (create FUSD vault)"
+        <action-card title="FUSD - Setup Account" description="Setup Account to handle FUSD (create FUSD vault)"
           action="FUSDCreateFUSDVault" method="post" fields="signer">
           <account-widget field="signer" label="Signer">
           </account-widget>
         </action-card>
       
-        <action-card title="FUSD - Get Balance" description="Get FUSD balance in an account"
-          action="FUSDGetFUSDBalance" method="get" fields="address">
+        <action-card title="FUSD - Get Balance" description="Get FUSD balance in an account" action="FUSDGetFUSDBalance"
+          method="get" fields="address">
           <account-widget field="address" label="Address">
           </account-widget>
         </action-card>
@@ -49,26 +49,26 @@ export default class PackNFTHarness extends LitElement {
         <action-card title="FUSD - Get Supply" description="Get the total supply of FUSD" action="FUSDGetFUSDSupply"
           method="get" fields="">
         </action-card>
-
-        <action-card title="FUSD - Mint Tokens" description="Mint FUSD into an account" action="FUSDMintFUSDs"
-          method="post" fields="to amount">
+      
+        <action-card title="FUSD - Mint Tokens" description="Mint FUSD into an account" action="FUSDMintFUSDs" method="post"
+          fields="to amount">
           <account-widget field="to" label="Recipient">
           </account-widget>
           <text-widget field="amount" label="Amount" placeholder="30.0"></text-widget>
         </action-card>
       
-        <action-card title="FUSD - Create FUSD Minter" description="Create FUSD minter"
-          action="FUSDCreateMinter" method="post" fields="signer">
+        <action-card title="FUSD - Create FUSD Minter" description="Create FUSD minter" action="FUSDCreateMinter"
+          method="post" fields="signer">
           <account-widget field="signer" label="Signer">
           </account-widget>
         </action-card>
       
       
-      <!-- CHARACTERX -->
+        <!-- CHARACTERX -->
       
         <!-- SETUP ACCOUNT HERO (POST) -->
-        <action-card title="Setup account - Hero" description="Setup account to handle Hero NFTs"
-          action="heroSetupAccount" method="post" fields="signer">
+        <action-card title="Setup account - Hero" description="Setup account to handle Hero NFTs" action="heroSetupAccount"
+          method="post" fields="signer">
           <account-widget field="signer" label="Signer"></account-widget>
         </action-card>
       
@@ -80,14 +80,13 @@ export default class PackNFTHarness extends LitElement {
         </action-card>
       
         <!-- SETS GET SET NAME (GET) -->
-        <action-card title="Get Set Name" description="Enter the setID to get the set's name" action="characterxGetSetName"
+        <action-card title="Get Set Name" description="Enter the setID to get the set's name" action="heroGetSetName"
           method="get" fields="setID">
           <text-widget field="setID" label="setID" placeholder="0"></text-widget>
         </action-card>
       
         <!-- CREATE HERO (POST) -->
-        <action-card title="Create a hero"
-          description="Enter the required fields to create a hero. *Only admin."
+        <action-card title="Create a hero" description="Enter the required fields to create a hero. *Only admin."
           action="heroCreateHero" method="post"
           fields="signer name sex race rarity createdAt createdFrom lineages bloodlines elements traits data">
           <account-widget field="signer" label="Signer"></account-widget>
@@ -108,17 +107,17 @@ export default class PackNFTHarness extends LitElement {
           <dictionary-widget field="data" label="Data" objectLabel="Data Object" keyplaceholder="Jacob"
             valueplaceholder="Rocks"></dictionary-widget>
         </action-card>
-
+      
         <!-- ADD LINEAGE KEY VALUE PAIR TO STRUCT  (POST) -->
-        <action-card title="Add lineage key value pair to struct" description="*Only admin" action="heroAddLineageKeyValuePair"
-          method="post" fields="signer lineage heroStructID">
+        <action-card title="Add lineage key value pair to struct" description="*Only admin"
+          action="heroAddLineageKeyValuePair" method="post" fields="signer lineage heroStructID">
           <account-widget field="signer" label="Signer"></account-widget>
-          <dictionary-widget field="lineage" label="New lineage" objectLabel="Lineage Object"
-            keyplaceholder="Lineage Name" valueplaceholder="false"></dictionary-widget>
-            <text-widget field="heroStructID" label="Hero struct ID" placeholder="0"></text-widget>
-
+          <dictionary-widget field="lineage" label="New lineage" objectLabel="Lineage Object" keyplaceholder="Lineage Name"
+            valueplaceholder="false"></dictionary-widget>
+          <text-widget field="heroStructID" label="Hero struct ID" placeholder="0"></text-widget>
+      
         </action-card>
-
+      
         <!-- ADD HERO STRUCT TO SET (POST) -->
         <action-card title="Add a hero struct to a set" description="*Only admin" action="heroAddHeroStructToSet"
           method="post" fields="signer setID heroStructID">
@@ -126,7 +125,7 @@ export default class PackNFTHarness extends LitElement {
           <text-widget field="setID" label="Set ID" placeholder="0"></text-widget>
           <text-widget field="heroStructID" label="Hero struct ID" placeholder="0"></text-widget>
         </action-card>
-
+      
         <!-- ADD CHARACTERS TO SET (POST) -->
         <action-card title="Add a characters to a set" description="*Only admin" action="characterxAddCharactersToSet"
           method="post" fields="signer setID characters">
@@ -136,14 +135,14 @@ export default class PackNFTHarness extends LitElement {
         </action-card>
       
         <!-- MINT HERO (POST) -->
-        <action-card title="Mint a hero" description="Mint a hero. *Only admin." action="heroMintHero"
-          method="post" fields="signer setID heroStructID recipientAddr">
+        <action-card title="Mint a hero" description="Mint a hero. *Only admin." action="heroMintHero" method="post"
+          fields="signer setID heroStructID recipientAddr">
           <account-widget field="signer" label="Signer"></account-widget>
           <text-widget field="setID" label="Set ID" placeholder="0"></text-widget>
           <text-widget field="heroStructID" label="Hero struct ID" placeholder="0"></text-widget>
           <account-widget field="recipientAddr" label="Recipient Address"></account-widget>
         </action-card>
-
+      
         <!-- BATCH MINT CHARACTER (POST) -->
         <action-card title="Batch mint a character" description="*Only admin" action="characterxBatchMintCharacter"
           method="post" fields="signer setID characterID quantity recipientAddr">
@@ -185,7 +184,7 @@ export default class PackNFTHarness extends LitElement {
           <text-widget field="setID" label="Set ID" placeholder="0"></text-widget>
           <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
         </action-card>
-         
+      
         <!-- RETIRE ALL CHARACTERS FROM SET (POST) -->
         <action-card title="Retire all characters from a set" description="*Only admin"
           action="characterxRetireAllCharactersFromSet" method="post" fields="signer setID">
@@ -198,7 +197,7 @@ export default class PackNFTHarness extends LitElement {
           fields="signer">
           <account-widget field="signer" label="Signer"></account-widget>
         </action-card>
-        
+      
         <!-- BUYING NFT WITH REFERRAL (POST) -->
         <action-card title="Buy NFT with referral" description="5% discount for buyer and 5% bonus for referrer"
           action="characterxBuyingNFTWithReferral" method="post" fields="signer to amount referrer">
@@ -211,87 +210,89 @@ export default class PackNFTHarness extends LitElement {
         <!-- BUYING NFT WITHOUT REFERRAL (POST) -->
         <!-- Signer is the buyer -->
         <!-- To is the one who receiving the fusd. -->
-
+      
         <action-card title="Buy NFT without referral" description="" action="characterxBuyingNFTWithoutReferral" method="post"
           fields="signer to amount">
           <account-widget field="signer" label="Buyer"></account-widget>
           <account-widget field="to" label="Receiver"></account-widget>
           <text-widget field="amount" label="Amount" placeholder="10.0"></text-widget>
         </action-card>
-
+      
         <!-- GET CHARACTER'S NAME (GET) -->
-        <action-card title="Get character's name" description="Enter characterID" action="characterxCharactersGetCharacterName" method="get"
-         fields="characterID">
-         <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
+        <action-card title="Get character's name" description="Enter characterID"
+          action="characterxCharactersGetCharacterName" method="get" fields="characterID">
+          <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
         </action-card>
-
+      
         <!-- GET CHARACTER'S DESCRIPTION (GET) -->
-        <action-card title="Get character's description" description="Enter characterID" action="characterxCharactersGetCharacterDescription" method="get"
-         fields="characterID">
-         <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
+        <action-card title="Get character's description" description="Enter characterID"
+          action="characterxCharactersGetCharacterDescription" method="get" fields="characterID">
+          <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
         </action-card>
-
+      
         <!-- GET CHARACTER'S IMAGE (GET) -->
-        <action-card title="Get character's image" description="Enter characterID" action="characterxCharactersGetCharacterImage" method="get"
-         fields="characterID">
-         <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
+        <action-card title="Get character's image" description="Enter characterID"
+          action="characterxCharactersGetCharacterImage" method="get" fields="characterID">
+          <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
         </action-card>
-
+      
         <!-- GET CHARACTER'S CREATED FROM 1 (GET) -->
-        <action-card title="Get character's ancestor 1" description="Enter characterID" action="characterxCharactersGetCharacterCreatedFrom1" method="get"
-         fields="characterID">
-         <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
+        <action-card title="Get character's ancestor 1" description="Enter characterID"
+          action="characterxCharactersGetCharacterCreatedFrom1" method="get" fields="characterID">
+          <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
         </action-card>
-
+      
         <!-- GET CHARACTER'S CREATED FROM 2 (GET) -->
-        <action-card title="Get character's ancestor 2" description="Enter characterID" action="characterxCharactersGetCharacterCreatedFrom2" method="get"
-         fields="characterID">
-         <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
+        <action-card title="Get character's ancestor 2" description="Enter characterID"
+          action="characterxCharactersGetCharacterCreatedFrom2" method="get" fields="characterID">
+          <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
         </action-card>
-
+      
         <!-- GET CHARACTER'S SEX (GET) -->
-        <action-card title="Get character's sex" description="Enter characterID" action="characterxCharactersGetCharacterSex" method="get"
-         fields="characterID">
-         <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
+        <action-card title="Get character's sex" description="Enter characterID" action="characterxCharactersGetCharacterSex"
+          method="get" fields="characterID">
+          <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
         </action-card>
-
+      
         <!-- GET CHARACTER'S RACE (GET) -->
-        <action-card title="Get character's race" description="Enter characterID" action="characterxCharactersGetCharacterRace" method="get"
-         fields="characterID">
-         <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
+        <action-card title="Get character's race" description="Enter characterID"
+          action="characterxCharactersGetCharacterRace" method="get" fields="characterID">
+          <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
         </action-card>
-
+      
         <!-- GET CHARACTER'S RARITY (GET) -->
-        <action-card title="Get character's rarity" description="Enter characterID" action="characterxCharactersGetCharacterRarity" method="get"
-         fields="characterID">
-         <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
+        <action-card title="Get character's rarity" description="Enter characterID"
+          action="characterxCharactersGetCharacterRarity" method="get" fields="characterID">
+          <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
         </action-card>
-
+      
         <!-- GET HERO'S LINEAGE (GET) -->
         <action-card title="Get hero's lineage" description="Enter heroID" action="heroHeroesGetHeroLineages" method="get"
-         fields="heroStructID">
-         <text-widget field="heroStructID" label="Hero ID" placeholder="1"></text-widget>
+          fields="heroStructID">
+          <text-widget field="heroStructID" label="Hero ID" placeholder="1"></text-widget>
         </action-card>
-
+      
         <!-- GET CHARACTER'S BLOODLINE (GET) -->
-        <action-card title="Get character's bloodline" description="Enter characterID" action="characterxCharactersGetCharacterBloodline" method="get"
-         fields="characterID">
-         <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
+        <action-card title="Get character's bloodline" description="Enter characterID"
+          action="characterxCharactersGetCharacterBloodline" method="get" fields="characterID">
+          <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
         </action-card>
-
+      
         <!-- GET CHARACTER'S ELEMENT (GET) -->
-        <action-card title="Get character's element" description="Enter characterID" action="characterxCharactersGetCharacterElement" method="get"
-         fields="characterID">
-         <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
+        <action-card title="Get character's element" description="Enter characterID"
+          action="characterxCharactersGetCharacterElement" method="get" fields="characterID">
+          <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
         </action-card>
-
+      
         <!-- GET TOTAL SUPPLY (GET) -->
-        <action-card title="Get current supply" description="Total minted characters" action="characterxGetTotalSupply" method="get" fields="">
+        <action-card title="Get current supply" description="Total minted characters" action="characterxGetTotalSupply"
+          method="get" fields="">
         </action-card>
       
         <!-- CHARATERS GET ALL HEROES (GET) -->
-        <action-card title="Get all heroes" description="Return with array containing struct. See the result in the browser console" action="heroHeroesGetAllHeroes"
-          method="get" fields="">
+        <action-card title="Get all heroes"
+          description="Return with array containing struct. See the result in the browser console"
+          action="heroHeroesGetAllHeroes" method="get" fields="">
         </action-card>
       
         <!-- CHARACTERS GET NEXT CHARACTER ID (GET) -->
@@ -313,14 +314,14 @@ export default class PackNFTHarness extends LitElement {
         </action-card>
       
         <!-- CHARATERS GET CHARATERS TRAITS (GET) -->
-        <action-card title="Get character's traits" description=""
-          action="characterxCharactersGetCharacterTraits" method="get" fields="characterID">
+        <action-card title="Get character's traits" description="" action="characterxCharactersGetCharacterTraits"
+          method="get" fields="characterID">
           <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
         </action-card>
       
         <!-- CHARATERS GET CHARATERS TRAITS FIELD (GET) -->
-        <action-card title="Get character's traits field" description=""
-          action="characterxCharactersGetCharacterTraitsField" method="get" fields="characterID field">
+        <action-card title="Get character's traits field" description="" action="characterxCharactersGetCharacterTraitsField"
+          method="get" fields="characterID field">
           <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
           <text-widget field="field" label="Field" placeholder=".."></text-widget>
         </action-card>
@@ -337,8 +338,9 @@ export default class PackNFTHarness extends LitElement {
         </action-card>
       
         <!-- SETS GET NUM CHARACTERS IN EDITION (GET) -->
-        <action-card title="Sets get num character in edition" description="Return the number of the character that has been minted in the setID" action="characterxSetsGetNumCharactersInEdition"
-          method="get" fields="setID characterID">
+        <action-card title="Sets get num character in edition"
+          description="Return the number of the character that has been minted in the setID"
+          action="characterxSetsGetNumCharactersInEdition" method="get" fields="setID characterID">
           <text-widget field="setID" label="Set ID" placeholder="0"></text-widget>
           <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
         </action-card>
@@ -360,10 +362,9 @@ export default class PackNFTHarness extends LitElement {
           fields="setID">
           <text-widget field="setID" label="Set ID" placeholder="0"></text-widget>
         </action-card>
-
+      
         <!-- SETS CURRENT SERIES (GET) -->
-        <action-card title="Get current series" description="" action="characterxGetCurrentSeries" method="get"
-          fields="">
+        <action-card title="Get current series" description="" action="characterxGetCurrentSeries" method="get" fields="">
         </action-card>
       
         <!-- SETS GET SET LOCKED (GET) -->
@@ -373,7 +374,8 @@ export default class PackNFTHarness extends LitElement {
         </action-card>
       
         <!-- COLLECTIONS GET COLLECTION IDS (GET) -->
-        <action-card title="Collections get collection Ids" description="Get a specific account collection. The result id(s) are in order of minted characters"
+        <action-card title="Collections get collection Ids"
+          description="Get a specific account collection. The result id(s) are in order of minted characters"
           action="characterxCollectionsGetCollectionIds" method="get" fields="account">
           <account-widget field="account" label="Account"></account-widget>
         </action-card>
@@ -386,15 +388,15 @@ export default class PackNFTHarness extends LitElement {
         </action-card>
       
         <!-- COLLECTIONS GET DATA (GET) -->
-        <action-card title="Collections get data" description=""
-          action="characterxCollectionsGetData" method="get" fields="account id">
+        <action-card title="Collections get data" description="" action="characterxCollectionsGetData" method="get"
+          fields="account id">
           <account-widget field="account" label="Account"></account-widget>
           <text-widget field="id" label="ID" placeholder="0"></text-widget>
         </action-card>
       
         <!-- COLLECTIONS GET DATA FIELD (GET) -->
-        <action-card title="Collections get data field" description="CharacterID == minted id" action="characterxCollectionsGetDataField" method="get"
-          fields="account characterID fieldToSearch">
+        <action-card title="Collections get data field" description="CharacterID == minted id"
+          action="characterxCollectionsGetDataField" method="get" fields="account characterID fieldToSearch">
           <account-widget field="account" label="Account"></account-widget>
           <text-widget field="characterID" label="Character ID" placeholder="0"></text-widget>
           <text-widget field="fieldToSearch" label="Field" placeholder=".."></text-widget>
@@ -429,8 +431,8 @@ export default class PackNFTHarness extends LitElement {
         </action-card>
       
         <!-- COLLECTIONS GET CHARACTER SET NAME (GET) -->
-        <action-card title="Collections get character set name" description="" action="characterxCollectionsGetCharacterSetName"
-          method="get" fields="account id">
+        <action-card title="Collections get character set name" description=""
+          action="characterxCollectionsGetCharacterSetName" method="get" fields="account id">
           <account-widget field="account" label="Account"></account-widget>
           <text-widget field="id" label="ID" placeholder="0"></text-widget>
         </action-card>
@@ -442,7 +444,7 @@ export default class PackNFTHarness extends LitElement {
           <array-widget field="setIDs" label="Characters" valueLabel="setIDs" placeholder="0"></array-widget>
           <array-widget field="characterIDs" label="characterIDs" valueLabel="characterIDs" placeholder="0"></array-widget>
         </action-card>
- 
+      
         <!-- Flow Token -->
         <action-card title="Flow Token - Mint Flow Tokens" description="Mint Flow Tokens" action="mintFlowTokens"
           method="post" fields="amount recipient">
@@ -626,6 +628,6 @@ export default class PackNFTHarness extends LitElement {
       <page-panel id="resultPanel"></page-panel>
     `;
 
-        return content;
-    }
+    return content;
+  }
 }

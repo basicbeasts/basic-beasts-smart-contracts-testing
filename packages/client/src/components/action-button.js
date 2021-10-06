@@ -59,6 +59,7 @@ export default class ActionButton extends LitElement {
     this.classList.add("disabled");
     // Capture values of all fields of interest
     let source = document.querySelector(this.source);
+    console.log(source);
     let values = {};
     
     let fields = this.fields.split(" ");
@@ -81,8 +82,10 @@ export default class ActionButton extends LitElement {
             values[field] = fieldElement.value || "";
           }
         } else {
-          if (source.querySelector(`[title="array-widget"]`)) {
+          if (source.querySelector(`[title="array-widget-${field}"]`)) {
             // FOR ARRAY-WIDGETS
+            console.log("Inside array.")
+            console.log(field)
           
             // the *= means "includes" ${field}, so if field == arrayField
             // then it will includes element with arrayField-0 and arrayField-1
@@ -93,9 +96,10 @@ export default class ActionButton extends LitElement {
               valuesArray.push(value.value)
             }
             values[field] = valuesArray
-            console.log(values)
-          } else if (source.querySelector(`[title="dictionary-widget"]`)) {
+          } else if (source.querySelector(`[title="dictionary-widget-${field}"]`)) {
             // FOR DICTIONARY-WIDGETS
+            console.log("Inside dictionary.")
+            console.log(field)
           
             // will look for the keys and values
             let dictionaryElementKeys = source.querySelectorAll(`[data-field*=${field}-key]`);
@@ -109,7 +113,6 @@ export default class ActionButton extends LitElement {
               valuesObject[dictionaryElementKey] = dictionaryElementValue
             }
             values[field] = valuesObject
-            console.log(values)
           }
         }
       }

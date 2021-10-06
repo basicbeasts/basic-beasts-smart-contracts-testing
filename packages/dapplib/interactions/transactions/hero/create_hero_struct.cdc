@@ -18,7 +18,7 @@ transaction(
 
     prepare(acct: AuthAccount) {
         self.currentHeroStructID = Hero.nextHeroStructID;
-        self.adminRef = acctç.borrow<&Hero.Admin>(from: Hero.AdminStoragePath)
+        self.adminRef = acct.borrow<&Hero.Admin>(from: Hero.AdminStoragePath)
             ?? panic("No admin resource in storage")
     }
     execute {
@@ -36,7 +36,8 @@ transaction(
     }
 
     post {
-        Hero.getHeroStruct(heroStructID: currentHeroStructID) != nil:
+        Hero.getHeroStruct(heroStructID: self.currentHeroStructID) != nil:
             "currentHeroStructID doesn't exist"
     
-            }
+    }
+}

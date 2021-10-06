@@ -1,8 +1,8 @@
-import CharacterX from "../../../contracts/Project/CharacterX.cdc"
+import Hero from "../../../contracts/Project/Hero.cdc"
 
 pub fun main(setID: UInt32): String {
 
-    let name = CharacterX.getSetName(setID: setID)
+    let name = Hero.getSetName(setID: setID)
         ?? panic("Couldn't find the specified set")
 
     return name
