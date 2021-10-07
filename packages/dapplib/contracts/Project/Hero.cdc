@@ -1095,7 +1095,7 @@ pub contract Hero: NonFungibleToken {
         } else {
             return nil
         }
-    }     
+    }
 
     // getHeroStructData returns all the other data associated with a specific HeroStruct
     // 
