@@ -7,14 +7,14 @@
                  williblue
 
         This smart contract contains the core functionality for 
-        the Hero characters that are part of The Eighth Note universe.
+        the Hero characters who are part of The Eighth Note universe.
 
         When a new Hero wants to be added to the records, an Admin creates
         a new HeroStruct that is stored in the smart contract.
 
         Then an Admin can create new Sets. Sets consist of a public struct that 
         contains public information about a set, and a private resource used 
-        to mint new heroes based off of HeroStructs that have been linked to the Set
+        to mint new heroes based on HeroStructs that have been linked to the Set
 
         The admin resource has the power to do all of the important actions
         in the smart contract and sets. When they want to call functions in a set,
@@ -31,17 +31,17 @@
         every Hero NFT owner will store in their account
         to manage their NFT Collection
 
-        The main Hero account will also have its own hero collection that it can 
+        The admin Hero account will also have its own hero collection that it can 
         use to hold its own heroes that have not yet been sent to a user.
 
-        Note: All state changing functions will panic if an invalid argument is 
+        Note: All state-changing functions will panic if an invalid argument is 
         provided or one of its pre-conditions or post-conditions aren't met.
         Functions that don't modify state will simply return 0 or nil
         and those cases need to be handled by the caller.
 
         Special thanks to: 
-        Jacob, Morgan and the rest of the Decentology team for teaching us how to write cadence and build Dapps.
-        Josh, Dieter and the rest of the Flow and Dapper Labs team for making TopShot and Flow Blockchain great and available to everyone.
+        Jacob, Morgan, and the rest of the Decentology team for teaching us how to write cadence and build Dapps.
+        Josh, Dieter, and the rest of the Flow and Dapper Labs team for making TopShot and Flow Blockchain great and available to everyone.
         You are the best partners, teachers, mentors, and friends one could ever ask for.
 
 */
@@ -219,7 +219,7 @@ pub contract Hero: NonFungibleToken {
         ) {
             pre {
                 name != "": "New HeroStruct name cannot be blank"
-                sex != "": "New HeroStruct must have sex"
+                sex != "": "New HeroStruct must have sex!"
                 race != "": "New HeroStruct race cannot be blank"
                 rarity != "": "New HeroStruct rarity must be determined"
                 createdAt != nil: "New HeroStruct createdAt unix timestamp cannot be blank"
@@ -383,7 +383,7 @@ pub contract Hero: NonFungibleToken {
         // Mapping of heroStructIDs that indicates the number of Heroes 
         // that have been minted for specific HeroStructs in this Set.
         // When a Hero is minted, this value is stored in the Hero to
-        // show its place in the Set, eg. 13 of 60.
+        // show its place in the Set, e.g. heroStructID 13 of 60 minted heroes.
         access(contract) var numOfMintedPerHeroStruct: {UInt32: UInt32}
 
         init(name: String) {
@@ -484,7 +484,8 @@ pub contract Hero: NonFungibleToken {
         // Parameters: heroStructID: The ID of the HeroStruct that the Hero references
         //
         // Pre-Conditions:
-        // The Hero must exist in the Set and be allowed to mint new Heroes
+        // The HeroStruct must exist in the Set and is not retired; 
+        // the set is allowed to mint new Heroes based on the HeroStruct
         //
         // Returns: The NFT that was minted
         // 
@@ -518,7 +519,6 @@ pub contract Hero: NonFungibleToken {
         //             quantity: The quantity of the HeroStruct to be minted
         //
         // Returns: Collection object that contains all the Heroes that were minted
-        // TODO: firstOwner beneficiary fix
         pub fun batchMintHero(
                                 heroStructID: UInt32, 
                                 quantity: UInt64): @Collection {
@@ -578,6 +578,9 @@ pub contract Hero: NonFungibleToken {
             self.id = Hero.totalSupply
 
             // Set beneficiary to nil
+            // so the admin that mints the NFT does not 
+            // automatically become the beneficiary and 
+            // the next holder can potentially be set as beneficiary
             self.beneficiary = nil
 
             // Set the metadata struct
@@ -592,6 +595,7 @@ pub contract Hero: NonFungibleToken {
             }
 
             self.beneficiary = beneficiary
+
             emit HeroBeneficiaryIsSet(id: self.id, beneficiary: self.beneficiary!)
         }
 
@@ -631,32 +635,32 @@ pub contract Hero: NonFungibleToken {
         // Returns: the ID of the new HeroStruct object
         //
         pub fun createHeroStruct(
-            name: String,
-            sex: String,
-            race: String,
-            rarity: String, 
-            createdAt: UInt64,
-            createdFrom: [UInt64],
-            lineages: {String: Bool},
-            bloodlines: {String: Bool},
-            elements: {String: Bool},
-            traits: {String: String}, 
-            data: {String: String}
-            ): UInt32 {
+                                    name: String,
+                                    sex: String,
+                                    race: String,
+                                    rarity: String, 
+                                    createdAt: UInt64,
+                                    createdFrom: [UInt64],
+                                    lineages: {String: Bool},
+                                    bloodlines: {String: Bool},
+                                    elements: {String: Bool},
+                                    traits: {String: String}, 
+                                    data: {String: String}
+                                ): UInt32 {
             // Create the new HeroStruct
             var newHeroStruct = HeroStruct(
-                name: name,
-                sex: sex,
-                race: race,
-                rarity: rarity,
-                createdAt: createdAt,
-                createdFrom: createdFrom, 
-                lineages: lineages,
-                bloodlines: bloodlines,
-                elements: elements,
-                traits: traits, 
-                data: data
-            )
+                                            name: name,
+                                            sex: sex,
+                                            race: race,
+                                            rarity: rarity,
+                                            createdAt: createdAt,
+                                            createdFrom: createdFrom, 
+                                            lineages: lineages,
+                                            bloodlines: bloodlines,
+                                            elements: elements,
+                                            traits: traits, 
+                                            data: data
+                                          )
 
             let newID = newHeroStruct.heroStructID
 
@@ -762,6 +766,9 @@ pub contract Hero: NonFungibleToken {
         }
     }
 
+    // This is the interface that users can cast their Hero Collection as
+    // to allow others to deposit heroes into their collection
+    //
     pub resource interface HeroCollectionPublic {
         pub fun deposit(token: @NonFungibleToken.NFT)
         pub fun batchDeposit(tokens: @NonFungibleToken.Collection)
@@ -772,18 +779,24 @@ pub contract Hero: NonFungibleToken {
             // should be the same as the argument to the function
             post {
                 (result == nil) || (result?.id == id): 
-                    "Cannot borrw Hero reference: The ID of the returned reference is incorrect"
+                    "Cannot borrow Hero reference: The ID of the returned reference is incorrect"
             }
         }
     }
 
+    // Collection is a resource that every user who owns NFTs 
+    // will store in their account to manage their NFTs
+    //
     pub resource Collection: HeroCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
+        // Dictionary of Hero conforming tokens
+        // NFT is a resource type with a UInt64 ID field
         pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
 
         init() {
             self.ownedNFTs <- {}
         }
 
+        // withdraw removes a Hero from the collection and moves it to the caller
         pub fun withdraw(withdrawID: UInt64): @NonFungibleToken.NFT {
 
             let token <- self.ownedNFTs.remove(key: withdrawID) 
@@ -794,6 +807,7 @@ pub contract Hero: NonFungibleToken {
             return <-token
         }
 
+        // batchWithdraw withdraws multiple tokens and returns them as a Collection
         pub fun batchWithdraw(ids: [UInt64]): @NonFungibleToken.Collection {
             // Create a new empty Collection
             var batchCollection <- create Collection()
@@ -807,11 +821,13 @@ pub contract Hero: NonFungibleToken {
             return <-batchCollection
         }
 
+        // deposit takes a Hero and adds it to the collections dictionary
         pub fun deposit(token: @NonFungibleToken.NFT) {
             let token <- token as! @Hero.NFT
 
             let id = token.id
             
+            // add the new token to the dictionary
             let oldToken <- self.ownedNFTs[id] <- token
 
             if self.owner?.address != nil {
@@ -821,9 +837,12 @@ pub contract Hero: NonFungibleToken {
             destroy oldToken
         }
 
+        // batchDeposit takes a Collection object as an argument
+        // and deposits each contained NFT into this collection
         pub fun batchDeposit(tokens: @NonFungibleToken.Collection) {
             let keys = tokens.getIDs()
 
+            // Iterate through the keys in the collection and deposit each one
             for key in keys {
                 self.deposit(token: <-tokens.withdraw(withdrawID: key))
             }
@@ -831,14 +850,31 @@ pub contract Hero: NonFungibleToken {
             destroy tokens
         }
 
+        // getIDs returns an array of the IDs that are in the collection
         pub fun getIDs(): [UInt64] {
             return self.ownedNFTs.keys
         }
 
+        // borrowNFT Returns a borrowed reference to a Hero in the collection
+        // so that the caller can read its ID
+        //
+        // Parameters: id: The ID of the NFT to get the reference for
+        //
+        // Returns: A reference to the NFT
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
             return &self.ownedNFTs[id] as &NonFungibleToken.NFT
         }
 
+        // borrowHero Returns a borrowed reference to a Hero in the collection
+        // so that the caller can read data and call methods from it
+        // They can use this to read its setID, heroStructID, serialNumber,
+        // or any of the setData or Hero Data associated with it by
+        // getting the setID or heroStructID and reading those fields from
+        // the smart contract
+        //
+        // Parameters: id: The ID of the NFT to get the reference for
+        //
+        // Returns: A reference to the NFT
         pub fun borrowHero(id: UInt64): &Hero.NFT? {
 
             if self.ownedNFTs[id] != nil { 
@@ -850,6 +886,9 @@ pub contract Hero: NonFungibleToken {
 
         }
 
+        // If a transaction destroys the Collection object,
+        // All the NFTs contained within are also destroyed
+        //
         destroy() {
             destroy self.ownedNFTs
         }
@@ -1061,11 +1100,12 @@ pub contract Hero: NonFungibleToken {
         return self.heroStructs[heroStructID]?.data
     }
 
-    // getHeroStructSex returns the sex of a specific HeroStruct
+    // getHeroStructDataByField returns the data associated with a 
+    // specific field of the data dictionary
     // 
     // Parameters: heroStructID: The id of the HeroStruct that is being searched
     //
-    // Returns: The sex as a String optional
+    // Returns: The data field as a String optional
     pub fun getHeroStructDataByField(heroStructID: UInt32, field: String): String? {
         // Don't force a revert if the heroStructID or field is invalid
         if let heroStruct = Hero.heroStructs[heroStructID] {
@@ -1075,40 +1115,47 @@ pub contract Hero: NonFungibleToken {
         }
     } 
     
-    // getHeroStructSex returns the sex of a specific HeroStruct
+    // getSetName returns the name that the specified set
+    //            is associated with.
     // 
-    // Parameters: heroStructID: The id of the HeroStruct that is being searched
+    // Parameters: setID: The id of the set that is being searched
     //
-    // Returns: The sex as a String optional
+    // Returns: The name of the set
     pub fun getSetName(setID: UInt32): String? {
         // Don't force a revert if the setID is invalid
         return Hero.sets[setID]?.name
     }
 
-    // getHeroStructSex returns the sex of a specific HeroStruct
+    // getSetSeries returns the series that the specified set
+    //              is associated with.
     // 
-    // Parameters: heroStructID: The id of the HeroStruct that is being searched
+    // Parameters: setID: The id of the set that is being searched
     //
-    // Returns: The sex as a String optional
+    // Returns: The series that the set belongs to
     pub fun getSetSeries(setID: UInt32): UInt32? {
         // Don't force a revert if the setID is invalid
         return Hero.sets[setID]?.series
     }
 
-    // getHeroStructSex returns the sex of a specific HeroStruct
+    // getSetIDsByName returns the IDs that the specified set name
+    //                 is associated with.
     // 
-    // Parameters: heroStructID: The id of the HeroStruct that is being searched
+    // Parameters: setName: The name of the set that is being searched
     //
-    // Returns: The sex as a String optional
+    // Returns: An array of the IDs of the set if it exists, or nil if doesn't
     pub fun getSetIDsByName(setName: String): [UInt32]? {
         var setIDs: [UInt32] = []
 
+        // Iterate through all the setDatas and search for the name
         for setID in self.sets.keys {
+            // If the name is found, return the ID
             if setName == Hero.SetData(setID: setID).name {
                 setIDs.append(setID)
             }
         }
 
+        // If the name isn't found, return nil
+        // Don't force a revert if the setName is invalid
         if setIDs.length == 0 {
             return nil
         } else {
@@ -1116,27 +1163,31 @@ pub contract Hero: NonFungibleToken {
         }
     }
 
-    // getHeroStructSex returns the sex of a specific HeroStruct
+    // getHeroStructsInSet returns the list of heroStructIDs that are in the set
     // 
-    // Parameters: heroStructID: The id of the HeroStruct that is being searched
+    // Parameters: setID: The id of the set that is being searched
     //
-    // Returns: The sex as a String optional
+    // Returns: An array of heroStructIDs
     pub fun getHeroStructsInSet(setID: UInt32): [UInt32]? {
         // Don't force a revert if the setID is invalid
         return Hero.sets[setID]?.heroStructsInSet
     }
 
-    // getHeroStructSex returns the sex of a specific HeroStruct
+    // isEditionRetired returns a boolean that indicates if a set/heroStuct combo
+    //                  (otherwise known as a hero edition) is retired.
+    //                  If a hero edition is retired, it still remains in the set,
+    //                  but heroes can no longer be minted from it.
     // 
-    // Parameters: heroStructID: The id of the HeroStruct that is being searched
+    // Parameters: setID: The id of the set that is being searched
+    //             heroStuctID: The id of the HeroStuct that is being searched
     //
-    // Returns: The sex as a String optional
+    // Returns: Boolean indicating if the hero edition is retired or not
     pub fun isEditionRetired(setID: UInt32, heroStructID: UInt32): Bool? {
         // Don't force a revert if the set or heroStruct ID is invalid
         // Remove the set from the dictionary to get its field
         if let setToRead <- Hero.sets.remove(key: setID) {
 
-            // See if the HeroStruct is retired from this Set
+            // Check if the HeroStruct is retired from this Set
             let retired = setToRead.retired[heroStructID]
 
             // Put the Set back in the contract storage
@@ -1151,13 +1202,28 @@ pub contract Hero: NonFungibleToken {
         }
     }
 
-
+    // isSetLocked returns a boolean that indicates if a set
+    //             is locked. If an set is locked, 
+    //             new HeroStructs can no longer be added to it,
+    //             but heroes can still be minted from HeroStructs
+    //             that are currently in it.
+    // 
+    // Parameters: setID: The id of the set that is being searched
+    //
+    // Returns: Boolean indicating if the set is locked or not
     pub fun isSetLocked(setID: UInt32): Bool? {
         // Don't force a revert if the setID is invalid
         return Hero.sets[setID]?.locked
     }
 
-
+    // getNumHeroesInEdition return the number of heroes that have been 
+    //                        minted from a certain hero edition.
+    //
+    // Parameters: setID: The id of the set that is being searched
+    //             heroStuctID: The id of the HeroStruct that is being searched
+    //
+    // Returns: The total number of heroes 
+    //          that have been minted from a specific HeroStruct
     pub fun getNumHeroesInEdition(setID: UInt32, heroStructID: UInt32): UInt32? {
 
         if let setToRead <- Hero.sets.remove(key: setID) {
