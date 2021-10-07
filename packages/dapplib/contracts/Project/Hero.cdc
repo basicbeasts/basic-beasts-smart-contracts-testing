@@ -307,7 +307,7 @@ pub contract Hero: NonFungibleToken {
         // Mapping of heroStructIDs that indicates the number of Heroes 
         // that have been minted for specific HeroStructs in this Set.
         // When a Hero is minted, this value is stored in the Hero to
-        // show its place in the Set, eg. 13 of 60.
+        // show its place in the Set, e.g. heroStructID 13 of 60 heroes minted.
         pub var numOfMintedPerHeroStruct: {UInt32: UInt32}
 
         init(setID: UInt32) {
@@ -555,6 +555,8 @@ pub contract Hero: NonFungibleToken {
         }
     }
 
+    // The resource that represents the Hero NFTs
+    //
     pub resource NFT: NonFungibleToken.INFT {
         // Global unique hero ID
         pub let id: UInt64

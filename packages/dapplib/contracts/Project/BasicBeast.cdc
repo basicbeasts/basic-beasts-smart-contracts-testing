@@ -1,7 +1,7 @@
 /*
         BasicBeast.cdc
 
-        Description: Central Smart Contract for BasicBeasts NFT
+        Description: Central Smart Contract for BasicBeasts  NFT
 
         Authors: bz bz.vanity@gmail.com
 
@@ -30,7 +30,7 @@
         every Beast NFT owner will store in their account
         to manage their NFT Collection
 
-        The main Beast account will also have its own beast collection that it can 
+        The admin Beast account will also have its own beast collection that it can 
         use to hold its own Beasts that have not yet been sent to a user.
 
         Note: All state changing functions will panic if an invalid argument is 
@@ -50,12 +50,34 @@ import NonFungibleToken from "../Flow/NonFungibleToken.cdc"
 pub contract BasicBeast: NonFungibleToken {
 
     // -----------------------------------------------------------------------
-    // BasicBeasts contract Events
+    // BasicBeast contract-level Events
     // -----------------------------------------------------------------------
 
     // Emitted when the contract is created
     pub event ContractInitialized()
 
+    // Events for Set-related actions
+    //
+    // Emitted when a new Set is created
+    pub event SetCreated(setID: UInt32, generation: UInt32)
+    // Emitted when a new BeastTemplate is added to a Set
+    pub event BeastTemplateAddedToSet(setID: UInt32, beastTemplateID: UInt32)
+    // Emitted when a BeastTemplate is retired from a Set and cannot be used to mint
+    pub event BeastTemplateRetiredFromSet(setID: UInt32, beastTemplateID: UInt32, numBeasts: UInt32)
+    // Emitted when a Set is locked, meaning BeastTemplates cannot be added
+    pub event SetLocked(setID: UInt32)
+    // Emitted when a Beast is minted from a Set
+    pub event BeastMinted(beastID: UInt64, beastTemplate: BeastTemplate, setID: UInt32, serialNumber: UInt32)
+
+    // Events for Beast-related actions
+    //
+    // Emitted when a beneficiary has been set to a Beast
+    pub event BeastBeneficiaryIsSet(id: UInt64, beneficiary: Address?)
+    // Emitted when a Beast is destroyed
+    pub event BeastDestroyed(id: UInt64)
+
+    // Events for Admin-related actions
+    //
     // Emitted when a new BeastTemplate is created
     pub event BeastTemplateCreated(
                                     id: UInt32, 
@@ -75,19 +97,7 @@ pub contract BasicBeast: NonFungibleToken {
     // Emitted when a new generation has been triggered by an admin
     pub event NewGenerationStarted(newCurrentGeneration: UInt32)
 
-    // Events for Set-related actions
-    //
-    // Emitted when a new Set is created
-    pub event SetCreated(setID: UInt32, generation: UInt32)
-    // Emitted when a new BeastTemplate is added to a Set
-    pub event BeastTemplateAddedToSet(setID: UInt32, beastTemplateID: UInt32)
-    // Emitted when a BeastTemplate is retired from a Set and cannot be used to mint
-    pub event BeastTemplateRetiredFromSet(setID: UInt32, beastTemplateID: UInt32, numBeasts: UInt32)
-    // Emitted when a Set is locked, meaning BeastTemplates cannot be added
-    pub event SetLocked(setID: UInt32)
-    // Emitted when a Beast is minted from a Set
-    pub event BeastMinted(beastID: UInt64, beastTemplate: BeastTemplate, setID: UInt32, serialNumber: UInt32)
-
+    
     // Events for Collection-related actions
     //
     // Emitted when a Beast is withdrawn from a Collection
@@ -95,8 +105,9 @@ pub contract BasicBeast: NonFungibleToken {
     // Emitted when a Beast is deposited into a Collection
     pub event Deposit(id: UInt64, to: Address?)
 
-    // Emitted when a Beast is destroyed
-    pub event BeastDestroyed(id: UInt64)
+    // -----------------------------------------------------------------------
+    // BasicBeast contract-level Named Paths
+    // -----------------------------------------------------------------------
 
     pub let CollectionStoragePath: StoragePath
     pub let CollectionPublicPath: PublicPath
