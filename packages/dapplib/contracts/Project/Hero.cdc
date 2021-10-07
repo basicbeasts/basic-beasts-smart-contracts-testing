@@ -591,6 +591,11 @@ pub contract Hero: NonFungibleToken {
             emit HeroMinted(heroID: self.id, heroStructID: heroStructID, setID: self.data.setID, serialNumber: self.data.serialNumber)
         }
 
+        // setBeneficiary sets the beneficiary of this NFT
+        // this action cannot be undone
+        // 
+        // Parameters: beneficiary: The address of the beneficiary
+        //
         pub fun setBeneficiary(beneficiary: Address) {
             pre {
                 self.beneficiary == nil: "Beneficiary is already initialized"
