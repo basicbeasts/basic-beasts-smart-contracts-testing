@@ -9,6 +9,7 @@
     },
     "scripts": {
         "start": "lerna run dev --no-sort --stream --parallel",
+        "testnet": "lerna run testnet --no-sort --stream --parallel",
         "prestart": "port-precheck 5000 5001 5002",
         "faucet": "lerna run faucet --scope=@decentology/dappstarter-dapplib --stream",
         "migrate": "lerna run deploy --scope=@decentology/dappstarter-dapplib --stream",

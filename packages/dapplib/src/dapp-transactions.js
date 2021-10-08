@@ -7,118 +7,9 @@ const fcl = require("@onflow/fcl");
 
 module.exports = class DappTransactions {
 
-	static FUSD_create_FUSD_vault() {
-		return fcl.transaction`
-
-import FungibleToken from 0xee82856bf20e2aa6
-import FUSD from 0x01cf0e2f2f715450
-
-transaction {
-  prepare(signer: AuthAccount) {
-
-    if(signer.borrow<&FUSD.Vault>(from: /storage/fusdVault) != nil) {
-      return
-    }
-  
-    signer.save(<-FUSD.createEmptyVault(), to: /storage/fusdVault)
-
-    signer.link<&FUSD.Vault{FungibleToken.Receiver}>(
-      /public/fusdReceiver,
-      target: /storage/fusdVault
-    )
-
-    signer.link<&FUSD.Vault{FungibleToken.Balance}>(
-      /public/fusdBalance,
-      target: /storage/fusdVault
-    )
-  }
-}
-		`;
-	}
-
-	static FUSD_mint_FUSDs() {
-		return fcl.transaction`
-
-import FungibleToken from 0xee82856bf20e2aa6
-import FUSD from 0x01cf0e2f2f715450
-
-transaction (to: Address, amount: UFix64) {
-  let sentVault: @FungibleToken.Vault
-
-  prepare(signer: AuthAccount) {
-    let minterRef = signer.borrow<&FUSD.Minter>(from: /storage/fusdMinter) ?? panic("Cannot borrow reference")
-    self.sentVault <- minterRef.mintTokens(amount: amount)
-  }
-
-  execute {
-    let recipient = getAccount(to)
-    let receiverRef = recipient.getCapability(/public/fusdReceiver).borrow<&{FungibleToken.Receiver}>()
-            ?? panic("Could not borrow receiver reference to the recipient's Vault")
-
-    // Deposit the withdrawn tokens in the recipient's receiver
-    receiverRef.deposit(from: <-self.sentVault)
-  }
-}
-		`;
-	}
-
-	static FUSD_create_FUSD_minter() {
-		return fcl.transaction`
-
-import FUSD from 0x01cf0e2f2f715450
-
-transaction {
-  prepare (acct: AuthAccount) {
-    let adminRef = acct.borrow<&FUSD.Administrator>(from: FUSD.AdminStoragePath) ?? panic("Could not borrow reference")
-    acct.save(<- adminRef.createNewMinter(), to: /storage/fusdMinter)
-  }
-}
-		`;
-	}
-
-	static flowtoken_mint_flow_tokens() {
-		return fcl.transaction`
-import FlowToken from 0x0ae53cb6e3f42a79
-import FungibleToken from 0xee82856bf20e2aa6
-
-// Mints FlowTokens
-
-transaction(recipient: Address, amount: UFix64) {
-    let tokenAdmin: &FlowToken.Administrator
-    let tokenReceiver: &{FungibleToken.Receiver}
-
-    prepare(acct: AuthAccount) {
-        // NOTE: acct MUST be the service account in the wallet. 
-        // This borrows a FlowToken Administrator resource reference to mint FlowToken.
-        self.tokenAdmin = acct.borrow<&FlowToken.Administrator>(from: /storage/flowTokenAdmin)
-            ?? panic("Signer is not the token admin")
-
-        // Borrows the recipient's FlowToken Vault
-        self.tokenReceiver = getAccount(recipient)
-            .getCapability(/public/flowTokenReceiver)
-            .borrow<&{FungibleToken.Receiver}>()
-            ?? panic("Unable to borrow receiver reference")
-    }
-
-    execute {
-        // Creates a new minter
-        let minter <- self.tokenAdmin.createNewMinter(allowedAmount: amount)
-        // Mints FlowToken and receives a Vault with the FlowToken
-        let mintedVault <- minter.mintTokens(amount: amount)
-
-        // Deposits the Vault filled with FlowToken into the receiver's 
-        // FlowToken Vault
-        self.tokenReceiver.deposit(from: <-mintedVault)
-
-        destroy minter
-    }
-}
-		`;
-	}
-
 	static characterx_Buying_a_NBATS_Pack() {
 		return fcl.transaction`
-import FungibleToken from 0xee82856bf20e2aa6
+import FungibleToken from 0x9a0766d93b6608b7
 
 transaction(amount: UFix64, to: Address) {
     let vault: @FungibleToken.Vault
@@ -139,7 +30,7 @@ transaction(amount: UFix64, to: Address) {
 		return fcl.transaction`
 //TODO: Do this for all transactions check flowscan how it is used and whether improvements have been made.
 
-import CharacterX from 0x01cf0e2f2f715450
+import CharacterX from 0x0
 
 transaction(setID: UInt32, characterID: UInt32) {
     let adminRef: &CharacterX.Admin
@@ -165,7 +56,7 @@ transaction(setID: UInt32, characterID: UInt32) {
 
 	static characterx_add_characters_to_set() {
 		return fcl.transaction`
-import CharacterX from 0x01cf0e2f2f715450
+import CharacterX from 0x0
 
 transaction(setID: UInt32, characters: [UInt32]) {
 
@@ -188,7 +79,7 @@ transaction(setID: UInt32, characters: [UInt32]) {
 
 	static characterx_add_lineage_key_value_pair() {
 		return fcl.transaction`
-import CharacterX from 0x01cf0e2f2f715450
+import CharacterX from 0x0
 
 transaction(lineageKey: String, lineageValue: Bool) {
     let adminRef: &CharacterX.Admin
@@ -213,7 +104,7 @@ transaction(lineageKey: String, lineageValue: Bool) {
 
 	static characterx_batch_mint_character() {
 		return fcl.transaction`
-import CharacterX from 0x01cf0e2f2f715450
+import CharacterX from 0x0
 
 transaction(setID: UInt32, characterID: UInt32, quantity: UInt64, recipientAddr: Address) {
     
@@ -241,51 +132,10 @@ transaction(setID: UInt32, characterID: UInt32, quantity: UInt64, recipientAddr:
 		`;
 	}
 
-	static characterx_buying_NFT_without_referral() {
-		return fcl.transaction`
-import FungibleToken from 0xee82856bf20e2aa6
-import FUSD from 0x01cf0e2f2f715450
-
-transaction(amount: UFix64, to: Address) {
-
-    let vault: @FungibleToken.Vault
-
-    prepare(signer: AuthAccount) {
-        self.vault <- signer.borrow<&FUSD.Vault>(from: /storage/fusdVault)!.withdraw(amount: amount)
-    }
-
-    execute {
-        getAccount(to).getCapability(/public/fusdReceiver)!.borrow<&{FungibleToken.Receiver}>()!
-            .deposit(from: <-self.vault)
-    }
-}
-
-/* 
-
-import FungibleToken from 0xee82856bf20e2aa6
-
-transaction(amount: UFix64, to: Address) {
-
-    let vault: @FungibleToken.Vault
-
-    prepare(signer: AuthAccount) {
-        self.vault <- signer.borrow<&{FungibleToken.Provider}>(from: /storage/flowTokenVault)!.withdraw(amount: amount)
-    }
-
-    execute {
-        getAccount(to).getCapability(/public/flowTokenReceiver)!.borrow<&{FungibleToken.Receiver}>()!
-            .deposit(from: <-self.vault)
-    }
-}
-
- */
-		`;
-	}
-
 	static characterx_buying_NFT_with_referral() {
 		return fcl.transaction`
-import FungibleToken from 0xee82856bf20e2aa6
-import FUSD from 0x01cf0e2f2f715450
+import FungibleToken from 0x9a0766d93b6608b7
+import FUSD from 0xe223d8a629e49c68
 
 transaction(amount: UFix64, to: Address, referrer: Address) {
 
@@ -319,9 +169,50 @@ transaction(amount: UFix64, to: Address, referrer: Address) {
 		`;
 	}
 
+	static characterx_buying_NFT_without_referral() {
+		return fcl.transaction`
+import FungibleToken from 0x9a0766d93b6608b7
+import FUSD from 0xe223d8a629e49c68
+
+transaction(amount: UFix64, to: Address) {
+
+    let vault: @FungibleToken.Vault
+
+    prepare(signer: AuthAccount) {
+        self.vault <- signer.borrow<&FUSD.Vault>(from: /storage/fusdVault)!.withdraw(amount: amount)
+    }
+
+    execute {
+        getAccount(to).getCapability(/public/fusdReceiver)!.borrow<&{FungibleToken.Receiver}>()!
+            .deposit(from: <-self.vault)
+    }
+}
+
+/* 
+
+import FungibleToken from 0x9a0766d93b6608b7
+
+transaction(amount: UFix64, to: Address) {
+
+    let vault: @FungibleToken.Vault
+
+    prepare(signer: AuthAccount) {
+        self.vault <- signer.borrow<&{FungibleToken.Provider}>(from: /storage/flowTokenVault)!.withdraw(amount: amount)
+    }
+
+    execute {
+        getAccount(to).getCapability(/public/flowTokenReceiver)!.borrow<&{FungibleToken.Receiver}>()!
+            .deposit(from: <-self.vault)
+    }
+}
+
+ */
+		`;
+	}
+
 	static characterx_create_character() {
 		return fcl.transaction`
-import CharacterX from 0x01cf0e2f2f715450
+import CharacterX from 0x0
 
 transaction(
             name: String, //might be removed
@@ -360,7 +251,7 @@ transaction(
 
 	static characterx_create_set() {
 		return fcl.transaction`
-import CharacterX from 0x01cf0e2f2f715450
+import CharacterX from 0x0
 
 transaction(setName: String) {
     let adminRef: &CharacterX.Admin
@@ -386,8 +277,8 @@ transaction(setName: String) {
 
 	static characterx_fulfill_pack() {
 		return fcl.transaction`
-import NonFungibleToken from 0x01cf0e2f2f715450
-import CharacterX from 0x01cf0e2f2f715450
+import NonFungibleToken from 0x631e88ae7f1d7c20
+import CharacterX from 0x0
 
 transaction(recipientAddr: Address, characterIDs: [UInt64]) {
     
@@ -410,8 +301,8 @@ transaction(recipientAddr: Address, characterIDs: [UInt64]) {
 
 	static characterx_fulfill_single() {
 		return fcl.transaction`
-import NonFungibleToken from 0x01cf0e2f2f715450
-import CharacterX from 0x01cf0e2f2f715450
+import NonFungibleToken from 0x631e88ae7f1d7c20
+import CharacterX from 0x0
 
 transaction(recipientAddr: Address, characterID: UInt64) {
     
@@ -436,7 +327,7 @@ transaction(recipientAddr: Address, characterID: UInt64) {
 		return fcl.transaction`
 //Does not seem to wo
 
-import CharacterX from 0x01cf0e2f2f715450
+import CharacterX from 0x0
 
 transaction(setID: UInt32) {
     let adminRef: &CharacterX.Admin
@@ -459,80 +350,9 @@ transaction(setID: UInt32) {
 		`;
 	}
 
-	static characterx_retireAll_characters_from_set() {
-		return fcl.transaction`
-import CharacterX from 0x01cf0e2f2f715450
-
-transaction(setID: UInt32) {
-    let adminRef: &CharacterX.Admin
-
-    prepare(acct: AuthAccount) {
-        self.adminRef = acct.borrow<&CharacterX.Admin>(from: CharacterX.AdminStoragePath)
-            ?? panic("No Admin resource in storage")
-    }
-
-    execute {
-        let setRef = self.adminRef.borrowSet(setID: setID)
-
-        setRef.retireAllCharacters()
-    }
-}
-		`;
-	}
-
-	static characterx_setup_account() {
-		return fcl.transaction`
-import CharacterX from 0x01cf0e2f2f715450
-
-transaction() {
-
-    prepare(acct: AuthAccount) {
-
-        if acct.borrow<&CharacterX.Collection>(from: CharacterX.CollectionStoragePath) == nil {
-
-            let collection <- CharacterX.createEmptyCollection() as! @CharacterX.Collection
-
-            acct.save(<- collection, to: CharacterX.CollectionStoragePath)
-
-            acct.link<&{CharacterX.CharacterCollectionPublic}>(CharacterX.CollectionPublicPath, target: CharacterX.CollectionStoragePath)
-        }
-
-    }
-}
-
-
-		`;
-	}
-
-	static characterx_retire_character_from_set() {
-		return fcl.transaction`
-import CharacterX from 0x01cf0e2f2f715450
-
-transaction(setID: UInt32, characterID: UInt32) {
-    let adminRef: &CharacterX.Admin
-
-    prepare(acct: AuthAccount) {
-        self.adminRef = acct.borrow<&CharacterX.Admin>(from: CharacterX.AdminStoragePath)
-            ?? panic("No Admin resource in storage")
-    }
-
-    execute {
-        let setRef = self.adminRef.borrowSet(setID: setID)
-
-        setRef.retireCharacter(characterID: characterID)
-    }
-
-    post {
-        CharacterX.isEditionRetired(setID: setID, characterID: characterID) == true:
-            "Character is not retired"
-    }
-}
-		`;
-	}
-
 	static characterx_mint_character() {
 		return fcl.transaction`
-import CharacterX from 0x01cf0e2f2f715450
+import CharacterX from 0x0
 
 transaction(setID: UInt32, characterID: UInt32, recipientAddr: Address) {
     let adminRef: &CharacterX.Admin
@@ -557,9 +377,80 @@ transaction(setID: UInt32, characterID: UInt32, recipientAddr: Address) {
 		`;
 	}
 
+	static characterx_retireAll_characters_from_set() {
+		return fcl.transaction`
+import CharacterX from 0x0
+
+transaction(setID: UInt32) {
+    let adminRef: &CharacterX.Admin
+
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&CharacterX.Admin>(from: CharacterX.AdminStoragePath)
+            ?? panic("No Admin resource in storage")
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowSet(setID: setID)
+
+        setRef.retireAllCharacters()
+    }
+}
+		`;
+	}
+
+	static characterx_retire_character_from_set() {
+		return fcl.transaction`
+import CharacterX from 0x0
+
+transaction(setID: UInt32, characterID: UInt32) {
+    let adminRef: &CharacterX.Admin
+
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&CharacterX.Admin>(from: CharacterX.AdminStoragePath)
+            ?? panic("No Admin resource in storage")
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowSet(setID: setID)
+
+        setRef.retireCharacter(characterID: characterID)
+    }
+
+    post {
+        CharacterX.isEditionRetired(setID: setID, characterID: characterID) == true:
+            "Character is not retired"
+    }
+}
+		`;
+	}
+
+	static characterx_setup_account() {
+		return fcl.transaction`
+import CharacterX from 0x0
+
+transaction() {
+
+    prepare(acct: AuthAccount) {
+
+        if acct.borrow<&CharacterX.Collection>(from: CharacterX.CollectionStoragePath) == nil {
+
+            let collection <- CharacterX.createEmptyCollection() as! @CharacterX.Collection
+
+            acct.save(<- collection, to: CharacterX.CollectionStoragePath)
+
+            acct.link<&{CharacterX.CharacterCollectionPublic}>(CharacterX.CollectionPublicPath, target: CharacterX.CollectionStoragePath)
+        }
+
+    }
+}
+
+
+		`;
+	}
+
 	static characterx_start_new_series() {
 		return fcl.transaction`
-import CharacterX from 0x01cf0e2f2f715450
+import CharacterX from 0x0
 
 transaction {
 
@@ -588,10 +479,10 @@ transaction {
 
 	static marketplace_buy_pack() {
 		return fcl.transaction`
-import FungibleToken from 0xee82856bf20e2aa6
-import MarketplaceContract from 0x01cf0e2f2f715450
-import NonFungibleToken from 0x01cf0e2f2f715450
-import FlowToken from 0x0ae53cb6e3f42a79
+import FungibleToken from 0x9a0766d93b6608b7
+import MarketplaceContract from 0xac70648174bc9884
+import NonFungibleToken from 0x631e88ae7f1d7c20
+import FlowToken from 0x7e60df042a9c0868
 
 // Buys a Pack from the admin's Pack Collection
 
@@ -637,7 +528,7 @@ transaction(id: UInt64, admin: Address) {
 
 	static marketplace_list_packs_for_sale() {
 		return fcl.transaction`
-import MarketplaceContract from 0x01cf0e2f2f715450
+import MarketplaceContract from 0xac70648174bc9884
 
 // This should be called by the admin to list Packs for sale in 
 // their SaleCollection
@@ -665,9 +556,9 @@ transaction(ids: [UInt64], price: UFix64) {
 
 	static marketplace_provision_marketplace() {
 		return fcl.transaction`
-import MarketplaceContract from 0x01cf0e2f2f715450
-import FungibleToken from 0xee82856bf20e2aa6
-import NonFungibleToken from 0x01cf0e2f2f715450
+import MarketplaceContract from 0xac70648174bc9884
+import FungibleToken from 0x9a0766d93b6608b7
+import NonFungibleToken from 0x631e88ae7f1d7c20
 
 // Sets up the admin to list Packs for sale by giving them a SaleCollection
 
@@ -709,10 +600,119 @@ transaction {
 		`;
 	}
 
+	static flowtoken_mint_flow_tokens() {
+		return fcl.transaction`
+import FlowToken from 0x7e60df042a9c0868
+import FungibleToken from 0x9a0766d93b6608b7
+
+// Mints FlowTokens
+
+transaction(recipient: Address, amount: UFix64) {
+    let tokenAdmin: &FlowToken.Administrator
+    let tokenReceiver: &{FungibleToken.Receiver}
+
+    prepare(acct: AuthAccount) {
+        // NOTE: acct MUST be the service account in the wallet. 
+        // This borrows a FlowToken Administrator resource reference to mint FlowToken.
+        self.tokenAdmin = acct.borrow<&FlowToken.Administrator>(from: /storage/flowTokenAdmin)
+            ?? panic("Signer is not the token admin")
+
+        // Borrows the recipient's FlowToken Vault
+        self.tokenReceiver = getAccount(recipient)
+            .getCapability(/public/flowTokenReceiver)
+            .borrow<&{FungibleToken.Receiver}>()
+            ?? panic("Unable to borrow receiver reference")
+    }
+
+    execute {
+        // Creates a new minter
+        let minter <- self.tokenAdmin.createNewMinter(allowedAmount: amount)
+        // Mints FlowToken and receives a Vault with the FlowToken
+        let mintedVault <- minter.mintTokens(amount: amount)
+
+        // Deposits the Vault filled with FlowToken into the receiver's 
+        // FlowToken Vault
+        self.tokenReceiver.deposit(from: <-mintedVault)
+
+        destroy minter
+    }
+}
+		`;
+	}
+
+	static FUSD_create_FUSD_minter() {
+		return fcl.transaction`
+
+import FUSD from 0xe223d8a629e49c68
+
+transaction {
+  prepare (acct: AuthAccount) {
+    let adminRef = acct.borrow<&FUSD.Administrator>(from: FUSD.AdminStoragePath) ?? panic("Could not borrow reference")
+    acct.save(<- adminRef.createNewMinter(), to: /storage/fusdMinter)
+  }
+}
+		`;
+	}
+
+	static FUSD_create_FUSD_vault() {
+		return fcl.transaction`
+
+import FungibleToken from 0x9a0766d93b6608b7
+import FUSD from 0xe223d8a629e49c68
+
+transaction {
+  prepare(signer: AuthAccount) {
+
+    if(signer.borrow<&FUSD.Vault>(from: /storage/fusdVault) != nil) {
+      return
+    }
+  
+    signer.save(<-FUSD.createEmptyVault(), to: /storage/fusdVault)
+
+    signer.link<&FUSD.Vault{FungibleToken.Receiver}>(
+      /public/fusdReceiver,
+      target: /storage/fusdVault
+    )
+
+    signer.link<&FUSD.Vault{FungibleToken.Balance}>(
+      /public/fusdBalance,
+      target: /storage/fusdVault
+    )
+  }
+}
+		`;
+	}
+
+	static FUSD_mint_FUSDs() {
+		return fcl.transaction`
+
+import FungibleToken from 0x9a0766d93b6608b7
+import FUSD from 0xe223d8a629e49c68
+
+transaction (to: Address, amount: UFix64) {
+  let sentVault: @FungibleToken.Vault
+
+  prepare(signer: AuthAccount) {
+    let minterRef = signer.borrow<&FUSD.Minter>(from: /storage/fusdMinter) ?? panic("Cannot borrow reference")
+    self.sentVault <- minterRef.mintTokens(amount: amount)
+  }
+
+  execute {
+    let recipient = getAccount(to)
+    let receiverRef = recipient.getCapability(/public/fusdReceiver).borrow<&{FungibleToken.Receiver}>()
+            ?? panic("Could not borrow receiver reference to the recipient's Vault")
+
+    // Deposit the withdrawn tokens in the recipient's receiver
+    receiverRef.deposit(from: <-self.sentVault)
+  }
+}
+		`;
+	}
+
 	static nft_provision_nfts() {
 		return fcl.transaction`
-import NFTContract from 0x01cf0e2f2f715450
-import NonFungibleToken from 0x01cf0e2f2f715450
+import NFTContract from 0x0
+import NonFungibleToken from 0x631e88ae7f1d7c20
 
 // Sets up an account to handle NFTs. Must be called by an account before
 // interacting with NFTs or an error will be thrown.
@@ -746,8 +746,8 @@ transaction {
 
 	static nft_transfer_nft() {
 		return fcl.transaction`
-import NFTContract from 0x01cf0e2f2f715450
-import NonFungibleToken from 0x01cf0e2f2f715450
+import NFTContract from 0x0
+import NonFungibleToken from 0x631e88ae7f1d7c20
 
 // Transfers an NFT from the giver to the recipient
 
@@ -780,35 +780,9 @@ transaction(id: UInt64, recipient: Address) {
 		`;
 	}
 
-	static packs_mint_pack() {
-		return fcl.transaction`
-import AdminContract from 0x01cf0e2f2f715450
-
-// Called by the admin to mint a Pack.
-
-transaction(packType: UInt64, numberOfPacks: UInt64) {
-
-  let adminRef: &AdminContract.Admin
-
-  prepare(admin: AuthAccount) {
-    // Borrows an Admin resource reference
-    self.adminRef = admin.borrow<&AdminContract.Admin>(from: /storage/admin)
-        ?? panic("Could not borrow the minter reference from the admin")
-  }
-
-  execute {
-    // Calls mintPacks on the Admin resource reference
-    self.adminRef.mintPacks(packType: packType, numberOfPacks: numberOfPacks)
-
-    log("Minted a pack")
-  }
-}
-		`;
-	}
-
 	static packs_add_pack_type() {
 		return fcl.transaction`
-import AdminContract from 0x01cf0e2f2f715450
+import AdminContract from 0x0
 
 // Should be called by the admin to create a new Pack Type.
 
@@ -832,10 +806,78 @@ transaction(packType: UInt64, numberOfNFTs: UInt64) {
 		`;
 	}
 
+	static packs_mint_pack() {
+		return fcl.transaction`
+import AdminContract from 0x0
+
+// Called by the admin to mint a Pack.
+
+transaction(packType: UInt64, numberOfPacks: UInt64) {
+
+  let adminRef: &AdminContract.Admin
+
+  prepare(admin: AuthAccount) {
+    // Borrows an Admin resource reference
+    self.adminRef = admin.borrow<&AdminContract.Admin>(from: /storage/admin)
+        ?? panic("Could not borrow the minter reference from the admin")
+  }
+
+  execute {
+    // Calls mintPacks on the Admin resource reference
+    self.adminRef.mintPacks(packType: packType, numberOfPacks: numberOfPacks)
+
+    log("Minted a pack")
+  }
+}
+		`;
+	}
+
+	static packs_open_pack() {
+		return fcl.transaction`
+import PackContract from 0x0
+import AdminContract from 0x0
+import NonFungibleToken from 0x631e88ae7f1d7c20
+
+// Called by the admin to open a Pack in the "recipient" account.
+
+transaction(id: UInt64, recipient: Address) {
+
+    let recipientPackCollectionRef: &PackContract.Collection{PackContract.IPackCollectionAdminAccessible}
+
+    let recipientNFTCollectionRef: &{NonFungibleToken.CollectionPublic}
+
+    let adminRef: &AdminContract.Admin
+    
+    prepare(admin: AuthAccount) {
+        // Borrows the Pack owner's Pack Collection
+        self.recipientPackCollectionRef = getAccount(recipient).getCapability(/public/packCollection)
+            .borrow<&PackContract.Collection{PackContract.IPackCollectionAdminAccessible}>()
+            ?? panic("Could not borrow the account's pack collection ref")
+            
+        // Borrows the Pack owner's NFT Collection so we can deposit the NFTs into it
+        self.recipientNFTCollectionRef = getAccount(recipient).getCapability(/public/nftCollection)
+            .borrow<&{NonFungibleToken.CollectionPublic}>()
+            ?? panic("Could not borrow the account's NFT collection ref")
+
+        // Borrows a reference to an Admin resource
+        self.adminRef = admin.borrow<&AdminContract.Admin>(from: /storage/admin)
+            ?? panic("Could not get admin's ref")
+    }
+
+    execute {
+        // Calls openPack on the admin resource reference
+        self.adminRef.openPack(id: id, packCollectionRef: self.recipientPackCollectionRef, nftCollectionRef: self.recipientNFTCollectionRef)
+    
+        log("Pack opened")
+    }
+}
+		`;
+	}
+
 	static packs_provision_packs() {
 		return fcl.transaction`
-import PackContract from 0x01cf0e2f2f715450
-import NonFungibleToken from 0x01cf0e2f2f715450
+import PackContract from 0x0
+import NonFungibleToken from 0x631e88ae7f1d7c20
 
 // Sets up an account to handle Packs. Must be called by an account before
 // interacting with Packs or an error will be thrown.
@@ -868,8 +910,8 @@ transaction {
 
 	static packs_transfer_pack() {
 		return fcl.transaction`
-import PackContract from 0x01cf0e2f2f715450
-import MarketplaceContract from 0x01cf0e2f2f715450
+import PackContract from 0x0
+import MarketplaceContract from 0xac70648174bc9884
 
 // Transfers a Pack from the giver to the recipient.
 
@@ -906,48 +948,6 @@ transaction(id: UInt64, recipient: Address) {
   }
 }
 
-		`;
-	}
-
-	static packs_open_pack() {
-		return fcl.transaction`
-import PackContract from 0x01cf0e2f2f715450
-import AdminContract from 0x01cf0e2f2f715450
-import NonFungibleToken from 0x01cf0e2f2f715450
-
-// Called by the admin to open a Pack in the "recipient" account.
-
-transaction(id: UInt64, recipient: Address) {
-
-    let recipientPackCollectionRef: &PackContract.Collection{PackContract.IPackCollectionAdminAccessible}
-
-    let recipientNFTCollectionRef: &{NonFungibleToken.CollectionPublic}
-
-    let adminRef: &AdminContract.Admin
-    
-    prepare(admin: AuthAccount) {
-        // Borrows the Pack owner's Pack Collection
-        self.recipientPackCollectionRef = getAccount(recipient).getCapability(/public/packCollection)
-            .borrow<&PackContract.Collection{PackContract.IPackCollectionAdminAccessible}>()
-            ?? panic("Could not borrow the account's pack collection ref")
-            
-        // Borrows the Pack owner's NFT Collection so we can deposit the NFTs into it
-        self.recipientNFTCollectionRef = getAccount(recipient).getCapability(/public/nftCollection)
-            .borrow<&{NonFungibleToken.CollectionPublic}>()
-            ?? panic("Could not borrow the account's NFT collection ref")
-
-        // Borrows a reference to an Admin resource
-        self.adminRef = admin.borrow<&AdminContract.Admin>(from: /storage/admin)
-            ?? panic("Could not get admin's ref")
-    }
-
-    execute {
-        // Calls openPack on the admin resource reference
-        self.adminRef.openPack(id: id, packCollectionRef: self.recipientPackCollectionRef, nftCollectionRef: self.recipientNFTCollectionRef)
-    
-        log("Pack opened")
-    }
-}
 		`;
 	}
 

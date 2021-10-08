@@ -18,6 +18,7 @@
         "clean": "rimraf -rf build && rimraf -rf dist",
         "deploy": "node src/rhythm deploy",
         "dev": "node src/rhythm",
+        "testnet": "node src/rhythm testnet",
         "test": "node src/rhythm test"
     },
     "bugs": {

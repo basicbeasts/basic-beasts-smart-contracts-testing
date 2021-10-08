@@ -15,9 +15,11 @@ const MODE = {
   DEFAULT: 'default',
   DEPLOY: 'deploy',
   TRANSPILE: 'transpile',
-  TEST: 'test'
+  TEST: 'test',
+  TESTNET: 'testnet'
 }
 const NETWORK_EMULATOR_KEY = 'emulator';
+const NETWORK_TESTNET_KEY = 'testnet';
 const SCRIPT_NAME = 'rhythm.js';
 
 const mode = process.argv.length > 2 ? process.argv[process.argv.length - 1].toLowerCase() : MODE.DEFAULT;
@@ -28,7 +30,8 @@ Object.keys(flowConfig.contracts).forEach((key) => {
 
 const emulator = flowConfig.emulators[mode === MODE.TEST ? MODE.TEST : MODE.DEFAULT];
 const serviceAccount = flowConfig.accounts[emulator.serviceAccount];
-const httpUri = 'http://localhost:8080';
+const httpUriEmulator = 'http://localhost:8080';
+const httpUriTestnet = 'https://access-testnet.onflow.org';
 const serviceWallet = {
   'address': '0x' + serviceAccount.address,
   'keys': [
@@ -39,6 +42,9 @@ const serviceWallet = {
     }
   ]
 }
+
+// Only fill this in with testnet accounts if you're developing on testnet
+const testnetAccounts = ['0xac70648174bc9884', '0x0', '0x1', '0x2'];
 
 const dappConfigFile = path.join(__dirname, 'dapp-config.json');
 
@@ -52,6 +58,10 @@ const dappConfigFile = path.join(__dirname, 'dapp-config.json');
 
   if ((mode === MODE.DEFAULT) || (mode === MODE.TEST)) {
 
+    Object.keys(flowConfig.contracts).forEach((key) => {
+      chainContracts[key] = flowConfig.contracts[key].aliases[NETWORK_EMULATOR_KEY];
+    });
+
     // For testing, generate accounts etc. but don't
     // update the dapp-config file
     if (fs.existsSync(dappConfigFile)) {
@@ -60,7 +70,7 @@ const dappConfigFile = path.join(__dirname, 'dapp-config.json');
 
     // Unpopulated dappConfig with service info only
     dappConfig = {
-      httpUri,
+      httpUri: httpUriEmulator,
       contracts: chainContracts,
       accounts: [],
       serviceWallet: serviceWallet,
@@ -118,6 +128,34 @@ const dappConfigFile = path.join(__dirname, 'dapp-config.json');
 
     await transpile();
 
+  } else if (mode === MODE.TESTNET) {
+
+    // get the already deployed contracts and set chainContracts
+    // but only if it has a testnet alias
+    Object.keys(flowConfig.contracts).forEach((key) => {
+      if (flowConfig.contracts[key].aliases[NETWORK_TESTNET_KEY]) {
+        chainContracts[key] = flowConfig.contracts[key].aliases[NETWORK_TESTNET_KEY];
+      }
+    });
+
+    // Gets rid of dapp-config
+    if (fs.existsSync(dappConfigFile)) {
+      fs.unlinkSync(dappConfigFile);
+    }
+
+    // Empties dappConfig to make a new one
+    dappConfig = {
+      httpUri: httpUriTestnet,
+      accounts: [],
+      contracts: chainContracts,
+    };
+
+    addTestnetAccounts();
+
+    updateConfiguration();
+
+    spawn('npx', ['watch', `node ${path.join(__dirname, SCRIPT_NAME)} transpile`, 'interactions'], { stdio: 'inherit' });
+
   }
 
   async function launchEmulator() {
@@ -167,7 +205,7 @@ const dappConfigFile = path.join(__dirname, 'dapp-config.json');
 
   async function createTestAccounts() {
     let flow = new Flow({
-      httpUri,
+      httpUri: httpUriEmulator,
       serviceWallet
     });
     for (let a = 0; a < accountCount; a++) {
@@ -192,6 +230,15 @@ const dappConfigFile = path.join(__dirname, 'dapp-config.json');
       }
       dappConfig.wallets.push(account);
       console.log(`\n🤖  Account created on blockchain: ${account.address}`);
+    }
+  }
+
+  // Added function to be able to add testnet accounts
+  // for the account widget
+  function addTestnetAccounts() {
+    for (let i = 0; i < testnetAccounts.length; i++) {
+      dappConfig.accounts.push(testnetAccounts[i]);
+      console.log(`\n🤖  Account added to dapp-config: ${testnetAccounts[i]}`);
     }
   }
 
@@ -313,7 +360,7 @@ const dappConfigFile = path.join(__dirname, 'dapp-config.json');
 
     let itemIndex = 0;
     let flow = new Flow({
-      httpUri,
+      httpUri: httpUriEmulator,
       serviceWallet
     });
     let handle = setInterval(async () => {

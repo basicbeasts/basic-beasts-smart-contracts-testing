@@ -39,11 +39,18 @@ export default class HarnessPage extends LitElement {
     return[
     {
         "name": "core-pack_nft",
-        "title": "Pack NFT",
+        "title": "Pack NFT [Emulator]",
         "description": "Pack-based NFTs (like NBA Top Shot) with Admin and Marketplace contracts.",
         "category": "Foundations",
         "route": "/core-pack_nft"
-    }
+    },
+    {
+      "name": "core-testnet",
+      "title": "Pack NFT [Testnet]",
+      "description": "Pack-based NFTs (like NBA Top Shot) with Admin and Marketplace contracts.",
+      "category": "Foundations",
+      "route": "/core-testnet"
+  }
 ]; 
   }
 

@@ -7,13 +7,14 @@
   "contributors": [
     "Jonathan Sheely <jon@decentology.com> https://www.decentology.com",
     "Nik Kalyani <nik@decentology.com> https://www.decentology.com"
-   ],
-    "scripts": {
+  ],
+  "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "dev": "wait-on ../dapplib/src/dapp-config.json && nest start --exec ts-node-dev --watch --preserveWatchOutput",
+    "testnet": "wait-on ../dapplib/src/dapp-config.json && nest start --exec ts-node-dev --watch --preserveWatchOutput",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "NODE_ENV=production node dist/main",

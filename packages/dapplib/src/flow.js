@@ -35,6 +35,12 @@ class Flow {
      */
     constructor(config) {
         this.serviceUri = config.httpUri;
+        console.log(config.httpUri)
+        if (config.httpUri.includes('localhost')) {
+            this.testnet = false
+        } else {
+            this.testnet = true
+        }
         this.serviceWallet = config.serviceWallet;
         this.testMode = config.testMode || false;
     }
@@ -301,94 +307,153 @@ class Flow {
     */
     async _processTransaction(tx, options) {
 
-        options = options || {};
+        if (!this.testnet) {
+            options = options || {};
 
-        let builders = [];
+            let builders = [];
 
-        let debug = null;
-        // BUILD INTERACTION
+            let debug = null;
+            // BUILD INTERACTION
 
-        // Add the actual interaction code
-        builders.push(tx);
+            // Add the actual interaction code
+            builders.push(tx);
 
-        // If there are any params, add those here
-        if (options.params && Array.isArray(options.params)) {
-            let params = [];
-            options.params.forEach((param) => {
-                params.push(fcl.param(param.value, param.type, param.name));
-            });
-            builders.push(fcl.params(params));
-        }
-
-        // If there are any args, add those here
-        if (options.args && Array.isArray(options.args)) {
-            let args = [];
-            options.args.forEach((arg) => {
-                args.push(fcl.arg(arg.value, arg.type));
-            });
-            builders.push(fcl.args(args));
-        }
-
-        if (options.gasLimit && options.gasLimit > 0) {
-            builders.push(fcl.limit(options.gasLimit));
-        }
-        // If the transaction is going to change state, it will require roleInfo to be populated
-        if (options.roleInfo) {
-
-            let signer = new Signer(this.serviceWallet, this.testMode);
-            let roles = options.roleInfo;
-
-            // The Proposer authorization is the only one that requires a sequenceNumber
-            // This block does double-duty...for Proposer and the scenario in which
-            // Proposer, Authorizer, Payer are all the same i.e. Flow.Roles.ALL
-            if (roles[Flow.Roles.PROPOSER] || roles[Flow.Roles.ALL]) {
-                let address = roles[Flow.Roles.PROPOSER] || roles[Flow.Roles.ALL];
-                let account = await this.getAccount(address);
-                builders.push(fcl.proposer(await signer.authorize(account)));
-
-                if (roles[Flow.Roles.ALL]) {
-                    builders.push(fcl.authorizations([await signer.authorize(account)]));
-                    builders.push(fcl.payer(await signer.authorize(account)));
-                }
+            // If there are any params, add those here
+            if (options.params && Array.isArray(options.params)) {
+                let params = [];
+                options.params.forEach((param) => {
+                    params.push(fcl.param(param.value, param.type, param.name));
+                });
+                builders.push(fcl.params(params));
             }
-            // A transaction can have multiple Authorizers. 
-            // Loop through and create an authorization object for each one
-            if (roles[Flow.Roles.AUTHORIZERS] && Array.isArray(roles[Flow.Roles.AUTHORIZERS])) {
-                let authorizations = [];
-                for (let a = 0; a < roles[Flow.Roles.AUTHORIZERS].length; a++) {
-                    let address = roles[Flow.Roles.AUTHORIZERS][a];
+
+            // If there are any args, add those here
+            if (options.args && Array.isArray(options.args)) {
+                let args = [];
+                options.args.forEach((arg) => {
+                    args.push(fcl.arg(arg.value, arg.type));
+                });
+                builders.push(fcl.args(args));
+            }
+
+            if (options.gasLimit && options.gasLimit > 0) {
+                builders.push(fcl.limit(options.gasLimit));
+            }
+            // If the transaction is going to change state, it will require roleInfo to be populated
+            if (options.roleInfo) {
+
+                let signer = new Signer(this.serviceWallet, this.testMode);
+                let roles = options.roleInfo;
+
+                // The Proposer authorization is the only one that requires a sequenceNumber
+                // This block does double-duty...for Proposer and the scenario in which
+                // Proposer, Authorizer, Payer are all the same i.e. Flow.Roles.ALL
+                if (roles[Flow.Roles.PROPOSER] || roles[Flow.Roles.ALL]) {
+                    let address = roles[Flow.Roles.PROPOSER] || roles[Flow.Roles.ALL];
                     let account = await this.getAccount(address);
-                    let authorization = await signer.authorize(account);
-                    authorizations.push(authorization);
+                    builders.push(fcl.proposer(await signer.authorize(account)));
+
+                    if (roles[Flow.Roles.ALL]) {
+                        builders.push(fcl.authorizations([await signer.authorize(account)]));
+                        builders.push(fcl.payer(await signer.authorize(account)));
+                    }
                 }
-                if (authorizations.length > 0) {
-                    builders.push(fcl.authorizations(authorizations));
+                // A transaction can have multiple Authorizers. 
+                // Loop through and create an authorization object for each one
+                if (roles[Flow.Roles.AUTHORIZERS] && Array.isArray(roles[Flow.Roles.AUTHORIZERS])) {
+                    let authorizations = [];
+                    for (let a = 0; a < roles[Flow.Roles.AUTHORIZERS].length; a++) {
+                        let address = roles[Flow.Roles.AUTHORIZERS][a];
+                        let account = await this.getAccount(address);
+                        let authorization = await signer.authorize(account);
+                        authorizations.push(authorization);
+                    }
+                    if (authorizations.length > 0) {
+                        builders.push(fcl.authorizations(authorizations));
+                    }
+                }
+
+                // Finally, add the Payer authorization
+                if (roles[Flow.Roles.PAYER]) {
+                    let address = roles[Flow.Roles.PAYER];
+                    let account = await this.getAccount(address);
+                    builders.push(fcl.payer(await signer.authorize(account)));
+
                 }
             }
+            fcl.config().put("accessNode.api", this.serviceUri);
 
-            // Finally, add the Payer authorization
-            if (roles[Flow.Roles.PAYER]) {
-                let address = roles[Flow.Roles.PAYER];
-                let account = await this.getAccount(address);
-                builders.push(fcl.payer(await signer.authorize(account)));
 
+            // try {
+            //     const response = await fcl.serialize(builders);
+            //     console.log(JSON.stringify(JSON.parse(response), null, 2))
+
+            // }
+            // catch (e) {
+            //     console.log(e)
+            // }
+
+            // SEND TRANSACTION TO BLOCKCHAIN
+
+            return await fcl.send(builders, { node: this.serviceUri });
+        } else if (this.testnet) {
+            options = options || {};
+
+            let builders = [];
+
+            let debug = null;
+            // BUILD INTERACTION
+
+            // Add the actual interaction code
+            builders.push(tx);
+
+            // If there are any params, add those here
+            if (options.params && Array.isArray(options.params)) {
+                let params = [];
+                options.params.forEach((param) => {
+                    params.push(fcl.param(param.value, param.type, param.name));
+                });
+                builders.push(fcl.params(params));
             }
+
+            // If there are any args, add those here
+            if (options.args && Array.isArray(options.args)) {
+                let args = [];
+                options.args.forEach((arg) => {
+                    args.push(fcl.arg(arg.value, arg.type));
+                });
+                builders.push(fcl.args(args));
+            }
+
+            if (options.gasLimit && options.gasLimit > 0) {
+                builders.push(fcl.limit(options.gasLimit));
+            }
+            // If the transaction is going to change state, it will require roleInfo to be populated
+            if (options.roleInfo) {
+                // If the transaction is going to change state, it will require roleInfo to be populated
+                if (options.roleInfo) {
+                    builders.push(fcl.proposer(fcl.currentUser().authorization));
+                    builders.push(fcl.authorizations([fcl.currentUser().authorization]));
+                    builders.push(fcl.payer(fcl.currentUser().authorization));
+                }
+            }
+            fcl.config().put("accessNode.api", this.serviceUri);
+
+
+            // try {
+            //     const response = await fcl.serialize(builders);
+            //     console.log(JSON.stringify(JSON.parse(response), null, 2))
+
+            // }
+            // catch (e) {
+            //     console.log(e)
+            // }
+
+            // SEND TRANSACTION TO BLOCKCHAIN
+
+            return await fcl.send(builders, { node: this.serviceUri });
+
         }
-        fcl.config().put("accessNode.api", this.serviceUri);
-
-
-        // try {
-        //     const response = await fcl.serialize(builders);
-        //     console.log(JSON.stringify(JSON.parse(response), null, 2))
-
-        // }
-        // catch (e) {
-        //     console.log(e)
-        // }
-
-        // SEND TRANSACTION TO BLOCKCHAIN
-
-        return await fcl.send(builders, { node: this.serviceUri });
 
     }
 

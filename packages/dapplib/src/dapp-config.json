@@ -1,155 +1,21 @@
 {
-	"httpUri": "http://localhost:8080",
+	"httpUri": "https://access-testnet.onflow.org",
+	"accounts": [
+		"0xac70648174bc9884"
+	],
 	"contracts": {
-		"Flow.FlowFees": "0xe5a8b7f23e8b548f",
+		"Flow.FlowFees": "0x912d5440f7e3769e",
 		"Flow.FlowServiceAccount": "0xf8d6e0586b0a20c7",
 		"Flow.FlowStorageFees": "0xf8d6e0586b0a20c7",
-		"Flow.FlowToken": "0x0ae53cb6e3f42a79",
-		"Flow.FungibleToken": "0xee82856bf20e2aa6",
-		"Flow.FUSD": "0x01cf0e2f2f715450",
-		"Flow.NonFungibleToken": "0x01cf0e2f2f715450",
-		"Project.NFTContract": "0x01cf0e2f2f715450",
-		"Project.PackContract": "0x01cf0e2f2f715450",
-		"Project.AdminContract": "0x01cf0e2f2f715450",
-		"Project.MarketplaceContract": "0x01cf0e2f2f715450",
-		"Project.CharacterX": "0x01cf0e2f2f715450"
-	},
-	"accounts": [
-		"0x01cf0e2f2f715450",
-		"0x179b6b1cb6755e31",
-		"0xf3fcd2c1a78f5eee",
-		"0xe03daebed8ca0615",
-		"0x045a1763c93006ca"
-	],
-	"serviceWallet": {
-		"address": "0xf8d6e0586b0a20c7",
-		"keys": [
-			{
-				"privateKey": "348bdc3216e6571ced8faf35ef6d5336d1dcda5895e1abcc556fa780bd0ac081",
-				"keyId": 0,
-				"weight": 1000
-			}
-		]
-	},
-	"contractWallet": {
-		"address": "0x120e725050340cab",
-		"keys": [
-			{
-				"publicKey": "37dec5ad5d171e88337d742db695ae7be85a9e317bddb9ba826d6eebc4f94b5b04777442c62534d65e7116593d25a2dcc74c0be5cf4c6e16a3fa9aee6fa49439",
-				"privateKey": "c0240324833bd5cf91f8700eb6e01e82570baf06e7f958590ba6aefa5c2d0a82",
-				"keyId": 0,
-				"weight": 1000
-			},
-			{
-				"publicKey": "fa36bf6d846b70e4e1b7db6dc2e2b68f6eb532daa6c556dedfd2a3f8cf78eb2a73402673e70c5c3693a57f3e8397094fb7c9698a530676fad4620a61ffd9792e",
-				"privateKey": "2e253fd07b5fb75c83878a68fa43334992bf280cc444272798824f03c2cf933e",
-				"keyId": 1,
-				"weight": 500
-			}
-		]
-	},
-	"wallets": [
-		{
-			"address": "0x01cf0e2f2f715450",
-			"keys": [
-				{
-					"publicKey": "19e2f6cd85eaae73c93929cc6b12eb1503d0308fb4486413c8f2addee3c5d917cd07a88b8ea80480588039d3fed7c55bfa86658422a56480f90997d56d316c02",
-					"privateKey": "9662194df5f79133c22eb9e62591c5dbf0456536a95977b5a4bea3efef7002db",
-					"keyId": 0,
-					"weight": 1000
-				},
-				{
-					"publicKey": "a144847256f17ce94999813b2cb9ae838d8490231fa1394c4e2c108fec777ed97d333868a109c252ab94136a5e4810ba50107371df1618443d76be55978c070b",
-					"privateKey": "170d9abdcc8d68d6e753b85f7fbffc93d57dd43d33f036cd0a2fc1790f9555f4",
-					"keyId": 1,
-					"weight": 500
-				}
-			]
-		},
-		{
-			"address": "0x179b6b1cb6755e31",
-			"keys": [
-				{
-					"publicKey": "fce1a44643aa620b31274734bcd874dbadc951487799af456b7ae5aa3325cab9ee937291e17100a5ab2aa513b1f4e8e09396be05d16d4fa63572d12519633004",
-					"privateKey": "e350be0291d09d0450f0f9ac6a94f07affc80ca4d04e0c9abac8a085a311b60c",
-					"keyId": 0,
-					"weight": 1000
-				},
-				{
-					"publicKey": "1e672af155568270cbc2368eb2b02f11f1604da8853316e1d2154a894d4cf6f2df06f5f2975a12611283b550b7a8c0d7d9f8d68095cf2675c89e5d192c8cc8d8",
-					"privateKey": "d372761ed21c06a707f447dd8008e5f58df621548a59b9384cdacd5241c2f619",
-					"keyId": 1,
-					"weight": 500
-				}
-			]
-		},
-		{
-			"address": "0xf3fcd2c1a78f5eee",
-			"keys": [
-				{
-					"publicKey": "5c2ad8cd2d16952a10da2f09771c2ab72292013a35ad917f8b39a92ead461535f69a915e57e2f49ad1c9d759a541392d5fa9c8b6cfe70aa2baa28ae04c5594c2",
-					"privateKey": "f3046cb7495fadcb62ca26029487b1a549e83471b3ee0ecabc31da18a0374066",
-					"keyId": 0,
-					"weight": 1000
-				},
-				{
-					"publicKey": "54d1b3b4422147a06cfe9a20768f2a0f7a7e823bf39fd0cf25cf11dd83110a856dcf3782bcedc73502ce496b404e2483733489dd711dedcf7c1e1aeea248a263",
-					"privateKey": "70aaf88a0ddd198a2b16ea0ab224a4645ecbb4799123c7d2291caf7fe4377bbe",
-					"keyId": 1,
-					"weight": 500
-				}
-			]
-		},
-		{
-			"address": "0xe03daebed8ca0615",
-			"keys": [
-				{
-					"publicKey": "929d0087f2f7bc882988679f21b4c2f98efb8834f54253598568fb557f03548fb87cd326b011501347bdabbc8b95f89b6d3345c5699ae01bddbf170873e9ffaf",
-					"privateKey": "19565dd142e39816db7b054804ccbbdac9b2b773aab75f94446c20e5cc76707b",
-					"keyId": 0,
-					"weight": 1000
-				},
-				{
-					"publicKey": "0713f08bc229532fba192c692af03e7067d0c2d4070b3863a8487040a04f53d5b37affdf4461cc1b090a3f7836cac6b84a8469dd8908caa0c0ec494ff2678f14",
-					"privateKey": "87d5eb45c356af6579d0c63f634398af9136cd0dbd6e977a1f6ef623b2d4c437",
-					"keyId": 1,
-					"weight": 500
-				}
-			]
-		},
-		{
-			"address": "0x045a1763c93006ca",
-			"keys": [
-				{
-					"publicKey": "b641d15a9a36aa626b2eefd8f0438adc996650da8041ab1bc8e7ae662aed8b80bcc253c29d3c37070cd7612b6c89f320c6a23093cb3ead44ec92a8ecdbc32a36",
-					"privateKey": "27a5267f558335ab373f4af7dc0c52e7113f3f8779e0917880968f34d9e0785c",
-					"keyId": 0,
-					"weight": 1000
-				},
-				{
-					"publicKey": "3f54eb17bbc7627d56c7c3aec7360b51d488cb1a8497f27d9c4ee9fc65f3d47f7990a28ad6104d482d60f8100f34c4b3f2c86f51e47a84b30445b3375fe86ba7",
-					"privateKey": "5afc4eca1739ab555147ac8ba7ab5f3e9b00936a7d3cc8fc2d5d54421b479fa2",
-					"keyId": 1,
-					"weight": 500
-				}
-			]
-		},
-		{
-			"address": "0x120e725050340cab",
-			"keys": [
-				{
-					"publicKey": "37dec5ad5d171e88337d742db695ae7be85a9e317bddb9ba826d6eebc4f94b5b04777442c62534d65e7116593d25a2dcc74c0be5cf4c6e16a3fa9aee6fa49439",
-					"privateKey": "c0240324833bd5cf91f8700eb6e01e82570baf06e7f958590ba6aefa5c2d0a82",
-					"keyId": 0,
-					"weight": 1000
-				},
-				{
-					"publicKey": "fa36bf6d846b70e4e1b7db6dc2e2b68f6eb532daa6c556dedfd2a3f8cf78eb2a73402673e70c5c3693a57f3e8397094fb7c9698a530676fad4620a61ffd9792e",
-					"privateKey": "2e253fd07b5fb75c83878a68fa43334992bf280cc444272798824f03c2cf933e",
-					"keyId": 1,
-					"weight": 500
-				}
-			]
-		}
-	]
+		"Flow.FlowToken": "0x7e60df042a9c0868",
+		"Flow.FungibleToken": "0x9a0766d93b6608b7",
+		"Flow.NonFungibleToken": "0x631e88ae7f1d7c20",
+		"Flow.FUSD": "0xe223d8a629e49c68",
+		"Project.Hero": "0xac70648174bc9884",
+		"Project.MarketplaceContract": "0xac70648174bc9884",
+		"Project.CharacterX": "0x0",
+		"Project.PackContract": "0x0",
+		"Project.NFTContract": "0x0",
+		"Project.AdminContract": "0x0"
+	}
 }
