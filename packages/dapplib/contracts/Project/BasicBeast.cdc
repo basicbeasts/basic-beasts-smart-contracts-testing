@@ -935,23 +935,6 @@ pub contract BasicBeast: NonFungibleToken {
     pub fun getCharacterRarity(characterID: UInt32): String? {
         return self.beastTemplates[characterID]?.rarity
     }
-    
-    pub fun getCharacterElement(characterID: UInt32): {String: Bool}? {
-        return self.beastTemplates[characterID]?.elements
-    }
-
-    pub fun getCharacterData(characterID: UInt32): {String: String}? {
-        return self.beastTemplates[characterID]?.data
-    }
-
-    pub fun getCharacterDataByField(characterID: UInt32, field: String): String? {
-        // Don't force a revert if the characterID or field is invalid
-        if let character = BasicBeast.beastTemplates[characterID] {
-            return character.data[field]
-        } else {
-            return nil
-        }
-    } 
 
     pub fun getAllCharacterMetaData(characterID: UInt32): BasicBeast.BeastTemplate? {
         return self.beastTemplates[characterID]
