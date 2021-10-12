@@ -6,20 +6,20 @@
         Authors: bz bz.vanity@gmail.com
 
         This smart contract contains the core functionality for 
-        the Basic Beasts, created by bz.
+        the Basic Beasts.
 
-        When a new BasicBeasts wants to be added to the records, an Admin creates
+        When a new Beast wants to be added to the records, an Admin creates
         a new BeastTemplate that is stored in the smart contract.
 
         Then an Admin can create new Sets. Sets consist of a public struct that 
-        contains public information about a set, and a private resource used 
-        to mint new beasts based off of BeastTemplate that have been linked to the Set
+        contains public information about a Set, and a private resource used 
+        to mint new beasts based on BeastTemplates that have been linked to the Set
 
         The admin resource has the power to do all of the important actions
-        in the smart contract and sets. When they want to call functions in a set,
+        in the smart contract and Sets. When they want to call functions in a Set,
         they call their borrowSet function to get a reference
-        to a set in the contract.
-        Then they can call functions on the set using that reference.
+        to a Set in the contract.
+        Then they can call functions on the Set using that reference.
 
         In this way, the smart contract and its defined resources interact.
 
@@ -28,20 +28,22 @@
 
         The contract also defines a Collection resource. This is an object that
         every Beast NFT owner will store in their account
-        to manage their NFT Collection
+        to manage their NFT Collection.
 
-        The admin Beast account will also have its own beast collection that it can 
+        The admin Beast account will also have its own Beast Collection that it can 
         use to hold its own Beasts that have not yet been sent to a user.
 
-        Note: All state changing functions will panic if an invalid argument is 
+        Note: All state-changing functions will panic if an invalid argument is 
         provided or one of its pre-conditions or post-conditions aren't met.
         Functions that don't modify state will simply return 0 or nil
         and those cases need to be handled by the caller.
 
+        To my second-most favorite brother (at the time of writing), this one is for you. L.O.L.
+
         Special thanks to: 
-        Jacob, Morgan and the rest of the Decentology team for teaching us how to write cadence and build Dapps.
-        Josh, Dieter and the rest of the Flow and Dapper Labs team for making TopShot and Flow Blockchain great and available to everyone.
-        You are the best teachers, mentors, and friends one could ever ask for.
+        Jacob, Gel, Morgan, and the rest of the Decentology team for teaching us how to write cadence and build Dapps.
+        Josh, Dieter, and the rest of the Flow and Dapper Labs team for making TopShot and Flow Blockchain great and available to everyone.
+        You are the best partners, teachers, mentors, and friends one could ever ask for.
 
 */
 
@@ -271,7 +273,7 @@ pub contract BasicBeast: NonFungibleToken {
     // A Set is a grouping of BeastTemplates. A BeastTemplate can exist in multiple different sets.
     // 
     // SetData is a struct that is used so anyone can easily 
-    // query information about a set by calling various getters located 
+    // query information about a Set by calling various getters located 
     // at the end of the contract. Only the admin has the ability 
     // to modify any data in the private Set resource.
     //
@@ -487,13 +489,24 @@ pub contract BasicBeast: NonFungibleToken {
         // mintBeast mints a new Beast and returns the newly minted Beast
         // 
         // Parameters: beastTemplateID: The ID of the BeastTemplate that the Beast references
+        //             bornAt: A unix timestamp of when this beast came into existence
+        //             matron: The beast ID of the matron of this beast. Set as 0 for genesis
+        //             sire: The beast ID of the sire of this beast. Set as 0 for genesis
+        //             evolvedFrom: The beast IDs of the beasts this beast is evolved from.
+        //                          Set as 0 for genesis or special beasts
         //
         // Pre-Conditions:
         // The Beast must exist in the Set and be allowed to mint new Beasts
         //
         // Returns: The NFT that was minted
         // 
-        pub fun mintBeast(beastTemplate: BeastTemplate): @NFT {
+        pub fun mintBeast(
+                            beastTemplate: BeastTemplate, 
+                            bornAt: UInt64, 
+                            matron: UInt64, 
+                            sire: UInt64, 
+                            evolvedFrom: [UInt64]
+            ): @NFT {
             pre {
                 self.retired[beastTemplate.beastTemplateID] != nil: "Cannot mint the Beast: This BeastTemplate doesn't exist in this set."
                 !self.retired[beastTemplate.beastTemplateID]!: "Cannot mint the Beast from this BeastTemplate: This BeastTemplate has been retired in this set."
@@ -505,10 +518,14 @@ pub contract BasicBeast: NonFungibleToken {
 
             // Mint the new Beast
             let newBeast: @NFT <- create NFT(
+                                            evolvedFrom: evolvedFrom,
+                                            sire: sire,
+                                            matron: matron,
+                                            bornAt: bornAt,
                                             serialNumber: numInBeastTemplate + 1 as UInt32, 
                                             beastTemplate: beastTemplate, 
                                             setID: self.setID,
-                                            )
+            )
 
             // Increment the count of Beasts minted for this BeastTemplate
             self.numOfMintedPerBeastTemplate[beastTemplate.beastTemplateID] = numInBeastTemplate + 1 as UInt32
@@ -518,19 +535,39 @@ pub contract BasicBeast: NonFungibleToken {
         
         // batchMintBeast mints a specified quantity of a 
         // single referenced BeastTemplate and returns them as a Collection
+        // when the same BeastTemplate is being minted in a batch all minted beasts
+        // will have the same bornAt, matron, sire, and evolvedFrom data
         //
         // Parameters: beastTemplateID: the ID of the BeastTemplate that the Beasts are minted for
+        //             bornAt: A unix timestamp of when this beast came into existence
+        //             matron: The beast ID of the matron of this beast. Set as 0 for genesis
+        //             sire: The beast ID of the sire of this beast. Set as 0 for genesis
+        //             evolvedFrom: The beast IDs of the beasts this beast is evolved from.
+        //                          Set as 0 for genesis or special beasts
         //             quantity: The quantity of the BeastTemplate to be minted
         //
         // Returns: Collection object that contains all the Beasts that were minted
         pub fun batchMintBeast(
-                                beastTemplate: BeastTemplate, 
-                                quantity: UInt64): @Collection {
+                                beastTemplate: BeastTemplate,
+                                bornAt: UInt64, 
+                                matron: UInt64, 
+                                sire: UInt64, 
+                                evolvedFrom: [UInt64], 
+                                quantity: UInt64
+                                ): @Collection {
+
             let newCollection <- create Collection()
 
             var count: UInt64 = 0
             while count < quantity {
-                newCollection.deposit(token: <-self.mintBeast(beastTemplate: beastTemplate))
+                newCollection.deposit(token: <-self.mintBeast(
+                                                            beastTemplate: beastTemplate,
+                                                            bornAt: bornAt, 
+                                                            matron: matron, 
+                                                            sire: sire, 
+                                                            evolvedFrom: evolvedFrom
+                                                            )
+                )
                 count = count + 1 as UInt64
             }
 
@@ -552,10 +589,37 @@ pub contract BasicBeast: NonFungibleToken {
         // Otherwise known as the serial number
         pub let serialNumber: UInt32
 
-        init(setID: UInt32, beastTemplate: BeastTemplate, serialNumber: UInt32) {
+        // A unix timestamp of when this beast came into existence
+        pub let bornAt: UInt64
+        
+        // The beast ID of the matron of this beast
+        // set to 0 for genesis beasts
+        pub let matron: UInt64
+
+        // The beast ID of the sire of this beast
+        // set to 0 for genesis beasts
+        pub let sire: UInt64
+
+        // The beast IDs of the beasts this beast is evolved from
+        // set to 0 for genesis and special beasts
+        pub let evolvedFrom: [UInt64]
+
+        init(
+            setID: UInt32, 
+            beastTemplate: BeastTemplate, 
+            serialNumber: UInt32,
+            bornAt: UInt64,
+            matron: UInt64,
+            sire: UInt64,
+            evolvedFrom: [UInt64]
+        ) {
             self.setID = setID
             self.beastTemplate = beastTemplate
             self.serialNumber = serialNumber
+            self.bornAt = bornAt
+            self.matron = matron
+            self.sire = sire
+            self.evolvedFrom = evolvedFrom
         }
     }
 
@@ -573,6 +637,10 @@ pub contract BasicBeast: NonFungibleToken {
         pub let data: BeastData
 
         init(
+            evolvedFrom: [UInt64],
+            sire: UInt64,
+            matron: UInt64,
+            bornAt: UInt64,
             serialNumber: UInt32, 
             beastTemplate: BeastTemplate, 
             setID: UInt32, 
@@ -590,7 +658,15 @@ pub contract BasicBeast: NonFungibleToken {
             self.beneficiary = nil
 
             // Set the metadata struct
-            self.data = BeastData(setID: setID, beastTemplate: beastTemplate, serialNumber: serialNumber)
+            self.data = BeastData(
+                                setID: setID, 
+                                beastTemplate: beastTemplate, 
+                                serialNumber: serialNumber,
+                                bornAt: bornAt,
+                                matron: matron,
+                                sire: sire,
+                                evolvedFrom: evolvedFrom
+            )
 
             emit BeastMinted(beastID: self.id, beastTemplate: beastTemplate, setID: self.data.setID, serialNumber: self.data.serialNumber)
         }
@@ -1011,7 +1087,7 @@ pub contract BasicBeast: NonFungibleToken {
         return BasicBeast.sets[setID]?.name
     }
 
-    // getSetGeneration returns the series that the specified set
+    // getSetGeneration returns the generation that the specified set
     //              is associated with.
     // 
     // Parameters: setID: The id of the set that is being searched
@@ -1157,3 +1233,4 @@ pub contract BasicBeast: NonFungibleToken {
     }
 
 }
+ 
