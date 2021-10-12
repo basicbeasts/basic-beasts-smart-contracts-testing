@@ -13,7 +13,7 @@
 
         Then an Admin can create new Sets. Sets consist of a public struct that 
         contains public information about a Set, and a private resource used 
-        to mint new beasts based on BeastTemplates that have been linked to the Set
+        to mint new Beasts based on BeastTemplates that have been linked to the Set
 
         The admin resource has the power to do all of the important actions
         in the smart contract and Sets. When they want to call functions in a Set,
@@ -145,7 +145,7 @@ pub contract BasicBeast: NonFungibleToken {
     // The total number of Beast NFTs that have been created
     // Because NFTs can be destroyed, it doesn't necessarily mean that this
     // reflects the total number of NFTs in existence, just the number that
-    // have been minted to date. Also used as global beast IDs for minting.
+    // have been minted to date. Also used as global Beast IDs for minting.
     pub var totalSupply: UInt64
 
     // -----------------------------------------------------------------------
@@ -489,11 +489,11 @@ pub contract BasicBeast: NonFungibleToken {
         // mintBeast mints a new Beast and returns the newly minted Beast
         // 
         // Parameters: beastTemplateID: The ID of the BeastTemplate that the Beast references
-        //             bornAt: A unix timestamp of when this beast came into existence
-        //             matron: The beast ID of the matron of this beast. Set as 0 for genesis
-        //             sire: The beast ID of the sire of this beast. Set as 0 for genesis
-        //             evolvedFrom: The beast IDs of the beasts this beast is evolved from.
-        //                          Set as 0 for genesis or special beasts
+        //             bornAt: A unix timestamp of when this Beast came into existence
+        //             matron: The Beast ID of the matron of this Beast. Set as 0 for genesis
+        //             sire: The Beast ID of the sire of this Beast. Set as 0 for genesis
+        //             evolvedFrom: The Beast IDs of the Beasts this Beast is evolved from.
+        //                          Set as 0 for genesis or special Beasts
         //
         // Pre-Conditions:
         // The Beast must exist in the Set and be allowed to mint new Beasts
@@ -535,15 +535,15 @@ pub contract BasicBeast: NonFungibleToken {
         
         // batchMintBeast mints a specified quantity of a 
         // single referenced BeastTemplate and returns them as a Collection
-        // when the same BeastTemplate is being minted in a batch all minted beasts
+        // when the same BeastTemplate is being minted in a batch all minted Beasts
         // will have the same bornAt, matron, sire, and evolvedFrom data
         //
         // Parameters: beastTemplateID: the ID of the BeastTemplate that the Beasts are minted for
-        //             bornAt: A unix timestamp of when this beast came into existence
-        //             matron: The beast ID of the matron of this beast. Set as 0 for genesis
-        //             sire: The beast ID of the sire of this beast. Set as 0 for genesis
-        //             evolvedFrom: The beast IDs of the beasts this beast is evolved from.
-        //                          Set as 0 for genesis or special beasts
+        //             bornAt: A unix timestamp of when this Beast came into existence
+        //             matron: The Beast ID of the matron of this Beast. Set as 0 for genesis
+        //             sire: The Beast ID of the sire of this Beast. Set as 0 for genesis
+        //             evolvedFrom: The Beast IDs of the Beasts this Beast is evolved from.
+        //                          Set as 0 for genesis or special Beasts
         //             quantity: The quantity of the BeastTemplate to be minted
         //
         // Returns: Collection object that contains all the Beasts that were minted
@@ -589,19 +589,19 @@ pub contract BasicBeast: NonFungibleToken {
         // Otherwise known as the serial number
         pub let serialNumber: UInt32
 
-        // A unix timestamp of when this beast came into existence
+        // A unix timestamp of when this Beast came into existence
         pub let bornAt: UInt64
         
-        // The beast ID of the matron of this beast
-        // set to 0 for genesis beasts
+        // The Beast ID of the matron of this Beast
+        // set to 0 for genesis Beasts
         pub let matron: UInt64
 
-        // The beast ID of the sire of this beast
-        // set to 0 for genesis beasts
+        // The Beast ID of the sire of this Beast
+        // set to 0 for genesis Beasts
         pub let sire: UInt64
 
-        // The beast IDs of the beasts this beast is evolved from
-        // set to 0 for genesis and special beasts
+        // The Beast IDs of the Beasts this Beast is evolved from
+        // set to 0 for genesis and special Beasts
         pub let evolvedFrom: [UInt64]
 
         init(
@@ -626,7 +626,7 @@ pub contract BasicBeast: NonFungibleToken {
     // The resource that represents the Beast NFTs
     //
     pub resource NFT: NonFungibleToken.INFT {
-        // Global unique beast ID
+        // Global unique Beast ID
         pub let id: UInt64
 
         // The wallet address of the beneficiary to receive 
@@ -648,7 +648,7 @@ pub contract BasicBeast: NonFungibleToken {
             // Increment the global Beast IDs
             BasicBeast.totalSupply = BasicBeast.totalSupply + 1 as UInt64
 
-            // Set unique beast ID to the newly incremented totalSupply
+            // Set unique Beast ID to the newly incremented totalSupply
             self.id = BasicBeast.totalSupply
 
             // Set beneficiary to nil
@@ -785,7 +785,7 @@ pub contract BasicBeast: NonFungibleToken {
         }
 
         // startNewGeneration ends the current generation by incrementing
-        // the generation number, meaning that beasts will be using the 
+        // the generation number, meaning that Beasts will be using the 
         // new generation number from now on
         //
         // Returns: The new generation number
