@@ -69,7 +69,16 @@ pub contract BasicBeast: NonFungibleToken {
     // Emitted when a Set is locked, meaning BeastTemplates cannot be added
     pub event SetLocked(setID: UInt32)
     // Emitted when a Beast is minted from a Set
-    pub event BeastMinted(beastID: UInt64, beastTemplate: BeastTemplate, setID: UInt32, serialNumber: UInt32)
+    pub event BeastMinted(
+                        beastID: UInt64, 
+                        beastTemplate: BeastTemplate, 
+                        setID: UInt32, 
+                        serialNumber: UInt32,
+                        bornAt: UInt64, 
+                        matron: UInt64,
+                        sire: UInt64,
+                        evolvedFrom: [UInt64]
+    )
 
     // Events for Beast-related actions
     //
@@ -198,7 +207,7 @@ pub contract BasicBeast: NonFungibleToken {
         // The BeastTemplate's ultimate skill
         pub let ultimateSkill: String
 
-        // The BeastTemplate's basic skills
+        // An array of the BeastTemplate's basic skills
         pub let basicSkills: [String]
 
         // A dictionary of the BeastTemplate's elements.
@@ -226,9 +235,10 @@ pub contract BasicBeast: NonFungibleToken {
                 dexNumber != nil: "New BeastTemplate dex number cannot be blank"
                 name != "": "New BeastTemplate name cannot be blank"
                 image != "": "New BeastTemplate image cannot be blank"
-                description != "": "New BeastTemplate race cannot be blank"
+                description != "": "New BeastTemplate description cannot be blank"
                 sex != "": "New BeastTemplate must have sex"
                 rarity != "": "New BeastTemplate rarity must be determined"
+                skin != "": "New BeastTemplate skin must be determined"
                 starLevel != nil: "New BeastTemplate star level cannot be blank"
                 ultimateSkill != "": "New BeastTemplate ultimate skill cannot be blank"
                 basicSkills.length != 0: "New BeastTemplate basic skills cannot be empty"
@@ -314,7 +324,7 @@ pub contract BasicBeast: NonFungibleToken {
         // Mapping of beastTemplateIDs that indicates the number of Beasts 
         // that have been minted for specific BeastTemplates in this Set.
         // When a Beast is minted, this value is stored in the Beast to
-        // show its place in the Set, eg. 13 of 60.
+        // show its place in the Set, e.g. beastTemplateID 13 of 60 Beasts minted.
         pub var numOfMintedPerBeastTemplate: {UInt32: UInt32}
 
         init(setID: UInt32) {
@@ -351,7 +361,7 @@ pub contract BasicBeast: NonFungibleToken {
     // If the admin locks the Set, no more BeastTemplates can be added to it, but 
     // Beasts can still be minted.
     //
-    // If retireAll() and lock() are called back-to-back, 
+    // If retireAllBeastTemplates() and lock() are called back-to-back, 
     // the Set is closed off forever and nothing more can be done with it.
     pub resource Set {
 
@@ -466,7 +476,7 @@ pub contract BasicBeast: NonFungibleToken {
             }
         }
 
-        // retireAll retires all the BeastTemplates in the Set
+        // retireAllBeastTemplates retires all the BeastTemplates in the Set
         // Afterwards, none of the retired BeastTemplates will be able to mint new Beasts
         //
         pub fun retireAllBeastTemplates() {
@@ -668,7 +678,16 @@ pub contract BasicBeast: NonFungibleToken {
                                 evolvedFrom: evolvedFrom
             )
 
-            emit BeastMinted(beastID: self.id, beastTemplate: beastTemplate, setID: self.data.setID, serialNumber: self.data.serialNumber)
+            emit BeastMinted(
+                            beastID: self.id, 
+                            beastTemplate: beastTemplate, 
+                            setID: self.data.setID, 
+                            serialNumber: self.data.serialNumber, 
+                            bornAt: self.data.bornAt, 
+                            matron: self.data.matron,
+                            sire: self.data.sire,
+                            evolvedFrom: self.data.evolvedFrom
+            )
         }
 
         // setBeneficiary sets the beneficiary of this NFT
@@ -686,6 +705,9 @@ pub contract BasicBeast: NonFungibleToken {
             emit BeastBeneficiaryIsSet(id: self.id, beneficiary: self.beneficiary!)
         }
 
+        // getBeneficiary returns the beneficiary's address of this NFT
+        //
+        // Returns: The beneficiary as an Address optional
         pub fun getBeneficiary(): Address? {
             return self.beneficiary
         }
@@ -1134,15 +1156,15 @@ pub contract BasicBeast: NonFungibleToken {
         return BasicBeast.sets[setID]?.beastTemplatesInSet
     }
 
-    // isEditionRetired returns a boolean that indicates if a set/beastTemplate combo
-    //                  (otherwise known as a beast edition) is retired.
-    //                  If a beast edition is retired, it still remains in the set,
-    //                  but beasts can no longer be minted from it.
+    // isEditionRetired returns a boolean that indicates if a Set/BeastTemplate combo
+    //                  (otherwise known as a Beast edition) is retired.
+    //                  If a Beast edition is retired, it still remains in the set,
+    //                  but Beasts can no longer be minted from it.
     // 
     // Parameters: setID: The id of the set that is being searched
     //             beastTemplateID: The id of the BeastTemplate that is being searched
     //
-    // Returns: Boolean indicating if the beast edition is retired or not
+    // Returns: Boolean indicating if the Beast edition is retired or not
     pub fun isEditionRetired(setID: UInt32, beastTemplateID: UInt32): Bool? {
         // Don't force a revert if the set or character ID is invalid
         // Remove the set from the dictionary to get its field
@@ -1166,7 +1188,7 @@ pub contract BasicBeast: NonFungibleToken {
     // isSetLocked returns a boolean that indicates if a set
     //             is locked. If an set is locked, 
     //             new BeastTemplates can no longer be added to it,
-    //             but beasts can still be minted from BeastTemplates
+    //             but Beasts can still be minted from BeastTemplates
     //             that are currently in it.
     // 
     // Parameters: setID: The id of the set that is being searched
@@ -1177,13 +1199,13 @@ pub contract BasicBeast: NonFungibleToken {
         return BasicBeast.sets[setID]?.locked
     }
 
-    // getNumBeastsInEdition return the number of beasts that have been 
-    //                        minted from a certain beasts edition.
+    // getNumBeastsInEdition return the number of Beasts that have been 
+    //                        minted from a certain Beast edition.
     //
     // Parameters: setID: The id of the set that is being searched
     //             beastTemplateID: The id of the BeastTemplate that is being searched
     //
-    // Returns: The total number of beasts 
+    // Returns: The total number of Beasts 
     //          that have been minted from a specific BeastTemplate
     pub fun getNumBeastsInEdition(setID: UInt32, characterID: UInt32): UInt32? {
 
