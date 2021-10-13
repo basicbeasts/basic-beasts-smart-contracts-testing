@@ -61,7 +61,7 @@ pub contract BasicBeast: NonFungibleToken {
     // Events for Set-related actions
     //
     // Emitted when a new Set is created
-    pub event SetCreated(setID: UInt32, generation: UInt32)
+    pub event SetCreated(setID: UInt32)
     // Emitted when a new BeastTemplate is added to a Set
     pub event BeastTemplateAddedToSet(setID: UInt32, beastTemplateID: UInt32)
     // Emitted when a BeastTemplate is retired from a Set and cannot be used to mint
@@ -94,6 +94,7 @@ pub contract BasicBeast: NonFungibleToken {
     // Emitted when a new BeastTemplate is created
     pub event BeastTemplateCreated(
                                     id: UInt32, 
+                                    generation: UInt32,
                                     dexNumber: UInt32,
                                     name: String, 
                                     image: String,
@@ -133,9 +134,9 @@ pub contract BasicBeast: NonFungibleToken {
     // These contain actual values that are stored in the smart contract.
     // -----------------------------------------------------------------------
 
-    // Generation that this Set belongs to.
-    // Generation is a concept that indicates a group of Sets through time.
-    // Many Sets can exist at a time, but only one generation.
+    // Generation that a BeastTemplate belongs to.
+    // Generation is a concept that indicates a group of BeastTemplates through time.
+    // Many BeastTemplates can exist at a time, but only one generation.
     pub var currentGeneration: UInt32
 
     // Variable size dictionary of Beast structs
@@ -178,6 +179,11 @@ pub contract BasicBeast: NonFungibleToken {
 
         // The unique ID for the BeastTemplate
         pub let beastTemplateID: UInt32
+
+        // Generation that this BeastTemplate belongs to.
+        // Generation is a concept that indicates a group of BeastTemplate through time.
+        // Many BeastTemplate can exist at a time, but only one generation.
+        pub let generation: UInt32
 
         // The BeastTemplate's dex number
         pub let dexNumber: UInt32
@@ -249,6 +255,7 @@ pub contract BasicBeast: NonFungibleToken {
                 data.length != 0: "New BeastTemplate data cannot be empty"
             }
             self.beastTemplateID = BasicBeast.nextBeastTemplateID 
+            self.generation = BasicBeast.currentGeneration
             self.dexNumber = dexNumber
             self.name = name
             self.image = image
@@ -267,6 +274,7 @@ pub contract BasicBeast: NonFungibleToken {
 
             emit BeastTemplateCreated(
                                     id: self.beastTemplateID, 
+                                    generation: self.generation,
                                     dexNumber: self.dexNumber,
                                     name: self.name, 
                                     image: self.image,
@@ -297,11 +305,6 @@ pub contract BasicBeast: NonFungibleToken {
 
         // Name of the Set
         pub let name: String
-
-        // Generation that this Set belongs to.
-        // Generation is a concept that indicates a group of Sets through time.
-        // Many Sets can exist at a time, but only one generation.
-        pub let generation: UInt32
 
         // Array of BeastTemplates that are a part of this Set.
         // When a BeastTemplate is added to the Set, its ID gets appended here.
@@ -339,7 +342,6 @@ pub contract BasicBeast: NonFungibleToken {
 
             self.setID = set.setID
             self.name = set.name
-            self.generation = set.generation
             self.beastTemplatesInSet = set.beastTemplatesInSet
             self.retired = set.retired
             self.locked = set.locked
@@ -374,11 +376,6 @@ pub contract BasicBeast: NonFungibleToken {
         // Name of the Set
         pub let name: String
 
-        // Generation that this Set belongs to.
-        // Generation is a concept that indicates a group of Sets through time.
-        // Many Sets can exist at a time, but only one generation.
-        pub let generation: UInt32
-
         // Array of BeastTemplates that are a part of this Set.
         // When a BeastTemplate is added to the Set, its ID gets appended here.
         // The ID does not get removed from this array when a BeastTemplate is retired.
@@ -409,7 +406,6 @@ pub contract BasicBeast: NonFungibleToken {
         init(name: String) {
             self.setID = BasicBeast.nextSetID
             self.name = name
-            self.generation = BasicBeast.currentGeneration
             self.beastTemplatesInSet = []
             self.retired = {}
             self.locked = false
@@ -418,7 +414,7 @@ pub contract BasicBeast: NonFungibleToken {
             // Increment the ID so that it isn't used again
             BasicBeast.nextSetID = BasicBeast.nextSetID + 1 as UInt32
 
-            emit SetCreated(setID: self.setID, generation: self.generation)
+            emit SetCreated(setID: self.setID)
         }
 
         // addBeastTemplate adds a BeastTemplate to the Set
@@ -842,7 +838,7 @@ pub contract BasicBeast: NonFungibleToken {
         }
 
         // startNewGeneration ends the current generation by incrementing
-        // the generation number, meaning that Beasts will be using the 
+        // the generation number, meaning that new BeastTemplates will be using the 
         // new generation number from now on
         //
         // Returns: The new generation number
@@ -1053,11 +1049,22 @@ pub contract BasicBeast: NonFungibleToken {
         return BasicBeast.beastTemplates.values
     }
 
-    pub fun getBeastDexNumber(beastTemplateID: UInt32): UInt32? {
+    // getBeastTemplateGeneration returns the generation that the specified BeastTemplate
+    //              is associated with.
+    // 
+    // Parameters: beastTemplateID: The id of the BeastTemplate that is being searched
+    //
+    // Returns: The generation that the BeastTemplate belongs to
+    pub fun getBeastTemplateGeneration(beastTemplateID: UInt32): UInt32? {
+        // Don't force a revert if the beastTemplateID is invalid
+        return BasicBeast.beastTemplates[beastTemplateID]?.generation
+    }
+
+    pub fun getBeastTemplateDexNumber(beastTemplateID: UInt32): UInt32? {
         return self.beastTemplates[beastTemplateID]?.dexNumber
     }
 
-    pub fun getBeastName(beastTemplateID: UInt32): String? {
+    pub fun getBeastTemplateName(beastTemplateID: UInt32): String? {
         return self.beastTemplates[beastTemplateID]?.name
     }
 
@@ -1142,17 +1149,6 @@ pub contract BasicBeast: NonFungibleToken {
     pub fun getSetName(setID: UInt32): String? {
         // Don't force a revert if the setID is invalid
         return BasicBeast.sets[setID]?.name
-    }
-
-    // getSetGeneration returns the generation that the specified set
-    //              is associated with.
-    // 
-    // Parameters: setID: The id of the set that is being searched
-    //
-    // Returns: The generation that the set belongs to
-    pub fun getSetGeneration(setID: UInt32): UInt32? {
-        // Don't force a revert if the setID is invalid
-        return BasicBeast.sets[setID]?.generation
     }
 
     // getSetIDsByName returns the IDs that the specified set name
