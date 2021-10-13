@@ -82,6 +82,8 @@ pub contract BasicBeast: NonFungibleToken {
 
     // Events for Beast-related actions
     //
+    // Emitted when a nickname has been set for a Beast
+    pub event BeastNewNicknameIsSet(id: UInt64, nickname: String?)
     // Emitted when a beneficiary has been set to a Beast
     pub event BeastBeneficiaryIsSet(id: UInt64, beneficiary: Address?)
     // Emitted when a Beast is destroyed
@@ -197,6 +199,7 @@ pub contract BasicBeast: NonFungibleToken {
         pub let rarity: String
 
         // The BeastTemplate's skin
+        // Skin refers to an alternate appearance and/or color scheme
         // e.g. "Normal", "Cursed Black", "Shiny Gold", "Mythic Diamond"
         pub let skin: String
 
@@ -639,6 +642,9 @@ pub contract BasicBeast: NonFungibleToken {
         // Global unique Beast ID
         pub let id: UInt64
 
+        // The nickname of the Beast
+        pub var nickname: String?
+
         // The wallet address of the beneficiary to receive 
         // potential royalty fees from all future trades of this NFT
         pub var beneficiary: Address?
@@ -660,6 +666,11 @@ pub contract BasicBeast: NonFungibleToken {
 
             // Set unique Beast ID to the newly incremented totalSupply
             self.id = BasicBeast.totalSupply
+
+            // Set nickname to nil
+            // any holder of this NFT can change
+            // its nickname
+            self.nickname = nil
 
             // Set beneficiary to nil
             // so the admin that mints the NFT does not 
@@ -690,6 +701,23 @@ pub contract BasicBeast: NonFungibleToken {
             )
         }
 
+        // setNickname sets the nickname of this NFT
+        // 
+        // Parameters: nickname: The nickname of the Beast
+        //
+        pub fun setNickname(nickname: String) {
+            self.nickname = nickname
+
+            emit BeastNewNicknameIsSet(id: self.id, nickname: self.nickname!)
+        }
+
+        // getNickname returns the nickname of this NFT
+        //
+        // Returns: The nickname as a String optional
+        pub fun getNickname(): String? {
+            return self.nickname
+        }
+
         // setBeneficiary sets the beneficiary of this NFT
         // this action cannot be undone
         // 
@@ -712,6 +740,8 @@ pub contract BasicBeast: NonFungibleToken {
             return self.beneficiary
         }
 
+
+
         // If the Beast is destroyed, emit an event to indicate 
         // to outside observers that is has been destroyed.
         destroy() {
@@ -729,13 +759,18 @@ pub contract BasicBeast: NonFungibleToken {
         // and stores it in the BeastTemplates dictionary in the Basic Beast smart contract
         // 
         // Parameters: 
+        // dexNumber: The dex number of the BeastTemplate
         // name: The name of the BeastTemplate
+        // image: The image URL of the BeastTemplate
+        // description: The description of the BeastTemplate
         // sex: The BeastTemplate's physical characteristics at birth. "Female" or "Male"
-        // race: The race of the BeastTemplate. e.g. "Human" or "Beast"
-        // rarity: The rarity of the BeastTemplate. e.g. "Legendary" or "Mythic"
-        // createdAt: The timestamp of when this BeastTemplate was created.
-        // createdFrom: 
-        // data: A dictionary mapping other types of metadata titles to their data
+        // rarity: The rarity of the BeastTemplate. e.g. "Common" or "Legendary"
+        // skin: The skin of the BeastTemplate. e.g. "Normal" or "Shiny Gold"
+        // starLevel: The star level of the BeastTemplate
+        // ultimateSkill: The ultimate skill of the BeastTemplate
+        // basicSkills: A string array of the BeastTemplate's basic skills
+        // elements: A dictionary mapping of elements to check which elements the BeastTemplate has
+        // data: A dictionary mapping other types of metadata titles to the BeastTemplate's data
         // 
         // Returns: the ID of the new BeastTemplate object
         //
@@ -778,7 +813,7 @@ pub contract BasicBeast: NonFungibleToken {
         }
 
         // createSet creates a new Set resource and stores it
-        // in the sets mapping in this contract
+        // in the Sets mapping in this contract
         // 
         // Parameters: name: The name of the Set
         //
@@ -788,13 +823,13 @@ pub contract BasicBeast: NonFungibleToken {
             BasicBeast.sets[newSet.setID] <-! newSet
         }
 
-        // borrowSet returns a reference to a set in the Beast
+        // borrowSet returns a reference to a Set in the Beast
         // contract so that the admin can call methods on it
         //
-        // Parameters: setID: The ID of the set that you want to
+        // Parameters: setID: The ID of the Set that you want to
         // get a reference to
         //
-        // Returns: A reference to the set with all of the fields
+        // Returns: A reference to the Set with all of the fields
         // and methods exposed
         //
         pub fun borrowSet(setID: UInt32): &Set {
@@ -822,12 +857,12 @@ pub contract BasicBeast: NonFungibleToken {
             return BasicBeast.currentGeneration
         }
 
-        // updateHeroStructDataByField updates a HeroStruct's data
+        // updateBeastTemplateDataByField updates a BeastTemplate's data
         // by adding a new key-value-pair or changing an existing key's 
         // value in the data dictionary
         //
         // Parameters: 
-        // heroStructID: The id of the HeroStruct to update
+        // beastTemplateID: The id of the BeastTemplate to update
         // key: The new key or existing key to insert into data
         // value: The value that is to be inserted with the key
         //
@@ -835,7 +870,7 @@ pub contract BasicBeast: NonFungibleToken {
         //
         pub fun updateBeastTemplateDataByField(beastTemplateID: UInt32, key: String, value: String): {String: String}? {
             pre {
-                BasicBeast.beastTemplates[beastTemplateID] != nil: "Cannot update HeroStruct: The HeroStruct doesn't exist."
+                BasicBeast.beastTemplates[beastTemplateID] != nil: "Cannot update BeastTemplate: The BeastTemplate doesn't exist."
             }
 
             let old = BasicBeast.beastTemplates[beastTemplateID]?.data?.insert(key: key, value)
@@ -845,18 +880,18 @@ pub contract BasicBeast: NonFungibleToken {
             return BasicBeast.beastTemplates[beastTemplateID]?.data
         }
 
-        // removeHeroStructDataByField removes a key from 
-        // a HeroStruct's data dictionary
+        // removeBeastTemplateDataByField removes a key from 
+        // a BeastTemplate's data dictionary
         //
         // Parameters: 
-        // heroStructID: The id of the HeroStruct to update
+        // beastTemplateID: The id of the BeastTemplate to update
         // key: The key that is to be removed from the data dictionary
         //
         // Returns: The removed key as a String optional
         //
         pub fun removeBeastTemplateDataByField(beastTemplateID: UInt32, key: String): String??  {
             pre {
-                BasicBeast.beastTemplates[beastTemplateID] != nil: "Cannot change HeroStruct data: The HeroStruct doesn't exist."
+                BasicBeast.beastTemplates[beastTemplateID] != nil: "Cannot change BeastTemplate data: The BeastTemplate doesn't exist."
             }
 
             let removedKey = BasicBeast.beastTemplates[beastTemplateID]?.data?.remove(key: key)
@@ -873,8 +908,8 @@ pub contract BasicBeast: NonFungibleToken {
         }
     }
 
-    // This is the interface that users can cast their Hero Collection as
-    // to allow others to deposit heroes into their collection
+    // This is the interface that users can cast their Beast Collection as
+    // to allow others to deposit Beasts into their Collection
     //
     pub resource interface BeastCollectionPublic {
         pub fun deposit(token: @NonFungibleToken.NFT)
@@ -895,7 +930,7 @@ pub contract BasicBeast: NonFungibleToken {
     // will store in their account to manage their NFTs
     //
     pub resource Collection: BeastCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
-        // Dictionary of Hero conforming tokens
+        // Dictionary of Beast conforming tokens
         // NFT is a resource type with a UInt64 ID field
         pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
 
@@ -903,7 +938,7 @@ pub contract BasicBeast: NonFungibleToken {
             self.ownedNFTs <- {}
         }
 
-        // withdraw removes a Hero from the collection and moves it to the caller
+        // withdraw removes a Beast from the Collection and moves it to the caller
         pub fun withdraw(withdrawID: UInt64): @NonFungibleToken.NFT {
 
             let token <- self.ownedNFTs.remove(key: withdrawID) 
@@ -928,7 +963,7 @@ pub contract BasicBeast: NonFungibleToken {
             return <-batchCollection
         }
 
-        // deposit takes a Hero and adds it to the collections dictionary
+        // deposit takes a Beast and adds it to the Collection's dictionary
         pub fun deposit(token: @NonFungibleToken.NFT) {
             let token <- token as! @BasicBeast.NFT
 
@@ -945,11 +980,11 @@ pub contract BasicBeast: NonFungibleToken {
         }
 
         // batchDeposit takes a Collection object as an argument
-        // and deposits each contained NFT into this collection
+        // and deposits each contained NFT into this Collection
         pub fun batchDeposit(tokens: @NonFungibleToken.Collection) {
             let keys = tokens.getIDs()
 
-            // Iterate through the keys in the collection and deposit each one
+            // Iterate through the keys in the Collection and deposit each one
             for key in keys {
                 self.deposit(token: <-tokens.withdraw(withdrawID: key))
             }
@@ -957,12 +992,12 @@ pub contract BasicBeast: NonFungibleToken {
             destroy tokens
         }
 
-        // getIDs returns an array of the IDs that are in the collection
+        // getIDs returns an array of the IDs that are in the Collection
         pub fun getIDs(): [UInt64] {
             return self.ownedNFTs.keys
         }
 
-        // borrowNFT Returns a borrowed reference to a Hero in the collection
+        // borrowNFT Returns a borrowed reference to a Beast in the Collection
         // so that the caller can read its ID
         //
         // Parameters: id: The ID of the NFT to get the reference for
@@ -972,11 +1007,11 @@ pub contract BasicBeast: NonFungibleToken {
             return &self.ownedNFTs[id] as &NonFungibleToken.NFT
         }
 
-        // borrowHero Returns a borrowed reference to a Hero in the collection
+        // borrowBeast Returns a borrowed reference to a Beast in the Collection
         // so that the caller can read data and call methods from it
-        // They can use this to read its setID, heroStructID, serialNumber,
-        // or any of the setData or Hero Data associated with it by
-        // getting the setID or heroStructID and reading those fields from
+        // They can use this to read its setID, beastTemplateID, serialNumber,
+        // or any of the setData or Beast Data associated with it by
+        // getting the setID or beastTemplateID and reading those fields from
         // the smart contract
         //
         // Parameters: id: The ID of the NFT to get the reference for
@@ -1008,7 +1043,7 @@ pub contract BasicBeast: NonFungibleToken {
     // createEmptyCollection creates a new, empty Collection object so that
     // a user can store it in their account storage.
     // Once they have a Collection in their storage, they are able to receive
-    // Moments in transactions
+    // Beasts in transactions
     //
     pub fun createEmptyCollection(): @NonFungibleToken.Collection {
         return <-create BasicBeast.Collection()
@@ -1026,16 +1061,16 @@ pub contract BasicBeast: NonFungibleToken {
         return self.beastTemplates[beastTemplateID]?.name
     }
 
-    pub fun getCharacterSex(characterID: UInt32): String? {
-        return self.beastTemplates[characterID]?.sex
+    pub fun getBeastTemplateSex(beastTemplateID: UInt32): String? {
+        return self.beastTemplates[beastTemplateID]?.sex
     }
 
-    pub fun getCharacterRarity(characterID: UInt32): String? {
-        return self.beastTemplates[characterID]?.rarity
+    pub fun getBeastTemplateRarity(beastTemplateID: UInt32): String? {
+        return self.beastTemplates[beastTemplateID]?.rarity
     }
 
-    pub fun getAllCharacterMetaData(characterID: UInt32): BasicBeast.BeastTemplate? {
-        return self.beastTemplates[characterID]
+    pub fun getAllBeastTemplateMetaData(beastTemplateID: UInt32): BasicBeast.BeastTemplate? {
+        return self.beastTemplates[beastTemplateID]
     }
 
     // getBeastTemplateBasicSkills returns all the basic skills associated with a specific BeastTemplate
@@ -1166,11 +1201,11 @@ pub contract BasicBeast: NonFungibleToken {
     //
     // Returns: Boolean indicating if the Beast edition is retired or not
     pub fun isEditionRetired(setID: UInt32, beastTemplateID: UInt32): Bool? {
-        // Don't force a revert if the set or character ID is invalid
+        // Don't force a revert if the set or beastTemplateID is invalid
         // Remove the set from the dictionary to get its field
         if let setToRead <- BasicBeast.sets.remove(key: setID) {
 
-            // See if the Character is retired from this Set
+            // See if the BeastTemplate is retired from this Set
             let retired = setToRead.retired[beastTemplateID]
 
             // Put the Set back in the contract storage
@@ -1207,12 +1242,12 @@ pub contract BasicBeast: NonFungibleToken {
     //
     // Returns: The total number of Beasts 
     //          that have been minted from a specific BeastTemplate
-    pub fun getNumBeastsInEdition(setID: UInt32, characterID: UInt32): UInt32? {
+    pub fun getNumBeastsInEdition(setID: UInt32, beastTemplateID: UInt32): UInt32? {
 
         if let setToRead <- BasicBeast.sets.remove(key: setID) {
 
             // Read the numOfMintedPerBeastTemplate
-            let amount = setToRead.numOfMintedPerBeastTemplate[characterID]
+            let amount = setToRead.numOfMintedPerBeastTemplate[beastTemplateID]
 
             // Put the Set back into the Sets dictionary
             BasicBeast.sets[setID] <-! setToRead
