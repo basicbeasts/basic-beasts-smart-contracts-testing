@@ -374,7 +374,8 @@ pub contract BasicBeast: NonFungibleToken {
     // the EvolutionSet that minted it, as well as the BeastTemplate it references.
     // 
     // Admin can also retire BeastTemplates from the EvolutionSet, meaning that the retired
-    // BeastTemplate can no longer have Beasts minted from it.
+    // BeastTemplate can no longer have Beasts minted from it. Retiring a BeastTemplate also
+    // makes it unable to be removed from the EvolutionSet
     //
     // If the admin locks the EvolutionSet, no more BeastTemplates can be added to it, but 
     // Beasts can still be minted.
@@ -439,14 +440,11 @@ pub contract BasicBeast: NonFungibleToken {
                 BasicBeast.beastTemplates[beastTemplateID] != nil: "Cannot add the BeastTemplate to EvolutionSet: The BeastTemplate doesn't exist."
                 !self.locked: "Cannot add the BeastTemplate to the EvolutionSet: The EvolutionSet is locked."
                 self.numOfMintedPerBeastTemplate[beastTemplateID] == nil: "The BeastTemplate has already been added to this EvolutionSet." 
-                BasicBeast.beastTemplatesInAnEvolutionSet[beastTemplateID] == nil: "The BeastTemplate has already been added to a EvolutionSet." 
+                BasicBeast.beastTemplatesInAnEvolutionSet[beastTemplateID] == nil: "The BeastTemplate has already been added to another EvolutionSet." 
             }
 
             // Open the BeastTemplate up for minting 
-            // if it has never been added to this EvolutionSet before
-            if self.retired[beastTemplateID] == nil {
-                self.retired[beastTemplateID] = false
-            }
+            self.retired[beastTemplateID] = false
 
             // Initialize the Beast minted count for this BeastTemplate to zero
             self.numOfMintedPerBeastTemplate[beastTemplateID] = 0
@@ -469,8 +467,6 @@ pub contract BasicBeast: NonFungibleToken {
         }
 
         // removeBeastTemplate removes a BeastTemplate from the EvolutionSet
-        // The removed BeastTemplate stays in the EvolutionSet's retired dictionary
-        // ensuring that the retirement of a Beast in an EvolutionSet persists
         //
         // Parameters: beastTemplateID: The ID of the BeastTemplate that is being removed
         //
@@ -481,13 +477,17 @@ pub contract BasicBeast: NonFungibleToken {
         //
         pub fun removeBeastTemplate(beastTemplateID: UInt32) {
             pre {
-                BasicBeast.beastTemplates[beastTemplateID] != nil: "Cannot add the BeastTemplate to EvolutionSet: The BeastTemplate doesn't exist."
+                BasicBeast.beastTemplates[beastTemplateID] != nil: "Cannot remove the BeastTemplate from EvolutionSet: The BeastTemplate doesn't exist."
                 !self.locked: "Cannot remove the BeastTemplate to the EvolutionSet: The EvolutionSet is locked."
-                self.numOfMintedPerBeastTemplate[beastTemplateID] == 0: "The BeastTemplate has already been minted or does not exist in this EvolutionSet." 
+                self.retired[beastTemplateID] == false: "Cannot remove the BeastTemplate: Cannot remove a retired BeastTemplate from its EvolutionSet"
+                self.numOfMintedPerBeastTemplate[beastTemplateID] == 0: "Cannot remove the BeastTemplate: The BeastTemplate has already been minted or does not exist in this EvolutionSet." 
             }
 
             // Set the Beast minted count for this BeastTemplate to nil
             self.numOfMintedPerBeastTemplate[beastTemplateID] = nil
+
+            // Set the retirement for this BeastTemplate to nil
+            self.retired[beastTemplateID] = nil
 
             // Remove the BeastTemplate from the array of beastTemplatesInAnEvolutionSet
             BasicBeast.beastTemplatesInAnEvolutionSet.remove(key: beastTemplateID)
