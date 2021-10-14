@@ -553,8 +553,6 @@ pub contract BasicBeast: NonFungibleToken {
         // mintBeast mints a new Beast and returns the newly minted Beast
         // 
         // Parameters: beastTemplateID: The ID of the BeastTemplate that the Beast references
-        //             sex: The BeastTemplate's sex. "Female" or "Male"
-        //             bornAt: A unix timestamp of when this Beast came into existence
         //             matron: The Beast ID of the matron of this Beast. Set as 0 for genesis
         //             sire: The Beast ID of the sire of this Beast. Set as 0 for genesis
         //             evolvedFrom: The Beast IDs of the Beasts this Beast is evolved from.
@@ -567,7 +565,6 @@ pub contract BasicBeast: NonFungibleToken {
         // 
         pub fun mintBeast(
                             beastTemplate: BeastTemplate,
-                            bornAt: UInt64, 
                             matron: UInt64, 
                             sire: UInt64, 
                             evolvedFrom: [UInt64]
@@ -587,7 +584,6 @@ pub contract BasicBeast: NonFungibleToken {
                                             evolvedFrom: evolvedFrom,
                                             sire: sire,
                                             matron: matron,
-                                            bornAt: bornAt,
                                             serialNumber: numInBeastTemplate + 1 as UInt32, 
                                             beastTemplate: beastTemplate, 
                                             setID: self.setID,
@@ -616,8 +612,6 @@ pub contract BasicBeast: NonFungibleToken {
         // Returns: Collection object that contains all the Beasts that were minted
         pub fun batchMintBeast(
                                 beastTemplate: BeastTemplate,
-                                sex: String,
-                                bornAt: UInt64, 
                                 matron: UInt64, 
                                 sire: UInt64, 
                                 evolvedFrom: [UInt64], 
@@ -630,7 +624,6 @@ pub contract BasicBeast: NonFungibleToken {
             while count < quantity {
                 newCollection.deposit(token: <-self.mintBeast(
                                                             beastTemplate: beastTemplate,
-                                                            bornAt: bornAt, 
                                                             matron: matron, 
                                                             sire: sire, 
                                                             evolvedFrom: evolvedFrom
@@ -716,7 +709,6 @@ pub contract BasicBeast: NonFungibleToken {
             evolvedFrom: [UInt64],
             sire: UInt64,
             matron: UInt64,
-            bornAt: UInt64,
             serialNumber: UInt32, 
             beastTemplate: BeastTemplate, 
             setID: UInt32, 
@@ -741,6 +733,10 @@ pub contract BasicBeast: NonFungibleToken {
             // the next holder can potentially be set as beneficiary
             self.beneficiary = nil
 
+            // Set bornAt to the timestamp of the current block
+            var bornAt = UInt64(getCurrentBlock().timestamp)
+
+            // Set the sex of the Beast
             // Initialize sex as "Asexual"
             var sex = "Asexual"
             // Check if BeastTemplate is not asexual
