@@ -1,5 +1,5 @@
 import BasicBeast from "../../../contracts/Project/BasicBeast.cdc"
 
-pub fun main(): UInt64 {
-    return BasicBeast.totalSupply
+pub fun main(): UInt32 {
+    return BasicBeast.currentGeneration
 }

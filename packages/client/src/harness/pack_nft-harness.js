@@ -13,23 +13,23 @@ import { LitElement, html, customElement, property } from 'lit-element';
 
 @customElement('pack-nft-harness')
 export default class PackNFTHarness extends LitElement {
-	@property()
-	title;
-	@property()
-	category;
-	@property()
-	description;
+    @property()
+    title;
+    @property()
+    category;
+    @property()
+    description;
 
-	createRenderRoot() {
-		return this;
-	}
+    createRenderRoot() {
+        return this;
+    }
 
-	constructor(args) {
-		super(args);
-	}
+    constructor(args) {
+        super(args);
+    }
 
-	render() {
-		let content = html`
+    render() {
+        let content = html `
 			<page-body
 				title="${this.title}"
 				category="${this.category}"
@@ -97,7 +97,7 @@ export default class PackNFTHarness extends LitElement {
 
 				<!-- BASIC BEASTS -->
 
-				<!-- SETUP ACCOUNT (POST) -->
+				<!-- 1 SETUP ACCOUNT (POST) -->
 				<action-card
 					title="Setup account - Beast Collection"
 					description="Setup account to handle Beast NFTs"
@@ -111,11 +111,11 @@ export default class PackNFTHarness extends LitElement {
 					></account-widget>
 				</action-card>
 
-				<!-- CREATE SET (POST) -->
+				<!-- 2 CREATE EVOLUTIONSET (POST) -->
 				<action-card
-					title="Create an Evolution Set"
-					description="Create an Evolution Set for Basic Beasts. *Only admin."
-					action="basicBeastCreateSet"
+					title="Create an EvolutionSet"
+					description="Create an EvolutionSet for Basic Beasts. *Only admin."
+					action="basicBeastCreateEvolutionSet"
 					method="post"
 					fields="signer setName"
 				>
@@ -125,15 +125,15 @@ export default class PackNFTHarness extends LitElement {
 					></account-widget>
 					<text-widget
 						field="setName"
-						label="Evolution Set Name"
+						label="EvolutionSet Name"
 						placeholder="Saber Evolution Line"
 					></text-widget>
 				</action-card>
 
-				<!-- SETS GET SET NAME (GET) -->
+				<!-- 3 GET EVOLUTIONSET NAME (GET) -->
 				<action-card
-					title="Get Evolution Set Name"
-					description="Enter the setID to get the Evolution Set's name"
+					title="Get EvolutionSet Name"
+					description="Enter the setID to get the EvolutionSet's name"
 					action="basicBeastGetEvolutionSetName"
 					method="get"
 					fields="setID"
@@ -145,27 +145,27 @@ export default class PackNFTHarness extends LitElement {
 					></text-widget>
 				</action-card>
 
-				<!-- CREATE CHARACTER (POST) -->
+				<!-- 4 CREATE BEASTTEMPLATE (POST) -->
 				<action-card
-					title="Create a character"
-					description="Enter the required fields to create a character. *Only admin."
-					action="characterxCreateCharacter"
+					title="Create a BeastTemplate"
+					description="Enter the required fields to create a BeastTemplate. *Only admin."
+					action="basicBeastCreateBeastTemplate"
 					method="post"
-					fields="signer name description image createdFrom_1 createdFrom_2 sex race rarity lineage bloodline element traits data"
+					fields="signer dexNumber name image description rarity skin starLevel asexual ultimateSkill basicSkills elements data"
 				>
 					<account-widget
 						field="signer"
 						label="Signer"
 					></account-widget>
 					<text-widget
+						field="dexNumber"
+						label="Dex number"
+						placeholder="9"
+					></text-widget>
+					<text-widget
 						field="name"
 						label="Name"
 						placeholder="Willi Blue"
-					></text-widget>
-					<text-widget
-						field="description"
-						label="Description"
-						placeholder="Legendary with the coolest name"
 					></text-widget>
 					<text-widget
 						field="image"
@@ -173,57 +173,47 @@ export default class PackNFTHarness extends LitElement {
 						placeholder="Image url Standard for OpenSea"
 					></text-widget>
 					<text-widget
-						field="createdFrom_1"
-						label="Ancestor 1"
-						placeholder="Character ID"
-					></text-widget>
-					<text-widget
-						field="createdFrom_2"
-						label="Ancestor 2"
-						placeholder="Character ID"
-					></text-widget>
-					<text-widget
-						field="sex"
-						label="Sex"
-						placeholder="Male or female"
-					></text-widget>
-					<text-widget
-						field="race"
-						label="Race"
-						placeholder="Yellow"
+						field="description"
+						label="Description"
+						placeholder="Beast with the coolest name"
 					></text-widget>
 					<text-widget
 						field="rarity"
 						label="Rarity"
 						placeholder="Fancy Intense"
 					></text-widget>
+					<text-widget
+						field="skin"
+						label="Skin"
+						placeholder="Mythic"
+					></text-widget>
+					<text-widget
+						field="starLevel"
+						label="Star Level"
+						placeholder="1"
+					></text-widget>
+					<text-widget
+						field="asexual"
+						label="Asexual"
+						placeholder="true"
+					></text-widget>
+					<text-widget
+						field="ultimateSkill"
+						label="Ultimate Skill"
+						placeholder="Silence fart"
+					></text-widget>
+					<array-widget
+						field="basicSkills"
+						label="Basic Skills"
+						valueLabel="Basic Skill"
+						placeholder="Fart"
+					></array-widget>
 					<dictionary-widget
-						field="lineage"
-						label="Lineage"
-						objectLabel="Lineage Object"
-						keyplaceholder="Lineage Name"
-						valueplaceholder="false"
-					></dictionary-widget>
-					<dictionary-widget
-						field="bloodline"
-						label="Bloodline"
-						objectLabel="Bloodline Object"
-						keyplaceholder="Bloodline Name"
-						valueplaceholder="false"
-					></dictionary-widget>
-					<dictionary-widget
-						field="element"
-						label="Element"
+						field="elements"
+						label="Elements"
 						objectLabel="Element Object"
 						keyplaceholder="Element Name"
 						valueplaceholder="false"
-					></dictionary-widget>
-					<dictionary-widget
-						field="traits"
-						label="Traits"
-						objectLabel="Traits Object"
-						keyplaceholder="Colour Hair"
-						valueplaceholder="Red"
 					></dictionary-widget>
 					<dictionary-widget
 						field="data"
@@ -233,6 +223,143 @@ export default class PackNFTHarness extends LitElement {
 						valueplaceholder="Rocks"
 					></dictionary-widget>
 				</action-card>
+
+				<!-- 5 GET BEASTTEMPLATE  (GET) -->
+				<action-card
+					title="Get BeastTemplate"
+					description="Enter the BeastTemplateID to get its BeastTemplate Struct. See the result in the browser console."
+					action="basicBeastGetBeastTemplate"
+					method="get"
+					fields="beastTemplateID"
+				>
+					<text-widget
+						field="beastTemplateID"
+						label="beastTemplateID"
+						placeholder="0"
+					></text-widget>
+				</action-card>
+
+				<!-- 6 GET ALL BEASTTEMPLATES  (GET) -->
+				<action-card
+					title="Get all BeastTemplates"
+					description="*Contract* See the results in the browser console."
+					action="basicBeastGetAllBeastTemplates"
+					method="get"
+				>
+				</action-card>
+
+				<!-- 7 GET ALL BEASTTEMPLATES IN AN EVOLUTIONSET (GET) -->
+				<action-card
+					title="Get All BeastTemplates In An EvolutionSet"
+					description="*Contract* See the results in the browser console."
+					action="basicBeastGetAllBeastTemplatesInAnEvolutionSet"
+					method="get"
+				>
+				</action-card>
+
+				<!-- 8 GET BEASTTEMPLATES IN EVOLUTIONSET (GET) -->
+				<action-card
+					title="Get BeastTemplates In EvolutionSet"
+					description="*Set* Return BeastTemplateID for a specific set. See the results in the browser console."
+					action="basicBeastGetBeastTemplatesInEvolutionSet"
+					method="get"
+					fields="setID"
+				>
+				<text-widget
+						field="setID"
+						label="Set ID"
+						placeholder="0"
+					></text-widget>
+				</action-card>
+
+				<!-- 9 ADD BEASTTEMPLATE IN EVOLUTIONSET (POST) -->
+				<action-card
+					title="Add BeastTemplate In EvolutionSet"
+					description=""
+					action="basicBeastAddBeastTemplateToEvolutionSet"
+					method="post"
+					fields="signer setID beastTemplateID"
+				>
+
+				<account-widget
+						field="signer"
+						label="Signer"
+					></account-widget>
+				<text-widget
+						field="setID"
+						label="Set ID"
+						placeholder="0"
+					></text-widget>
+
+				<text-widget
+						field="beastTemplateID"
+						label="beastTemplateID"
+						placeholder="0"
+				></text-widget>
+				</action-card>
+
+				<!-- 10 ADD BEASTTEMPLATES IN EVOLUTIONSET (POST) -->
+				<action-card
+					title="Add BeastTemplates In EvolutionSet"
+					description=""
+					action="basicBeastAddBeastTemplatesToEvolutionSet"
+					method="post"
+					fields="signer setID beastTemplateID"
+				>
+
+				<account-widget
+						field="signer"
+						label="Signer"
+					></account-widget>
+				<text-widget
+						field="setID"
+						label="Set ID"
+						placeholder="0"
+					></text-widget>
+
+					<array-widget
+						field="beastTemplateID"
+						label="beastTemplateID"
+						valueLabel="beastTemplateID"
+						placeholder="0"
+					></array-widget>
+				></text-widget>
+				</action-card>
+
+				<!-- 11 GET BEASTTEMPLATE EVOLUTIONSET (GET) -->
+				<action-card
+					title="Get BeastTemplate EvolutionSet"
+					description="*Set* Return the setID(s) that a specific BeastTemplateID belongs. See the results in the browser console."
+					action="basicBeastGetBeastTemplateEvolutionSet"
+					method="get"
+					fields="beastTemplateID"
+				>
+				<text-widget
+						field="beastTemplateID"
+						label="beastTemplateID"
+						placeholder="0"
+					></text-widget>
+				</action-card>
+
+				<!-- 12 REMOVE BEASTTEMPLATE FROM EVOLUTIONSET (POST) -->
+				<action-card
+					title="Remove BeastTemplate from EvolutionSet"
+					description="*Set* Return the setID(s) that a specific beastTemplateID belongs. See the results in the browser console."
+					action="basicBeastGetBeastTemplateEvolutionSet"
+					method="get"
+					fields="beastTemplateID"
+				>
+				<text-widget
+						field="beastTemplateID"
+						label="beastTemplateID"
+						placeholder="0"
+					></text-widget>
+				</action-card>
+
+
+
+
+
 
 				<!-- ADD LINEAGE KEY VALUE PAIR TO STRUCT  (POST) -->
 				<action-card
@@ -1129,6 +1256,6 @@ export default class PackNFTHarness extends LitElement {
 			<page-panel id="resultPanel"></page-panel>
 		`;
 
-		return content;
-	}
+        return content;
+    }
 }

@@ -1,9 +1,9 @@
-import BasicBeast from "../../../../contracts/Project/BasicBeast.cdc"
+import BasicBeast from "./../../../contracts/Project/BasicBeast.cdc"
 
 pub fun main(setID: UInt32): String {
 
     let name = BasicBeast.getEvolutionSetName(setID: setID)
-        ?? panic("Couldn't find the specified set")
+        ?? panic("Couldn't find the specified EvolutionSet")
 
     return name
 }
