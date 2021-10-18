@@ -497,13 +497,14 @@ pub contract BasicBeast: NonFungibleToken {
 
         // removeAllBeastTemplates removes all the BeastTemplates in the EvolutionSet
         // Afterwards, the EvolutionSet will be empty from BeastTemplates
-        // This function will revert if any 
+        // This function will revert if any BeastTemplate does not comply with the pre-conditions
+        // of removeBeastTemplate(beastTemplateID: UInt32)
         //
         pub fun removeAllBeastTemplates() {
             let beastTemplatesInSet = self.numOfMintedPerBeastTemplate.keys
 
             for beastTemplate in beastTemplatesInSet { 
-                self.retireBeastTemplate(beastTemplateID: beastTemplate) 
+                self.removeBeastTemplate(beastTemplateID: beastTemplate) 
             }
         }
 

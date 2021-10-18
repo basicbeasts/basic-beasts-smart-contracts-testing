@@ -148,7 +148,7 @@ module.exports = class DappLib {
         };
     }
 
-    // basicBeastCreateEvolutionSet
+    // 2 basicBeastCreateEvolutionSet
     // calls transactions/basicbeast/create_evolutionSet.cdc
     //
     // signer/proposer/authorizer: data.signer
@@ -173,7 +173,7 @@ module.exports = class DappLib {
         };
     }
 
-    // basicBeastGetEvolutionSetName
+    // 3 basicBeastGetEvolutionSetName
     // calls scripts/basicbeast/sets/get_setName.cdc
     //
     // signer/proposer/authorizer:
@@ -224,7 +224,7 @@ module.exports = class DappLib {
         };
     }
 
-    // basicBeastCreateBeastTemplate
+    // 4 basicBeastCreateBeastTemplate
     // calls transactions/basicbeast/create_beastTemplate.cdc
     //
     // signer/proposer/authorizer: data.signer
@@ -267,7 +267,7 @@ module.exports = class DappLib {
         };
     }
 
-    // basicBeastGetBeastTemplate
+    // 5 basicBeastGetBeastTemplate
     // calls scripts/basicbeast/beastTemplates/get_beastTemplate.cdc
     //
     // signer/proposer/authorizer: data.signer
@@ -293,7 +293,7 @@ module.exports = class DappLib {
         };
     }
 
-    // basicBeastGetAllBeastTemplates
+    // 6 basicBeastGetAllBeastTemplates
     // calls scripts/basicbeast/beastTemplates/get_all_beastTemplates.cdc
     //
     // signer/proposer/authorizer: data.signer
@@ -319,7 +319,7 @@ module.exports = class DappLib {
         };
     }
 
-    // basicBeastGetAllBeastTemplatesInAnEvolutionSet
+    // 7 basicBeastGetAllBeastTemplatesInAnEvolutionSet
     // calls scripts/basicbeast/get_all_beastTemplates_in_an_evolutionSet.cdc
     //
     // signer/proposer/authorizer: data.signer
@@ -345,7 +345,7 @@ module.exports = class DappLib {
         };
     }
 
-    // basicBeastGetBeastTemplatesInEvolutionSet.cdc
+    // 8 basicBeastGetBeastTemplatesInEvolutionSet.cdc
     // calls scripts/basicbeast/sets/get_beastTemplates_in_evolutionSet.cdc.cdc
     //
     // signer/proposer/authorizer: data.signer
@@ -373,7 +373,7 @@ module.exports = class DappLib {
 
 
 
-    // basicBeastAddBeastTemplateToEvolutionSet
+    // 9 basicBeastAddBeastTemplateToEvolutionSet
     // calls transactions/basicbeast/add_beastTemplate_to_evolutionSet.cdc
     //
     // signer/proposer/authorizer: data.signer
@@ -399,14 +399,40 @@ module.exports = class DappLib {
         };
     }
 
-    // basicBeastGetBeastTemplateEvolutionSet
-    // calls transactions/basicbeast/get_beastTemplate_evolutionSet.cdc.cdc
+    // 10 basicBeastAddBeastTemplatesToEvolutionSet
+    // calls transactions/basicbeast/add_beastTemplates_to_evolutionSet.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+
+    static async basicBeastAddBeastTemplatesToEvolutionSet(data) {
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer,
+                },
+            },
+            'basicbeast_add_beastTemplates_to_evolutionSet', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 },
+                beastTemplateID: DappLib.formatFlowArray(data.beastTemplateID, t.UInt32)
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId,
+        };
+    }
+
+    // 11 basicBeastGetBeastTemplateEvolutionSet
+    // calls scripts/basicbeast/get_beastTemplate_evolutionSet.cdc
     //
     // signer/proposer/authorizer: data.signer
     //
 
     static async basicBeastGetBeastTemplateEvolutionSet(data) {
-        let result = await Blockchain.post({
+        let result = await Blockchain.get({
                 config: DappLib.getConfig(),
                 roles: {
                     proposer: data.signer,
@@ -420,31 +446,28 @@ module.exports = class DappLib {
         console.log(data.signer)
 
         return {
-            type: DappLib.DAPP_RESULT_TX_HASH,
-            label: 'Transaction Hash',
-            result: result.callData.transactionId,
+            type: DappLib.DAPP_RESULT_STRING,
+            label: 'setID',
+            result: result.callData,
         };
     }
 
-
-    // characterxAddCharacterToSet
-    // calls transactions/characterx/add_character_to_set.cdc
+    // 12 basicBeastRemoveBeastTemplateFromEvolutionSet
+    // calls transactions/basicbeast/remove_beastTemplate_from_evolutionSet.cdc
     //
     // signer/proposer/authorizer: data.signer
     //
-    static async characterxAddCharacterToSet(data) {
+
+    static async basicBeastRemoveBeastTemplateFromEvolutionSet(data) {
         let result = await Blockchain.post({
                 config: DappLib.getConfig(),
                 roles: {
                     proposer: data.signer,
                 },
             },
-            'characterx_add_character_to_set', {
+            'basicbeast_remove_beastTemplate_from_evolutionSet', {
                 setID: { value: parseInt(data.setID), type: t.UInt32 },
-                characterID: {
-                    value: parseInt(data.characterID),
-                    type: t.UInt32,
-                },
+                beastTemplateID: { value: parseInt(data.beastTemplateID), type: t.UInt32 }
             }
         );
 
@@ -452,6 +475,361 @@ module.exports = class DappLib {
             type: DappLib.DAPP_RESULT_TX_HASH,
             label: 'Transaction Hash',
             result: result.callData.transactionId,
+        };
+    }
+
+    // 13 basicBeastRemoveAllBeastTemplatesFromEvolutionSet
+    // calls transactions/basicbeast/remove_all_beastTemplates_from_evolutionSet.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+
+    static async basicBeastRemoveAllBeastTemplatesFromEvolutionSet(data) {
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer,
+                },
+            },
+            'basicbeast_remove_all_beastTemplates_from_evolutionSet', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId,
+        };
+    }
+
+    // 14 basicBeastMintBeast
+    // calls transactions/basicbeast/mint_beast.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+
+    static async basicBeastMintBeast(data) {
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer,
+                },
+            },
+            'basicbeast_mint_beast', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 },
+                beastTemplateID: { value: parseInt(data.beastTemplateID), type: t.UInt32 },
+                matron: { value: parseInt(data.matron), type: t.UInt64 },
+                sire: { value: parseInt(data.sire), type: t.UInt64 },
+                evolvedFrom: DappLib.formatFlowArray(data.evolvedFrom, t.UInt64),
+                recipientAddr: { value: data.recipientAddr, type: t.Address }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId,
+        };
+    }
+
+    // 15 basicBeastBatchMintBeast
+    // calls transactions/basicbeast/batch_mint_beast.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+
+    static async basicBeastBatchMintBeast(data) {
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer,
+                },
+            },
+            'basicbeast_batch_mint_beast', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 },
+                beastTemplateID: { value: parseInt(data.beastTemplateID), type: t.UInt32 },
+                matron: { value: parseInt(data.matron), type: t.UInt64 },
+                sire: { value: parseInt(data.sire), type: t.UInt64 },
+                evolvedFrom: DappLib.formatFlowArray(data.evolvedFrom, t.UInt64),
+                quantity: { value: parseInt(data.quantity), type: t.UInt64 },
+                recipientAddr: { value: data.recipientAddr, type: t.Address }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId,
+        };
+    }
+
+    // 16 basicBeastGetTotalSupply
+    // calls scripts/basicbeast/get_totalSupply.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+
+    static async basicBeastGetTotalSupply(data) {
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer,
+                },
+            },
+            'basicbeast_get_totalSupply', {}
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_STRING,
+            label: 'Total minted Beast NFTs',
+            result: result.callData,
+        };
+    }
+
+    // 17 basicBeastGetCollectionOwnedBeastsIds
+    // calls scripts/basicbeast/collections/get_collection_owned_beasts_ids.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+
+    static async basicBeastGetCollectionOwnedBeastsIds(data) {
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer,
+                },
+            },
+            'basicbeast_collections_get_collection_owned_beasts_ids', {
+                account: { value: data.account, type: t.Address }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_STRING,
+            label: 'The Collection s Beast NFTs',
+            result: result.callData,
+        };
+    }
+
+    // 18 basicBeastGetBeastIdInCollection
+    // calls scripts/basicbeast/collections/get_beast_id_in_Collection.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+
+    static async basicBeastGetBeastIdInCollection(data) {
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer,
+                },
+            },
+            'basicbeast_collections_get_beast_id_in_Collection', {
+                account: { value: data.account, type: t.Address },
+                id: { value: parseInt(data.id), type: t.UInt64 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_STRING,
+            label: 'The Collection s Beast NFTs',
+            result: result.callData,
+        };
+    }
+
+
+    // 19 basicBeastLockEvolutionSet
+    // calls transactions/basicbeast/lock_evolutionSet.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async basicBeastLockEvolutionSet(data) {
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer,
+                },
+            },
+            'basicbeast_lock_evolutionSet', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId,
+        };
+    }
+
+    // 20 basicBeastRetireBeastTemplateFromEvolutionSet
+    // calls transactions/basicbeast/retire_beastTemplate_from_evolutionSet.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async basicBeastRetireBeastTemplateFromEvolutionSet(data) {
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer,
+                },
+            },
+            'basicbeast_retire_beastTemplate_from_evolutionSet', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 },
+                beastTemplateID: { value: parseInt(data.beastTemplateID), type: t.UInt32 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId,
+        };
+    }
+
+    // 21 basicBeastRetireAllBeastTemplatesFromEvolutionSet
+    // calls transactions/basicbeast/retire_all_beastTemplates_from_evolutionSet.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async basicBeastRetireAllBeastTemplatesFromEvolutionSet(data) {
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer,
+                },
+            },
+            'basicbeast_retire_all_beastTemplates_from_evolutionSet', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 },
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId,
+        };
+    }
+
+    // 22 basicBeastStartNewGeneration
+    // calls transactions/basicbeast/start_new_generation.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async basicBeastStartNewGeneration(data) {
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer,
+                },
+            },
+            'basicbeast_start_new_generation', {}
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId,
+        };
+    }
+
+    // 23 basicBeastGetCurrentGeneration
+    // calls scripts/basicbeast/get_currentGeneration.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async basicBeastGetCurrentGeneration(data) {
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer,
+                },
+            },
+            'basicbeast_get_currentGeneration', {}
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'The current generation is',
+            result: result.callData,
+        };
+    }
+
+    // 24 basicBeastDepositBeastNft
+    // calls transactions/basicbeast/deposit_beast_nft.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async basicBeastDepositBeastNft(data) {
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer,
+                },
+            },
+            'basicbeast_deposit_beast_nft', {
+                recipientAddr: { value: data.recipientAddr, type: t.Address },
+                beastID: { value: parseInt(data.beastID), type: t.UInt64 }
+            }
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId,
+        };
+    }
+
+    // 25 basicBeastDepositBeastNfts
+    // calls transactions/basicbeast/deposit_beast_nfts.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async basicBeastDepositBeastNfts(data) {
+        let result = await Blockchain.post({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer,
+                },
+            },
+            'basicbeast_deposit_beast_nfts', {
+                recipientAddr: { value: data.recipientAddr, type: t.Address },
+                beastIDs: DappLib.formatFlowArray(data.beastIDs, t.UInt64)
+            }
+
+        );
+
+        return {
+            type: DappLib.DAPP_RESULT_TX_HASH,
+            label: 'Transaction Hash',
+            result: result.callData.transactionId,
+        };
+    }
+
+    // 26 basicBeastGetEvolutionSetData
+    // calls scripts/basicbeast/sets/get_evolutionSetData.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async basicBeastGetEvolutionSetData(data) {
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer,
+                },
+            },
+            'basicbeast_sets_get_evolutionSetData', {
+                setID: { value: parseInt(data.setID), type: t.UInt32 }
+            }
+        );
+
+        console.log(result)
+
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'The current generation is',
+            result: result.callData,
         };
     }
 
@@ -716,7 +1094,7 @@ module.exports = class DappLib {
         };
     }
 
-    // basicBeastSetupAccount
+    // 1 basicBeastSetupAccount
     // calls transactions/basicbeast/setup_account.cdc
     //
     // signer/proposer/authorizer: data.signer

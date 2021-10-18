@@ -99,7 +99,7 @@ export default class PackNFTHarness extends LitElement {
 
 				<!-- 1 SETUP ACCOUNT (POST) -->
 				<action-card
-					title="Setup account - Beast Collection"
+					title="1 Setup account - Beast Collection"
 					description="Setup account to handle Beast NFTs"
 					action="basicBeastSetupAccount"
 					method="post"
@@ -113,7 +113,7 @@ export default class PackNFTHarness extends LitElement {
 
 				<!-- 2 CREATE EVOLUTIONSET (POST) -->
 				<action-card
-					title="Create an EvolutionSet"
+					title="2 Create an EvolutionSet"
 					description="Create an EvolutionSet for Basic Beasts. *Only admin."
 					action="basicBeastCreateEvolutionSet"
 					method="post"
@@ -132,7 +132,7 @@ export default class PackNFTHarness extends LitElement {
 
 				<!-- 3 GET EVOLUTIONSET NAME (GET) -->
 				<action-card
-					title="Get EvolutionSet Name"
+					title="3 Get EvolutionSet Name"
 					description="Enter the setID to get the EvolutionSet's name"
 					action="basicBeastGetEvolutionSetName"
 					method="get"
@@ -147,7 +147,7 @@ export default class PackNFTHarness extends LitElement {
 
 				<!-- 4 CREATE BEASTTEMPLATE (POST) -->
 				<action-card
-					title="Create a BeastTemplate"
+					title="4 Create a BeastTemplate"
 					description="Enter the required fields to create a BeastTemplate. *Only admin."
 					action="basicBeastCreateBeastTemplate"
 					method="post"
@@ -226,7 +226,7 @@ export default class PackNFTHarness extends LitElement {
 
 				<!-- 5 GET BEASTTEMPLATE  (GET) -->
 				<action-card
-					title="Get BeastTemplate"
+					title="5 Get BeastTemplate"
 					description="Enter the BeastTemplateID to get its BeastTemplate Struct. See the result in the browser console."
 					action="basicBeastGetBeastTemplate"
 					method="get"
@@ -241,7 +241,7 @@ export default class PackNFTHarness extends LitElement {
 
 				<!-- 6 GET ALL BEASTTEMPLATES  (GET) -->
 				<action-card
-					title="Get all BeastTemplates"
+					title="6 Get all BeastTemplates"
 					description="*Contract* See the results in the browser console."
 					action="basicBeastGetAllBeastTemplates"
 					method="get"
@@ -250,8 +250,8 @@ export default class PackNFTHarness extends LitElement {
 
 				<!-- 7 GET ALL BEASTTEMPLATES IN AN EVOLUTIONSET (GET) -->
 				<action-card
-					title="Get All BeastTemplates In An EvolutionSet"
-					description="*Contract* See the results in the browser console."
+					title="7 Get All BeastTemplates In An EvolutionSet"
+					description="*Contract* See the results in the browser console. beastTemplateID : setID"
 					action="basicBeastGetAllBeastTemplatesInAnEvolutionSet"
 					method="get"
 				>
@@ -259,7 +259,7 @@ export default class PackNFTHarness extends LitElement {
 
 				<!-- 8 GET BEASTTEMPLATES IN EVOLUTIONSET (GET) -->
 				<action-card
-					title="Get BeastTemplates In EvolutionSet"
+					title="8 Get BeastTemplates In EvolutionSet"
 					description="*Set* Return BeastTemplateID for a specific set. See the results in the browser console."
 					action="basicBeastGetBeastTemplatesInEvolutionSet"
 					method="get"
@@ -274,7 +274,7 @@ export default class PackNFTHarness extends LitElement {
 
 				<!-- 9 ADD BEASTTEMPLATE IN EVOLUTIONSET (POST) -->
 				<action-card
-					title="Add BeastTemplate In EvolutionSet"
+					title="9 Add BeastTemplate In EvolutionSet"
 					description=""
 					action="basicBeastAddBeastTemplateToEvolutionSet"
 					method="post"
@@ -300,7 +300,7 @@ export default class PackNFTHarness extends LitElement {
 
 				<!-- 10 ADD BEASTTEMPLATES IN EVOLUTIONSET (POST) -->
 				<action-card
-					title="Add BeastTemplates In EvolutionSet"
+					title="10 Add BeastTemplates In EvolutionSet"
 					description=""
 					action="basicBeastAddBeastTemplatesToEvolutionSet"
 					method="post"
@@ -328,8 +328,8 @@ export default class PackNFTHarness extends LitElement {
 
 				<!-- 11 GET BEASTTEMPLATE EVOLUTIONSET (GET) -->
 				<action-card
-					title="Get BeastTemplate EvolutionSet"
-					description="*Set* Return the setID(s) that a specific BeastTemplateID belongs. See the results in the browser console."
+					title="11 Get BeastTemplate EvolutionSet"
+					description="*Set* Return the setID that a specific BeastTemplateID belongs."
 					action="basicBeastGetBeastTemplateEvolutionSet"
 					method="get"
 					fields="beastTemplateID"
@@ -343,21 +343,329 @@ export default class PackNFTHarness extends LitElement {
 
 				<!-- 12 REMOVE BEASTTEMPLATE FROM EVOLUTIONSET (POST) -->
 				<action-card
-					title="Remove BeastTemplate from EvolutionSet"
-					description="*Set* Return the setID(s) that a specific beastTemplateID belongs. See the results in the browser console."
-					action="basicBeastGetBeastTemplateEvolutionSet"
-					method="get"
-					fields="beastTemplateID"
+					title="12 Remove BeastTemplate from EvolutionSet"
+					description="Enter the setID for EvolutionSet and the BeastTemplateID you want to remove."
+					action="basicBeastRemoveBeastTemplateFromEvolutionSet"
+					method="post"
+					fields="signer setID beastTemplateID"
 				>
-				<text-widget
+				<account-widget
+						field="signer"
+						label="Signer"
+					></account-widget>
+					<text-widget
+						field="setID"
+						label="setID"
+						placeholder="0"
+					></text-widget>
+					<text-widget
 						field="beastTemplateID"
 						label="beastTemplateID"
 						placeholder="0"
 					></text-widget>
 				</action-card>
 
+				<!-- 13 REMOVE ALL BEASTTEMPLATES FROM EVOLUTIONSET (POST) -->
+				<action-card
+					title="13 Remove all BeastTemplates from EvolutionSet"
+					description="Enter the setID for EvolutionSet you want to empty."
+					action="basicBeastRemoveAllBeastTemplatesFromEvolutionSet"
+					method="post"
+					fields="signer setID"
+				>
+				<account-widget
+						field="signer"
+						label="Signer"
+					></account-widget>
+					<text-widget
+						field="setID"
+						label="setID"
+						placeholder="0"
+					></text-widget>
+				</action-card>
 
+				<!-- 14 MINT BEAST (POST) -->
+				<action-card
+					title="14 Mint Beast"
+					description="Enter the required fields to mint a Beast."
+					action="basicBeastMintBeast"
+					method="post"
+					fields="signer setID beastTemplateID matron sire evolvedFrom recipientAddr"
+				>
+				<account-widget
+						field="signer"
+						label="Signer"
+					></account-widget>
+					<text-widget
+						field="setID"
+						label="setID"
+						placeholder="0"
+					></text-widget>
+					<text-widget
+						field="beastTemplateID"
+						label="beastTemplateID"
+						placeholder="0"
+					></text-widget>
+					<text-widget
+						field="matron"
+						label="matron"
+						placeholder="0"
+					></text-widget>
+					<text-widget
+						field="sire"
+						label="sire"
+						placeholder="0"
+					></text-widget>
+					<array-widget
+						field="evolvedFrom"
+						label="evolvedFrom"
+						valueLabel="evolvedFrom"
+						placeholder="0"
+					></array-widget>
+					<account-widget
+						field="recipientAddr"
+						label="Recipient Address"
+					></account-widget>
+				</action-card>
 
+				<!-- 15 BATCH MINT BEAST (POST) -->
+				<action-card
+					title="15 Batch Mint Beast"
+					description="Mint a specific Beast x times."
+					action="basicBeastBatchMintBeast"
+					method="post"
+					fields="signer setID beastTemplateID matron sire evolvedFrom quantity recipientAddr"
+				>
+				<account-widget
+						field="signer"
+						label="Signer"
+					></account-widget>
+					<text-widget
+						field="setID"
+						label="setID"
+						placeholder="0"
+					></text-widget>
+					<text-widget
+						field="beastTemplateID"
+						label="beastTemplateID"
+						placeholder="0"
+					></text-widget>
+					<text-widget
+						field="matron"
+						label="matron"
+						placeholder="0"
+					></text-widget>
+					<text-widget
+						field="sire"
+						label="sire"
+						placeholder="0"
+					></text-widget>
+					<array-widget
+						field="evolvedFrom"
+						label="evolvedFrom"
+						valueLabel="evolvedFrom"
+						placeholder="0"
+					></array-widget>
+					<text-widget
+						field="quantity"
+						label="quantity"
+						placeholder="0"
+					></text-widget>
+					<account-widget
+						field="recipientAddr"
+						label="Recipient Address"
+					></account-widget>
+				</action-card>
+
+				<!-- 16 GET TOTAL SUPPLY (GET) -->
+				<action-card
+					title="16 Get total supply"
+					description="Total supply of minted Beast NFTs"
+					action="basicBeastGetTotalSupply"
+					method="get"
+				>
+				</action-card>
+
+				<!-- 17 GET COLLECTION OWNED BEASTS IDS (GET) -->
+				<action-card
+					title="17 Get Collection owned Beasts ids"
+					description="Choose the address to see its Collection of Beast NFTs. Return an array with the ids"
+					action="basicBeastGetCollectionOwnedBeastsIds"
+					method="get"
+					fields="account"
+				>
+				<account-widget
+						field="account"
+						label="account"
+					></account-widget>
+				</action-card>
+
+				<!-- 18 GET BEAST ID IN COLLECTION (GET) -->
+				<action-card
+					title="18 Get Beast id in Collection"
+					description="Check whether the Beast id is in an address's Collection. Return true or false."
+					action="basicBeastGetBeastIdInCollection"
+					method="get"
+					fields="account id"
+				>
+				<account-widget
+						field="account"
+						label="account"
+					></account-widget>
+					<text-widget
+						field="id"
+						label="id"
+						placeholder="0"
+					></text-widget>
+				</action-card>
+
+				<!-- 19 LOCK EVOLUTIONSET (POST) -->
+				<action-card
+					title="19 Lock EvolutionSet"
+					description="Lock an EvolutionSet so BeastTemplates cannot be added to it anymore. *Only admin"
+					action="basicBeastLockEvolutionSet"
+					method="post"
+					fields="signer setID"
+				>
+					<account-widget
+						field="signer"
+						label="Signer"
+					></account-widget>
+					<text-widget
+						field="setID"
+						label="setID"
+						placeholder="0"
+					></text-widget>
+				</action-card>
+
+				<!-- 20 RETIRE BEASTTEMPLATE FROM EVOLUTIONSET (POST) -->
+				<action-card
+					title="20 Retire BeastTemplate From EvolutionSet"
+					description="Enter the BeastTemplateID and the EvolutionSet prevent minting in the future. *Only admin"
+					action="basicBeastRetireBeastTemplateFromEvolutionSet"
+					method="post"
+					fields="signer setID beastTemplateID"
+				>
+					<account-widget
+						field="signer"
+						label="Signer"
+					></account-widget>
+					<text-widget
+						field="setID"
+						label="setID"
+						placeholder="0"
+					></text-widget>
+					<text-widget
+						field="beastTemplateID"
+						label="beastTemplateID"
+						placeholder="0"
+					></text-widget>
+				</action-card>
+
+				<!-- 21 RETIRE ALL BEASTTEMPLATES FROM EVOLUTIONSET (POST) -->
+				<action-card
+					title="21 Retire All BeastTemplates From EvolutionSet"
+					description="Enter the EvolutionSet to retire all the BeastTemplates in it. *Only admin"
+					action="basicBeastRetireAllBeastTemplatesFromEvolutionSet"
+					method="post"
+					fields="signer setID"
+				>
+					<account-widget
+						field="signer"
+						label="Signer"
+					></account-widget>
+					<text-widget
+						field="setID"
+						label="setID"
+						placeholder="0"
+					></text-widget>
+				</action-card>
+
+				<!-- 22 START NEW GENERATION (POST) -->
+				<action-card
+					title="22 Start new generation"
+					description="Enter the EvolutionSet to retire all the BeastTemplates in it. *Only admin"
+					action="basicBeastStartNewGeneration"
+					method="post"
+					fields="signer"
+				>
+					<account-widget
+						field="signer"
+						label="Signer"
+					></account-widget>
+				</action-card>
+
+				<!-- 23 GET CURRENT GENERATION (POST) -->
+				<action-card
+					title="23 Get current generation"
+					description=""
+					action="basicBeastGetCurrentGeneration"
+					method="get"
+				>
+				</action-card>
+
+				<!-- 24 DEPOSIT BEAST NFT (POST) -->
+				<action-card
+					title="24 Deposit Beast NFT"
+					description=""
+					action="basicBeastDepositBeastNft"
+					method="post"
+					fields="signer recipientAddr beastID"
+				>
+				<account-widget
+					field="signer"
+					label="signer"
+				></account-widget>
+					<account-widget
+					field="recipientAddr"
+					label="recipientAddr"
+				></account-widget>
+				<text-widget
+					field="beastID"
+					label="beastID"
+					placeholder="0"
+				></text-widget>
+				</action-card>
+
+				<!-- 25 DEPOSIT BEAST NFTS (POST) -->
+				<action-card
+					title="25 Deposit Beast NFTs"
+					description=""
+					action="basicBeastDepositBeastNfts"
+					method="post"
+					fields="signer recipientAddr beastIDs"
+				>
+
+				<account-widget
+					field="signer"
+					label="signer"
+				></account-widget>
+					<account-widget
+					field="recipientAddr"
+					label="recipientAddr"
+				></account-widget>
+				<array-widget
+					field="beastIDs"
+					label="beastIDs"
+					valueLabel="beastIDs"
+					placeholder="0"
+				></array-widget>
+				</action-card>
+
+				<!-- 26 GET EVOLUTION SET DATA (POST) -->
+				<action-card
+					title="26 Get EvolutionSet data"
+					description="See the result in the browser console."
+					action="basicBeastGetEvolutionSetData"
+					method="get"
+					fields="setID"
+				>
+				<text-widget
+					field="setID"
+					label="setID"
+					placeholder="0"
+				></text-widget>
+				</action-card>
 
 
 
