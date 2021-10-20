@@ -501,7 +501,7 @@ pub contract BasicBeast: NonFungibleToken {
             let beastTemplatesInSet = self.numOfMintedPerBeastTemplate.keys
 
             for beastTemplate in beastTemplatesInSet { 
-                self.retireBeastTemplate(beastTemplateID: beastTemplate) 
+                self.removeBeastTemplate(beastTemplateID: beastTemplate) 
             }
         }
 

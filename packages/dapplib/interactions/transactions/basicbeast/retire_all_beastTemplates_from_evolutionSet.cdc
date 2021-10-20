@@ -1,6 +1,6 @@
 import BasicBeast from "../../../contracts/Project/BasicBeast.cdc"
 
-transaction(setID: UInt32, beastTemplateID: UInt32) {
+transaction(setID: UInt32) {
     let adminRef: &BasicBeast.Admin
 
     prepare(acct: AuthAccount) {
