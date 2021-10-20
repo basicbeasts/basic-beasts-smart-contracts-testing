@@ -348,9 +348,6 @@ pub contract BasicBeast: NonFungibleToken {
         pub var numOfMintedPerBeastTemplate: {UInt32: UInt32}
 
         init(setID: UInt32) {
-            pre {
-                setID != nil: "setID cannot be empty"
-            }
 
             let set = &BasicBeast.evolutionSets[setID] as &EvolutionSet
 
@@ -497,7 +494,8 @@ pub contract BasicBeast: NonFungibleToken {
 
         // removeAllBeastTemplates removes all the BeastTemplates in the EvolutionSet
         // Afterwards, the EvolutionSet will be empty from BeastTemplates
-        // This function will revert if any 
+        // This function will revert if any BeastTemplate has been removed or minted, 
+        // EvolutionSet is locked, or if one of the BeastTemplateIDs doesn't exist
         //
         pub fun removeAllBeastTemplates() {
             let beastTemplatesInSet = self.numOfMintedPerBeastTemplate.keys
@@ -788,13 +786,6 @@ pub contract BasicBeast: NonFungibleToken {
             emit BeastNewNicknameIsSet(id: self.id, nickname: self.nickname!)
         }
 
-        // getNickname returns the nickname of this NFT
-        //
-        // Returns: The nickname as a String optional
-        pub fun getNickname(): String? {
-            return self.nickname
-        }
-
         // setBeneficiary sets the beneficiary of this NFT
         // this action cannot be undone
         // 
@@ -808,13 +799,6 @@ pub contract BasicBeast: NonFungibleToken {
             self.beneficiary = beneficiary
 
             emit BeastBeneficiaryIsSet(id: self.id, beneficiary: self.beneficiary!)
-        }
-
-        // getBeneficiary returns the beneficiary's address of this NFT
-        //
-        // Returns: The beneficiary as an Address optional
-        pub fun getBeneficiary(): Address? {
-            return self.beneficiary
         }
 
         // If the Beast is destroyed, emit an event to indicate 
@@ -948,7 +932,7 @@ pub contract BasicBeast: NonFungibleToken {
                 BasicBeast.beastTemplates[beastTemplateID] != nil: "Cannot update BeastTemplate: The BeastTemplate doesn't exist."
             }
 
-            BasicBeast.beastTemplates[beastTemplateID]?.data?.insert(key: key, value)
+            BasicBeast.beastTemplates[beastTemplateID]!.data.insert(key: key, value)
 
             emit NewBeastTemplateDataFieldAdded(beastTemplateID: beastTemplateID, key: key, value: value)
 
@@ -969,7 +953,7 @@ pub contract BasicBeast: NonFungibleToken {
                 BasicBeast.beastTemplates[beastTemplateID] != nil: "Cannot change BeastTemplate data: The BeastTemplate doesn't exist."
             }
 
-            let removedKey = BasicBeast.beastTemplates[beastTemplateID]?.data?.remove(key: key)
+            let removedKey = BasicBeast.beastTemplates[beastTemplateID]!.data.remove(key: key)
 
             emit BeastTemplateDataFieldRemoved(beastTemplateID: beastTemplateID, key: key)
 
@@ -1405,15 +1389,15 @@ pub contract BasicBeast: NonFungibleToken {
         self.evolutionSets <- {}
         self.beastTemplatesInAnEvolutionSet = {}
         self.breedingCounts = {}
-        self.nextBeastTemplateID = 0
-        self.nextSetID = 0
+        self.nextBeastTemplateID = 1
+        self.nextSetID = 1
         self.totalSupply = 0
 
         // Put a new Collection in storage
         self.account.save<@Collection>(<- create Collection(), to: self.CollectionStoragePath)
 
         // Create a public capability for the Collection
-        self.account.link<&{BeastCollectionPublic}>(self.CollectionPublicPath, target: self.CollectionStoragePath)
+        self.account.link<&Collection{BeastCollectionPublic}>(self.CollectionPublicPath, target: self.CollectionStoragePath)
 
         // Put the Minter in storage
         self.account.save<@Admin>(<- create Admin(), to: self.AdminStoragePath)
