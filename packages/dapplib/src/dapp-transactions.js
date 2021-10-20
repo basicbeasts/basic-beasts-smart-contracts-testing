@@ -76,480 +76,6 @@ transaction (to: Address, amount: UFix64) {
 		`;
 	}
 
-	static basicbeast_add_beastTemplates_to_evolutionSet() {
-		return fcl.transaction`
-import BasicBeast from 0x01cf0e2f2f715450
-
-transaction(setID: UInt32, beastTemplateIDs: [UInt32]) {
-
-    let adminRef: &BasicBeast.Admin
-    
-    prepare(acct: AuthAccount) {
-
-        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)!
-
-    }
-
-    execute {
-        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
-
-        setRef.addBeastTemplates(beastTemplateIDs: beastTemplateIDs)
-    }
-}
-		`;
-	}
-
-	static basicbeast_add_beastTemplate_to_evolutionSet() {
-		return fcl.transaction`
-import BasicBeast from 0x01cf0e2f2f715450
-
-transaction(setID: UInt32, beastTemplateID: UInt32) {
-    let adminRef: &BasicBeast.Admin
-
-    prepare(acct: AuthAccount) {
-        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath) 
-            ?? panic("Could not borrow a reference to the Admin resource")
-    }
-
-    execute {
-        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
-
-        setRef.addBeastTemplate(beastTemplateID: beastTemplateID)
-    }
-
-    post {
-        BasicBeast.getBeastTemplatesInSet(setID: setID)!.contains(beastTemplateID):
-            "Set does not contain beastTemplateID"
-    }
-}
-		`;
-	}
-
-	static basicbeast_batch_mint_beast() {
-		return fcl.transaction`
-import BasicBeast from 0x01cf0e2f2f715450
-
-transaction(setID: UInt32, beastTemplateID: UInt32, matron: UInt64, sire: UInt64, evolvedFrom: [UInt64], quantity: UInt64, recipientAddr: Address) {
-    
-    let adminRef: &BasicBeast.Admin
-
-    prepare(acct: AuthAccount) {
-
-        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)!
-
-    }
-
-    execute {
-        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
-
-        let beastTemplateToMint = BasicBeast.getBeastTemplate(beastTemplateID: beastTemplateID)!
-
-        if beastTemplateToMint == nil {
-            panic("BeastTemplate does not exist")
-        }
-
-        let collection <- setRef.batchMintBeast(beastTemplate: beastTemplateToMint, matron: matron, sire: sire, evolvedFrom: evolvedFrom, quantity: quantity)
-
-        let recipient = getAccount(recipientAddr)
-
-        let receiverRef = recipient.getCapability(BasicBeast.CollectionPublicPath).borrow<&{BasicBeast.BeastCollectionPublic}>()
-            ?? panic("Cannot borrow a reference to the recipient's collection")
-
-        receiverRef.batchDeposit(tokens: <-collection)
-    }
-}
-		`;
-	}
-
-	static basicbeast_create_beastTemplate() {
-		return fcl.transaction`
-import BasicBeast from 0x01cf0e2f2f715450
-
-transaction(
-            dexNumber: UInt32,
-            name: String, 
-            image: String,
-            description: String,
-            rarity: String,
-            skin: String,
-            starLevel: UInt32,
-            asexual: Bool,
-            ultimateSkill: String,
-            basicSkills: [String],
-            elements: {String: Bool},
-            data: {String: String}
-    ) {
-    let adminRef: &BasicBeast.Admin
-    let currentBeastTemplateID: UInt32
-
-    prepare(acct: AuthAccount) {
-        self.currentBeastTemplateID = BasicBeast.nextBeastTemplateID;
-        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)
-            ?? panic("No admin resource in storage")
-    }
-    execute {
-        self.adminRef.createBeastTemplate(
-                                        dexNumber: dexNumber,
-                                        name: name, 
-                                        image: image,
-                                        description: description,
-                                        rarity: rarity,
-                                        skin: skin,
-                                        starLevel: starLevel,
-                                        asexual: asexual,
-                                        ultimateSkill: ultimateSkill,
-                                        basicSkills: basicSkills,
-                                        elements: elements,
-                                        data: data
-        )
-    }
-
-    post {
-        BasicBeast.getBeastTemplate(beastTemplateID: self.currentBeastTemplateID) != nil:
-            "BeastTemplate doesn't exist"
-    }
-            }
-		`;
-	}
-
-	static basicbeast_create_evolutionSet() {
-		return fcl.transaction`
-import BasicBeast from 0x01cf0e2f2f715450
-
-transaction(setName: String) {
-    let adminRef: &BasicBeast.Admin
-    let currentSetID: UInt32
-    
-    prepare(acct: AuthAccount) {
-        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)
-            ?? panic("Couldn't borrow a reference to the Admin resource")
-            self.currentSetID = BasicBeast.nextSetID;
-    }
-
-    execute {
-        self.adminRef.createEvolutionSet(name: setName)
-    }
-
-    post {
-        BasicBeast.getEvolutionSetName(setID: self.currentSetID) == setName:
-            "Couldn't find the specified set"
-    }
-}
-		`;
-	}
-
-	static basicbeast_deposit_beast_nft() {
-		return fcl.transaction`
-import NonFungibleToken from 0x01cf0e2f2f715450
-import BasicBeast from 0x01cf0e2f2f715450
-
-transaction(recipientAddr: Address, beastID: UInt64) {
-    
-    prepare(acct: AuthAccount) {
-        let recipient = getAccount(recipientAddr)
-
-        let receiverRef = recipient.getCapability(BasicBeast.CollectionPublicPath)
-            .borrow<&{BasicBeast.BeastCollectionPublic}>()
-                ?? panic("Couldn't borrow reference to Receiver's collection")
-    
-
-        if let collection = acct.borrow<&BasicBeast.Collection>(from: BasicBeast.CollectionStoragePath) {
-            receiverRef.deposit(token: <-collection.withdraw(withdrawID: beastID))
-        }
-
-    }
-}
-		`;
-	}
-
-	static basicbeast_deposit_beast_nfts() {
-		return fcl.transaction`
-import NonFungibleToken from 0x01cf0e2f2f715450
-import BasicBeast from 0x01cf0e2f2f715450
-
-transaction(recipientAddr: Address, beastIDs: [UInt64]) {
-    
-    prepare(acct: AuthAccount) {
-        let recipient = getAccount(recipientAddr)
-
-        let receiverRef = recipient.getCapability(BasicBeast.CollectionPublicPath)
-            .borrow<&{BasicBeast.BeastCollectionPublic}>()
-                ?? panic("Couldn't borrow reference to Receiver's collection")
-    
-
-        if let collection = acct.borrow<&BasicBeast.Collection>(from: BasicBeast.CollectionStoragePath) {
-            receiverRef.batchDeposit(tokens: <-collection.batchWithdraw(ids: beastIDs))
-        }
-
-    }
-}
-		`;
-	}
-
-	static basicbeast_fulfill_pack() {
-		return fcl.transaction`
-import NonFungibleToken from 0x01cf0e2f2f715450
-import CharacterX from 0x01cf0e2f2f715450
-
-transaction(recipientAddr: Address, characterIDs: [UInt64]) {
-    
-    prepare(acct: AuthAccount) {
-        let recipient = getAccount(recipientAddr)
-
-        let receiverRef = recipient.getCapability(CharacterX.CollectionPublicPath)
-            .borrow<&{CharacterX.CharacterCollectionPublic}>()
-                ?? panic("Couldn't borrow reference to Receiver's collection")
-    
-
-        if let collection = acct.borrow<&CharacterX.Collection>(from: CharacterX.CollectionStoragePath) {
-            receiverRef.batchDeposit(tokens: <-collection.batchWithdraw(ids: characterIDs))
-        }
-
-    }
-}
-		`;
-	}
-
-	static basicbeast_fulfill_single() {
-		return fcl.transaction`
-import NonFungibleToken from 0x01cf0e2f2f715450
-import CharacterX from 0x01cf0e2f2f715450
-
-transaction(recipientAddr: Address, characterID: UInt64) {
-    
-    prepare(acct: AuthAccount) {
-        let recipient = getAccount(recipientAddr)
-
-        let receiverRef = recipient.getCapability(CharacterX.CollectionPublicPath)
-            .borrow<&{CharacterX.CharacterCollectionPublic}>()
-                ?? panic("Couldn't borrow reference to Receiver's collection")
-    
-
-        if let collection = acct.borrow<&CharacterX.Collection>(from: CharacterX.CollectionStoragePath) {
-            receiverRef.deposit(token: <-collection.withdraw(withdrawID: characterID))
-        }
-
-    }
-}
-		`;
-	}
-
-	static basicbeast_remove_all_beastTemplates_from_evolutionSet() {
-		return fcl.transaction`
-import BasicBeast from 0x01cf0e2f2f715450
-
-transaction(setID: UInt32) {
-    let adminRef: &BasicBeast.Admin
-
-    prepare(acct: AuthAccount) {
-        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)
-            ?? panic("No Admin resource in storage")
-    }
-
-    execute {
-        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
-
-        setRef.removeAllBeastTemplates()
-    }
-
-    post {
-        BasicBeast.getBeastTemplatesInSet(setID: setID)!.length == 0:
-            "BeastTemplates are not removed"
-    }
-}
-		`;
-	}
-
-	static basicbeast_lock_evolutionSet() {
-		return fcl.transaction`
-import BasicBeast from 0x01cf0e2f2f715450
-
-transaction(setID: UInt32) {
-    let adminRef: &BasicBeast.Admin
-
-    prepare(acct: AuthAccount) {
-        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)
-            ?? panic("No Admin resource in storage")
-    }
-
-    execute {
-        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
-        setRef.lock()
-    }
-
-    post {
-        BasicBeast.isEvolutionSetLocked(setID: setID)!:
-            "EvolutionSet didn't lock"
-    }
-}
-		`;
-	}
-
-	static basicbeast_mint_beast() {
-		return fcl.transaction`
-import BasicBeast from 0x01cf0e2f2f715450
-
-transaction(setID: UInt32, beastTemplateID: UInt32, matron: UInt64, sire: UInt64, evolvedFrom: [UInt64], recipientAddr: Address) {
-    let adminRef: &BasicBeast.Admin
-
-    prepare(acct: AuthAccount) {
-        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)!
-    }
-
-    execute {
-        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
-
-        let beastTemplateToMint = BasicBeast.getBeastTemplate(beastTemplateID: beastTemplateID)!
-
-        if beastTemplateToMint == nil {
-            panic("BeastTemplate does not exist")
-        }
-
-        let newMintedBeast <- setRef.mintBeast(
-                                                beastTemplate: beastTemplateToMint, 
-                                                matron: matron, 
-                                                sire: sire, 
-                                                evolvedFrom: evolvedFrom
-        )
-
-        let recipient = getAccount(recipientAddr)
-
-        let receiverRef = recipient.getCapability(BasicBeast.CollectionPublicPath).borrow<&{BasicBeast.BeastCollectionPublic}>()
-            ?? panic("Can't borrow a reference to the Recipient's Beast collection")
-
-        receiverRef.deposit(token: <-newMintedBeast)
-    }
-}
-		`;
-	}
-
-	static basicbeast_remove_beastTemplate_from_evolutionSet() {
-		return fcl.transaction`
-import BasicBeast from 0x01cf0e2f2f715450
-
-transaction(setID: UInt32, beastTemplateID: UInt32) {
-    let adminRef: &BasicBeast.Admin
-
-    prepare(acct: AuthAccount) {
-        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)
-            ?? panic("No Admin resource in storage")
-    }
-
-    execute {
-        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
-
-        setRef.removeBeastTemplate(beastTemplateID: beastTemplateID)
-    }
-
-    post {
-        BasicBeast.getBeastTemplatesInSet(setID: setID)!.contains(beastTemplateID) == false:
-            "BeastTemplate is not removed"
-    }
-}
-		`;
-	}
-
-	static basicbeast_retire_all_beastTemplates_from_evolutionSet() {
-		return fcl.transaction`
-import BasicBeast from 0x01cf0e2f2f715450
-
-transaction(setID: UInt32) {
-    let adminRef: &BasicBeast.Admin
-
-    prepare(acct: AuthAccount) {
-        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)
-            ?? panic("No Admin resource in storage")
-    }
-
-    execute {
-        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
-
-        setRef.retireAllBeastTemplates()
-    }
-
-}
-		`;
-	}
-
-	static basicbeast_retire_beastTemplate_from_evolutionSet() {
-		return fcl.transaction`
-import BasicBeast from 0x01cf0e2f2f715450
-
-transaction(setID: UInt32, beastTemplateID: UInt32) {
-    let adminRef: &BasicBeast.Admin
-
-    prepare(acct: AuthAccount) {
-        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)
-            ?? panic("No Admin resource in storage")
-    }
-
-    execute {
-        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
-
-        setRef.retireBeastTemplate(beastTemplateID: beastTemplateID)
-    }
-
-    post {
-        BasicBeast.isEditionRetired(setID: setID, beastTemplateID: beastTemplateID) == true:
-            "BeastTemplate is not retired"
-    }
-}
-		`;
-	}
-
-	static basicbeast_setup_account() {
-		return fcl.transaction`
-import BasicBeast from 0x01cf0e2f2f715450
-
-transaction() {
-
-    prepare(acct: AuthAccount) {
-
-        if acct.borrow<&BasicBeast.Collection>(from: BasicBeast.CollectionStoragePath) == nil {
-
-            let collection <- BasicBeast.createEmptyCollection() as! @BasicBeast.Collection
-
-            acct.save(<- collection, to: BasicBeast.CollectionStoragePath)
-
-            acct.link<&{BasicBeast.BeastCollectionPublic}>(BasicBeast.CollectionPublicPath, target: BasicBeast.CollectionStoragePath)
-        }
-
-    }
-}
-
-
-		`;
-	}
-
-	static basicbeast_start_new_generation() {
-		return fcl.transaction`
-import BasicBeast from 0x01cf0e2f2f715450
-
-transaction {
-
-    let adminRef: &BasicBeast.Admin
-    let currentGeneration: UInt32
-
-    prepare(acct: AuthAccount) {
-        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)
-            ?? panic("No Admin resource in storage")
-
-        self.currentGeneration = BasicBeast.currentGeneration
-
-    }
-
-    execute {
-        self.adminRef.startNewGeneration()
-    }
-
-    post {
-        BasicBeast.currentGeneration == self.currentGeneration + 1 as UInt32:
-            "New Generation is not started"
-    }
-}
-		`;
-	}
-
 	static characterx_Buying_a_NBATS_Pack() {
 		return fcl.transaction`
 import FungibleToken from 0xee82856bf20e2aa6
@@ -641,36 +167,6 @@ transaction(lineageKey: String, lineageValue: Bool) {
         CharacterX.getSetName(setID: self.currentSetID) == setName:
             "Couldn't find the specified set"
     }*/
-}
-		`;
-	}
-
-	static characterx_batch_mint_character() {
-		return fcl.transaction`
-import CharacterX from 0x01cf0e2f2f715450
-
-transaction(setID: UInt32, characterID: UInt32, quantity: UInt64, recipientAddr: Address) {
-    
-    let adminRef: &CharacterX.Admin
-
-    prepare(acct: AuthAccount) {
-
-        self.adminRef = acct.borrow<&CharacterX.Admin>(from: CharacterX.AdminStoragePath)!
-
-    }
-
-    execute {
-        let setRef = self.adminRef.borrowSet(setID: setID)
-
-        let collection <- setRef.batchMintCharacter(characterID: characterID, quantity: quantity)
-
-        let recipient = getAccount(recipientAddr)
-
-        let receiverRef = recipient.getCapability(CharacterX.CollectionPublicPath).borrow<&{CharacterX.CharacterCollectionPublic}>()
-            ?? panic("Cannot borrow a reference to the recipient's collection")
-
-        receiverRef.batchDeposit(tokens: <-collection)
-    }
 }
 		`;
 	}
@@ -792,25 +288,31 @@ transaction(
 		`;
 	}
 
-	static characterx_fulfill_pack() {
+	static characterx_batch_mint_character() {
 		return fcl.transaction`
-import NonFungibleToken from 0x01cf0e2f2f715450
 import CharacterX from 0x01cf0e2f2f715450
 
-transaction(recipientAddr: Address, characterIDs: [UInt64]) {
+transaction(setID: UInt32, characterID: UInt32, quantity: UInt64, recipientAddr: Address) {
     
+    let adminRef: &CharacterX.Admin
+
     prepare(acct: AuthAccount) {
+
+        self.adminRef = acct.borrow<&CharacterX.Admin>(from: CharacterX.AdminStoragePath)!
+
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowSet(setID: setID)
+
+        let collection <- setRef.batchMintCharacter(characterID: characterID, quantity: quantity)
+
         let recipient = getAccount(recipientAddr)
 
-        let receiverRef = recipient.getCapability(CharacterX.CollectionPublicPath)
-            .borrow<&{CharacterX.CharacterCollectionPublic}>()
-                ?? panic("Couldn't borrow reference to Receiver's collection")
-    
+        let receiverRef = recipient.getCapability(CharacterX.CollectionPublicPath).borrow<&{CharacterX.CharacterCollectionPublic}>()
+            ?? panic("Cannot borrow a reference to the recipient's collection")
 
-        if let collection = acct.borrow<&CharacterX.Collection>(from: CharacterX.CollectionStoragePath) {
-            receiverRef.batchDeposit(tokens: <-collection.batchWithdraw(ids: characterIDs))
-        }
-
+        receiverRef.batchDeposit(tokens: <-collection)
     }
 }
 		`;
@@ -837,6 +339,57 @@ transaction(setName: String) {
     post {
         CharacterX.getSetName(setID: self.currentSetID) == setName:
             "Couldn't find the specified set"
+    }
+}
+		`;
+	}
+
+	static characterx_fulfill_pack() {
+		return fcl.transaction`
+import NonFungibleToken from 0x01cf0e2f2f715450
+import CharacterX from 0x01cf0e2f2f715450
+
+transaction(recipientAddr: Address, characterIDs: [UInt64]) {
+    
+    prepare(acct: AuthAccount) {
+        let recipient = getAccount(recipientAddr)
+
+        let receiverRef = recipient.getCapability(CharacterX.CollectionPublicPath)
+            .borrow<&{CharacterX.CharacterCollectionPublic}>()
+                ?? panic("Couldn't borrow reference to Receiver's collection")
+    
+
+        if let collection = acct.borrow<&CharacterX.Collection>(from: CharacterX.CollectionStoragePath) {
+            receiverRef.batchDeposit(tokens: <-collection.batchWithdraw(ids: characterIDs))
+        }
+
+    }
+}
+		`;
+	}
+
+	static characterx_lock_set() {
+		return fcl.transaction`
+//Does not seem to wo
+
+import CharacterX from 0x01cf0e2f2f715450
+
+transaction(setID: UInt32) {
+    let adminRef: &CharacterX.Admin
+
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&CharacterX.Admin>(from: CharacterX.AdminStoragePath)
+            ?? panic("No Admin resource in storage")
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowSet(setID: setID)
+        setRef.lock()
+    }
+
+    post {
+        CharacterX.isSetLocked(setID: setID)!:
+            "Set didn't lock"
     }
 }
 		`;
@@ -893,33 +446,6 @@ transaction(setID: UInt32, characterID: UInt32, recipientAddr: Address) {
 		`;
 	}
 
-	static characterx_lock_set() {
-		return fcl.transaction`
-//Does not seem to wo
-
-import CharacterX from 0x01cf0e2f2f715450
-
-transaction(setID: UInt32) {
-    let adminRef: &CharacterX.Admin
-
-    prepare(acct: AuthAccount) {
-        self.adminRef = acct.borrow<&CharacterX.Admin>(from: CharacterX.AdminStoragePath)
-            ?? panic("No Admin resource in storage")
-    }
-
-    execute {
-        let setRef = self.adminRef.borrowSet(setID: setID)
-        setRef.lock()
-    }
-
-    post {
-        CharacterX.isSetLocked(setID: setID)!:
-            "Set didn't lock"
-    }
-}
-		`;
-	}
-
 	static characterx_retireAll_characters_from_set() {
 		return fcl.transaction`
 import CharacterX from 0x01cf0e2f2f715450
@@ -938,30 +464,6 @@ transaction(setID: UInt32) {
         setRef.retireAllCharacters()
     }
 }
-		`;
-	}
-
-	static characterx_setup_account() {
-		return fcl.transaction`
-import CharacterX from 0x01cf0e2f2f715450
-
-transaction() {
-
-    prepare(acct: AuthAccount) {
-
-        if acct.borrow<&CharacterX.Collection>(from: CharacterX.CollectionStoragePath) == nil {
-
-            let collection <- CharacterX.createEmptyCollection() as! @CharacterX.Collection
-
-            acct.save(<- collection, to: CharacterX.CollectionStoragePath)
-
-            acct.link<&{CharacterX.CharacterCollectionPublic}>(CharacterX.CollectionPublicPath, target: CharacterX.CollectionStoragePath)
-        }
-
-    }
-}
-
-
 		`;
 	}
 
@@ -1020,43 +522,27 @@ transaction {
 		`;
 	}
 
-	static flowtoken_mint_flow_tokens() {
+	static characterx_setup_account() {
 		return fcl.transaction`
-import FlowToken from 0x0ae53cb6e3f42a79
-import FungibleToken from 0xee82856bf20e2aa6
+import CharacterX from 0x01cf0e2f2f715450
 
-// Mints FlowTokens
-
-transaction(recipient: Address, amount: UFix64) {
-    let tokenAdmin: &FlowToken.Administrator
-    let tokenReceiver: &{FungibleToken.Receiver}
+transaction() {
 
     prepare(acct: AuthAccount) {
-        // NOTE: acct MUST be the service account in the wallet. 
-        // This borrows a FlowToken Administrator resource reference to mint FlowToken.
-        self.tokenAdmin = acct.borrow<&FlowToken.Administrator>(from: /storage/flowTokenAdmin)
-            ?? panic("Signer is not the token admin")
 
-        // Borrows the recipient's FlowToken Vault
-        self.tokenReceiver = getAccount(recipient)
-            .getCapability(/public/flowTokenReceiver)
-            .borrow<&{FungibleToken.Receiver}>()
-            ?? panic("Unable to borrow receiver reference")
-    }
+        if acct.borrow<&CharacterX.Collection>(from: CharacterX.CollectionStoragePath) == nil {
 
-    execute {
-        // Creates a new minter
-        let minter <- self.tokenAdmin.createNewMinter(allowedAmount: amount)
-        // Mints FlowToken and receives a Vault with the FlowToken
-        let mintedVault <- minter.mintTokens(amount: amount)
+            let collection <- CharacterX.createEmptyCollection() as! @CharacterX.Collection
 
-        // Deposits the Vault filled with FlowToken into the receiver's 
-        // FlowToken Vault
-        self.tokenReceiver.deposit(from: <-mintedVault)
+            acct.save(<- collection, to: CharacterX.CollectionStoragePath)
 
-        destroy minter
+            acct.link<&{CharacterX.CharacterCollectionPublic}>(CharacterX.CollectionPublicPath, target: CharacterX.CollectionStoragePath)
+        }
+
     }
 }
+
+
 		`;
 	}
 
@@ -1131,126 +617,517 @@ transaction(id: UInt64, recipient: Address) {
 		`;
 	}
 
-	static marketplace_buy_pack() {
+	static flowtoken_mint_flow_tokens() {
 		return fcl.transaction`
-import FungibleToken from 0xee82856bf20e2aa6
-import MarketplaceContract from 0x01cf0e2f2f715450
-import NonFungibleToken from 0x01cf0e2f2f715450
 import FlowToken from 0x0ae53cb6e3f42a79
+import FungibleToken from 0xee82856bf20e2aa6
 
-// Buys a Pack from the admin's Pack Collection
+// Mints FlowTokens
 
-transaction(id: UInt64, admin: Address) {
+transaction(recipient: Address, amount: UFix64) {
+    let tokenAdmin: &FlowToken.Administrator
+    let tokenReceiver: &{FungibleToken.Receiver}
 
-    let packSaleCollection: &MarketplaceContract.SaleCollection{MarketplaceContract.SalePublic}
+    prepare(acct: AuthAccount) {
+        // NOTE: acct MUST be the service account in the wallet. 
+        // This borrows a FlowToken Administrator resource reference to mint FlowToken.
+        self.tokenAdmin = acct.borrow<&FlowToken.Administrator>(from: /storage/flowTokenAdmin)
+            ?? panic("Signer is not the token admin")
 
-    let userVaultRef: &{FungibleToken.Provider}
+        // Borrows the recipient's FlowToken Vault
+        self.tokenReceiver = getAccount(recipient)
+            .getCapability(/public/flowTokenReceiver)
+            .borrow<&{FungibleToken.Receiver}>()
+            ?? panic("Unable to borrow receiver reference")
+    }
 
-    let userCollection: &{NonFungibleToken.CollectionPublic}
+    execute {
+        // Creates a new minter
+        let minter <- self.tokenAdmin.createNewMinter(allowedAmount: amount)
+        // Mints FlowToken and receives a Vault with the FlowToken
+        let mintedVault <- minter.mintTokens(amount: amount)
+
+        // Deposits the Vault filled with FlowToken into the receiver's 
+        // FlowToken Vault
+        self.tokenReceiver.deposit(from: <-mintedVault)
+
+        destroy minter
+    }
+}
+		`;
+	}
+
+	static basicbeast_add_beastTemplate_to_evolutionSet() {
+		return fcl.transaction`
+import BasicBeast from 0x01cf0e2f2f715450
+
+transaction(setID: UInt32, beastTemplateID: UInt32) {
+    let adminRef: &BasicBeast.Admin
+
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath) 
+            ?? panic("Could not borrow a reference to the Admin resource")
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
+
+        setRef.addBeastTemplate(beastTemplateID: beastTemplateID)
+    }
+
+    post {
+        BasicBeast.getBeastTemplatesInSet(setID: setID)!.contains(beastTemplateID):
+            "Set does not contain beastTemplateID"
+    }
+}
+		`;
+	}
+
+	static basicbeast_batch_mint_beast() {
+		return fcl.transaction`
+import BasicBeast from 0x01cf0e2f2f715450
+
+transaction(setID: UInt32, beastTemplateID: UInt32, matron: UInt64, sire: UInt64, evolvedFrom: [UInt64], quantity: UInt64, recipientAddr: Address) {
     
-    prepare(user: AuthAccount) {
-        // Borrows the Admin's public SaleCollection so we can purchase from it
-        self.packSaleCollection = getAccount(admin).getCapability(/public/packSaleCollection)
-            .borrow<&MarketplaceContract.SaleCollection{MarketplaceContract.SalePublic}>()
-            ?? panic("Could not borrow from the Admin's saleCollection")
+    let adminRef: &BasicBeast.Admin
 
-        // Borrow the user's FlowToken Vault
-        self.userVaultRef = user.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)
-            ?? panic("Could not borrow reference to the owner's Vault!")
+    prepare(acct: AuthAccount) {
 
-        // Borrows the user's Pack Collection so we can deposit the newly purchased Pack
-        // into it
-        self.userCollection = user.getCapability(/public/packCollection)
-            .borrow<&{NonFungibleToken.CollectionPublic}>()
-            ?? panic("Could not borrow from the user's PackCollection")
+        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)!
 
     }
 
     execute {
-        // Checks the price of the Pack we want to purchase
-        let cost = self.packSaleCollection.idPrice(id: id) ?? panic("A Pack with this id is not up for sale")
-        // Withdraw the correct amount of tokens from the user's FlowToken Vault
-        let vault <- self.userVaultRef.withdraw(amount: cost)
+        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
 
-        // Purchase the Pack
-        self.packSaleCollection.purchase(id: id, recipient: self.userCollection, buyTokens: <-vault)
+        let beastTemplateToMint = BasicBeast.getBeastTemplate(beastTemplateID: beastTemplateID)!
+
+        if beastTemplateToMint == nil {
+            panic("BeastTemplate does not exist")
+        }
+
+        let collection <- setRef.batchMintBeast(beastTemplate: beastTemplateToMint, matron: matron, sire: sire, evolvedFrom: evolvedFrom, quantity: quantity)
+
+        let recipient = getAccount(recipientAddr)
+
+        let receiverRef = recipient.getCapability(BasicBeast.CollectionPublicPath).borrow<&{BasicBeast.BeastCollectionPublic}>()
+            ?? panic("Cannot borrow a reference to the recipient's collection")
+
+        receiverRef.batchDeposit(tokens: <-collection)
     }
 }
-
 		`;
 	}
 
-	static marketplace_list_packs_for_sale() {
+	static basicbeast_add_beastTemplates_to_evolutionSet() {
 		return fcl.transaction`
-import MarketplaceContract from 0x01cf0e2f2f715450
+import BasicBeast from 0x01cf0e2f2f715450
 
-// This should be called by the admin to list Packs for sale in 
-// their SaleCollection
+transaction(setID: UInt32, beastTemplateIDs: [UInt32]) {
 
-transaction(ids: [UInt64], price: UFix64) {
+    let adminRef: &BasicBeast.Admin
+    
+    prepare(acct: AuthAccount) {
 
-  let packSaleCollection: &MarketplaceContract.SaleCollection
+        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)!
 
-  prepare(admin: AuthAccount) {
-      // Borrows the admin's SaleCollection
-      self.packSaleCollection = admin.borrow<&MarketplaceContract.SaleCollection>(from: /storage/packSaleCollection) 
-          ?? panic("Could not borrow the admin's Pack SaleCollection")
-  }
+    }
 
-  execute {
-      // Lists Packs for sale
-      self.packSaleCollection.listForSale(ids: ids, price: price)
+    execute {
+        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
 
-      log("Listed Pack(s) for sale")
-  }
+        setRef.addBeastTemplates(beastTemplateIDs: beastTemplateIDs)
+    }
 }
-
 		`;
 	}
 
-	static marketplace_provision_marketplace() {
+	static basicbeast_create_beastTemplate() {
 		return fcl.transaction`
-import MarketplaceContract from 0x01cf0e2f2f715450
-import FungibleToken from 0xee82856bf20e2aa6
-import NonFungibleToken from 0x01cf0e2f2f715450
+import BasicBeast from 0x01cf0e2f2f715450
 
-// Sets up the admin to list Packs for sale by giving them a SaleCollection
+transaction(
+            dexNumber: UInt32,
+            name: String, 
+            image: String,
+            description: String,
+            rarity: String,
+            skin: String,
+            starLevel: UInt32,
+            asexual: Bool,
+            ultimateSkill: String,
+            basicSkills: [String],
+            elements: {String: Bool},
+            data: {String: String}
+    ) {
+    let adminRef: &BasicBeast.Admin
+    let currentBeastTemplateID: UInt32
+
+    prepare(acct: AuthAccount) {
+        self.currentBeastTemplateID = BasicBeast.nextBeastTemplateID;
+        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)
+            ?? panic("No admin resource in storage")
+    }
+    execute {
+        self.adminRef.createBeastTemplate(
+                                        dexNumber: dexNumber,
+                                        name: name, 
+                                        image: image,
+                                        description: description,
+                                        rarity: rarity,
+                                        skin: skin,
+                                        starLevel: starLevel,
+                                        asexual: asexual,
+                                        ultimateSkill: ultimateSkill,
+                                        basicSkills: basicSkills,
+                                        elements: elements,
+                                        data: data
+        )
+    }
+
+    post {
+        BasicBeast.getBeastTemplate(beastTemplateID: self.currentBeastTemplateID) != nil:
+            "BeastTemplate doesn't exist"
+    }
+            }
+		`;
+	}
+
+	static basicbeast_create_evolutionSet() {
+		return fcl.transaction`
+import BasicBeast from 0x01cf0e2f2f715450
+
+transaction(setName: String) {
+    let adminRef: &BasicBeast.Admin
+    let currentSetID: UInt32
+    
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)
+            ?? panic("Couldn't borrow a reference to the Admin resource")
+            self.currentSetID = BasicBeast.nextSetID;
+    }
+
+    execute {
+        self.adminRef.createEvolutionSet(name: setName)
+    }
+
+    post {
+        BasicBeast.getEvolutionSetName(setID: self.currentSetID) == setName:
+            "Couldn't find the specified set"
+    }
+}
+		`;
+	}
+
+	static basicbeast_fulfill_single() {
+		return fcl.transaction`
+import NonFungibleToken from 0x01cf0e2f2f715450
+import CharacterX from 0x01cf0e2f2f715450
+
+transaction(recipientAddr: Address, characterID: UInt64) {
+    
+    prepare(acct: AuthAccount) {
+        let recipient = getAccount(recipientAddr)
+
+        let receiverRef = recipient.getCapability(CharacterX.CollectionPublicPath)
+            .borrow<&{CharacterX.CharacterCollectionPublic}>()
+                ?? panic("Couldn't borrow reference to Receiver's collection")
+    
+
+        if let collection = acct.borrow<&CharacterX.Collection>(from: CharacterX.CollectionStoragePath) {
+            receiverRef.deposit(token: <-collection.withdraw(withdrawID: characterID))
+        }
+
+    }
+}
+		`;
+	}
+
+	static basicbeast_fulfill_pack() {
+		return fcl.transaction`
+import NonFungibleToken from 0x01cf0e2f2f715450
+import CharacterX from 0x01cf0e2f2f715450
+
+transaction(recipientAddr: Address, characterIDs: [UInt64]) {
+    
+    prepare(acct: AuthAccount) {
+        let recipient = getAccount(recipientAddr)
+
+        let receiverRef = recipient.getCapability(CharacterX.CollectionPublicPath)
+            .borrow<&{CharacterX.CharacterCollectionPublic}>()
+                ?? panic("Couldn't borrow reference to Receiver's collection")
+    
+
+        if let collection = acct.borrow<&CharacterX.Collection>(from: CharacterX.CollectionStoragePath) {
+            receiverRef.batchDeposit(tokens: <-collection.batchWithdraw(ids: characterIDs))
+        }
+
+    }
+}
+		`;
+	}
+
+	static basicbeast_deposit_beast_nft() {
+		return fcl.transaction`
+import NonFungibleToken from 0x01cf0e2f2f715450
+import BasicBeast from 0x01cf0e2f2f715450
+
+transaction(recipientAddr: Address, beastID: UInt64) {
+    
+    prepare(acct: AuthAccount) {
+        let recipient = getAccount(recipientAddr)
+
+        let receiverRef = recipient.getCapability(BasicBeast.CollectionPublicPath)
+            .borrow<&{BasicBeast.BeastCollectionPublic}>()
+                ?? panic("Couldn't borrow reference to Receiver's collection")
+    
+
+        if let collection = acct.borrow<&BasicBeast.Collection>(from: BasicBeast.CollectionStoragePath) {
+            receiverRef.deposit(token: <-collection.withdraw(withdrawID: beastID))
+        }
+
+    }
+}
+		`;
+	}
+
+	static basicbeast_deposit_beast_nfts() {
+		return fcl.transaction`
+import NonFungibleToken from 0x01cf0e2f2f715450
+import BasicBeast from 0x01cf0e2f2f715450
+
+transaction(recipientAddr: Address, beastIDs: [UInt64]) {
+    
+    prepare(acct: AuthAccount) {
+        let recipient = getAccount(recipientAddr)
+
+        let receiverRef = recipient.getCapability(BasicBeast.CollectionPublicPath)
+            .borrow<&{BasicBeast.BeastCollectionPublic}>()
+                ?? panic("Couldn't borrow reference to Receiver's collection")
+    
+
+        if let collection = acct.borrow<&BasicBeast.Collection>(from: BasicBeast.CollectionStoragePath) {
+            receiverRef.batchDeposit(tokens: <-collection.batchWithdraw(ids: beastIDs))
+        }
+
+    }
+}
+		`;
+	}
+
+	static basicbeast_lock_evolutionSet() {
+		return fcl.transaction`
+import BasicBeast from 0x01cf0e2f2f715450
+
+transaction(setID: UInt32) {
+    let adminRef: &BasicBeast.Admin
+
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)
+            ?? panic("No Admin resource in storage")
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
+        setRef.lock()
+    }
+
+    post {
+        BasicBeast.isEvolutionSetLocked(setID: setID)!:
+            "EvolutionSet didn't lock"
+    }
+}
+		`;
+	}
+
+	static basicbeast_mint_beast() {
+		return fcl.transaction`
+import BasicBeast from 0x01cf0e2f2f715450
+
+transaction(setID: UInt32, beastTemplateID: UInt32, matron: UInt64, sire: UInt64, evolvedFrom: [UInt64], recipientAddr: Address) {
+    let adminRef: &BasicBeast.Admin
+
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)!
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
+
+        let beastTemplateToMint = BasicBeast.getBeastTemplate(beastTemplateID: beastTemplateID)!
+
+        if beastTemplateToMint == nil {
+            panic("BeastTemplate does not exist")
+        }
+
+        let newMintedBeast <- setRef.mintBeast(
+                                                beastTemplate: beastTemplateToMint, 
+                                                matron: matron, 
+                                                sire: sire, 
+                                                evolvedFrom: evolvedFrom
+        )
+
+        let recipient = getAccount(recipientAddr)
+
+        let receiverRef = recipient.getCapability(BasicBeast.CollectionPublicPath).borrow<&{BasicBeast.BeastCollectionPublic}>()
+            ?? panic("Can't borrow a reference to the Recipient's Beast collection")
+
+        receiverRef.deposit(token: <-newMintedBeast)
+    }
+}
+		`;
+	}
+
+	static basicbeast_remove_all_beastTemplates_from_evolutionSet() {
+		return fcl.transaction`
+import BasicBeast from 0x01cf0e2f2f715450
+
+transaction(setID: UInt32) {
+    let adminRef: &BasicBeast.Admin
+
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)
+            ?? panic("No Admin resource in storage")
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
+
+        setRef.removeAllBeastTemplates()
+    }
+
+    post {
+        BasicBeast.getBeastTemplatesInSet(setID: setID)!.length == 0:
+            "BeastTemplates are not removed"
+    }
+}
+		`;
+	}
+
+	static basicbeast_remove_beastTemplate_from_evolutionSet() {
+		return fcl.transaction`
+import BasicBeast from 0x01cf0e2f2f715450
+
+transaction(setID: UInt32, beastTemplateID: UInt32) {
+    let adminRef: &BasicBeast.Admin
+
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)
+            ?? panic("No Admin resource in storage")
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
+
+        setRef.removeBeastTemplate(beastTemplateID: beastTemplateID)
+    }
+
+    post {
+        BasicBeast.getBeastTemplatesInSet(setID: setID)!.contains(beastTemplateID) == false:
+            "BeastTemplate is not removed"
+    }
+}
+		`;
+	}
+
+	static basicbeast_retire_all_beastTemplates_from_evolutionSet() {
+		return fcl.transaction`
+import BasicBeast from 0x01cf0e2f2f715450
+
+transaction(setID: UInt32) {
+    let adminRef: &BasicBeast.Admin
+
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)
+            ?? panic("No Admin resource in storage")
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
+
+        setRef.retireAllBeastTemplates()
+    }
+
+}
+		`;
+	}
+
+	static basicbeast_retire_beastTemplate_from_evolutionSet() {
+		return fcl.transaction`
+import BasicBeast from 0x01cf0e2f2f715450
+
+transaction(setID: UInt32, beastTemplateID: UInt32) {
+    let adminRef: &BasicBeast.Admin
+
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)
+            ?? panic("No Admin resource in storage")
+    }
+
+    execute {
+        let setRef = self.adminRef.borrowEvolutionSet(setID: setID)
+
+        setRef.retireBeastTemplate(beastTemplateID: beastTemplateID)
+    }
+
+    post {
+        BasicBeast.isEditionRetired(setID: setID, beastTemplateID: beastTemplateID) == true:
+            "BeastTemplate is not retired"
+    }
+}
+		`;
+	}
+
+	static basicbeast_start_new_generation() {
+		return fcl.transaction`
+import BasicBeast from 0x01cf0e2f2f715450
 
 transaction {
 
-  prepare(acct: AuthAccount) {
-    if acct.borrow<&MarketplaceContract.SaleCollection>(from: /storage/packSaleCollection) == nil && acct.borrow<&NonFungibleToken.Collection>(from: /storage/packCollection) != nil {
-      // same as doing <&FlowToken.Vault{FungibleToken.Receiver}> but we don't have
-      // to import FlowToken this way
-      let ownerVault = acct.getCapability<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
-      assert(ownerVault.borrow() != nil, message: "Missing or mis-typed Token Vault")
+    let adminRef: &BasicBeast.Admin
+    let currentGeneration: UInt32
 
-      /** The reason we do this part is because we cannot do getCapability for something
-      in storage, so because we need a Capability specifically we just put it in a private
-      path and get it from there. By making it private its also only available to us **/
-      acct.link<&NonFungibleToken.Collection>(/private/packCollection, target: /storage/packCollection)
-      
-      let ownerPackCollection = acct.getCapability<&NonFungibleToken.Collection>(/private/packCollection)
-      assert(ownerPackCollection.borrow() != nil, message: "Missing or mis-typed PackCollection")
-      /** **/
-      
-      // create a new empty collection
-      let packSaleCollection <- MarketplaceContract.createSaleCollection(ownerVault: ownerVault, ownerCollection: ownerPackCollection)
-            
-      // save it to the account
-      acct.save(<-packSaleCollection, to: /storage/packSaleCollection)
+    prepare(acct: AuthAccount) {
+        self.adminRef = acct.borrow<&BasicBeast.Admin>(from: BasicBeast.AdminStoragePath)
+            ?? panic("No Admin resource in storage")
 
-      // create a public capability for the collection
-      acct.link<&MarketplaceContract.SaleCollection{MarketplaceContract.SalePublic}>(/public/packSaleCollection, target: /storage/packSaleCollection)
-    
-      log("Gave account a sale collection")
+        self.currentGeneration = BasicBeast.currentGeneration
+
     }
-  }
 
-  execute {
-    
-  }
+    execute {
+        self.adminRef.startNewGeneration()
+    }
+
+    post {
+        BasicBeast.currentGeneration == self.currentGeneration + 1 as UInt32:
+            "New Generation is not started"
+    }
 }
+		`;
+	}
+
+	static basicbeast_setup_account() {
+		return fcl.transaction`
+import BasicBeast from 0x01cf0e2f2f715450
+
+transaction() {
+
+    prepare(acct: AuthAccount) {
+
+        if acct.borrow<&BasicBeast.Collection>(from: BasicBeast.CollectionStoragePath) == nil {
+
+            let collection <- BasicBeast.createEmptyCollection() as! @BasicBeast.Collection
+
+            acct.save(<- collection, to: BasicBeast.CollectionStoragePath)
+
+            acct.link<&{BasicBeast.BeastCollectionPublic}>(BasicBeast.CollectionPublicPath, target: BasicBeast.CollectionStoragePath)
+        }
+
+    }
+}
+
+
 		`;
 	}
 
@@ -1422,6 +1299,129 @@ transaction(id: UInt64, recipient: Address) {
   }
 }
 
+		`;
+	}
+
+	static marketplace_buy_pack() {
+		return fcl.transaction`
+import FungibleToken from 0xee82856bf20e2aa6
+import MarketplaceContract from 0x01cf0e2f2f715450
+import NonFungibleToken from 0x01cf0e2f2f715450
+import FlowToken from 0x0ae53cb6e3f42a79
+
+// Buys a Pack from the admin's Pack Collection
+
+transaction(id: UInt64, admin: Address) {
+
+    let packSaleCollection: &MarketplaceContract.SaleCollection{MarketplaceContract.SalePublic}
+
+    let userVaultRef: &{FungibleToken.Provider}
+
+    let userCollection: &{NonFungibleToken.CollectionPublic}
+    
+    prepare(user: AuthAccount) {
+        // Borrows the Admin's public SaleCollection so we can purchase from it
+        self.packSaleCollection = getAccount(admin).getCapability(/public/packSaleCollection)
+            .borrow<&MarketplaceContract.SaleCollection{MarketplaceContract.SalePublic}>()
+            ?? panic("Could not borrow from the Admin's saleCollection")
+
+        // Borrow the user's FlowToken Vault
+        self.userVaultRef = user.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)
+            ?? panic("Could not borrow reference to the owner's Vault!")
+
+        // Borrows the user's Pack Collection so we can deposit the newly purchased Pack
+        // into it
+        self.userCollection = user.getCapability(/public/packCollection)
+            .borrow<&{NonFungibleToken.CollectionPublic}>()
+            ?? panic("Could not borrow from the user's PackCollection")
+
+    }
+
+    execute {
+        // Checks the price of the Pack we want to purchase
+        let cost = self.packSaleCollection.idPrice(id: id) ?? panic("A Pack with this id is not up for sale")
+        // Withdraw the correct amount of tokens from the user's FlowToken Vault
+        let vault <- self.userVaultRef.withdraw(amount: cost)
+
+        // Purchase the Pack
+        self.packSaleCollection.purchase(id: id, recipient: self.userCollection, buyTokens: <-vault)
+    }
+}
+
+		`;
+	}
+
+	static marketplace_list_packs_for_sale() {
+		return fcl.transaction`
+import MarketplaceContract from 0x01cf0e2f2f715450
+
+// This should be called by the admin to list Packs for sale in 
+// their SaleCollection
+
+transaction(ids: [UInt64], price: UFix64) {
+
+  let packSaleCollection: &MarketplaceContract.SaleCollection
+
+  prepare(admin: AuthAccount) {
+      // Borrows the admin's SaleCollection
+      self.packSaleCollection = admin.borrow<&MarketplaceContract.SaleCollection>(from: /storage/packSaleCollection) 
+          ?? panic("Could not borrow the admin's Pack SaleCollection")
+  }
+
+  execute {
+      // Lists Packs for sale
+      self.packSaleCollection.listForSale(ids: ids, price: price)
+
+      log("Listed Pack(s) for sale")
+  }
+}
+
+		`;
+	}
+
+	static marketplace_provision_marketplace() {
+		return fcl.transaction`
+import MarketplaceContract from 0x01cf0e2f2f715450
+import FungibleToken from 0xee82856bf20e2aa6
+import NonFungibleToken from 0x01cf0e2f2f715450
+
+// Sets up the admin to list Packs for sale by giving them a SaleCollection
+
+transaction {
+
+  prepare(acct: AuthAccount) {
+    if acct.borrow<&MarketplaceContract.SaleCollection>(from: /storage/packSaleCollection) == nil && acct.borrow<&NonFungibleToken.Collection>(from: /storage/packCollection) != nil {
+      // same as doing <&FlowToken.Vault{FungibleToken.Receiver}> but we don't have
+      // to import FlowToken this way
+      let ownerVault = acct.getCapability<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+      assert(ownerVault.borrow() != nil, message: "Missing or mis-typed Token Vault")
+
+      /** The reason we do this part is because we cannot do getCapability for something
+      in storage, so because we need a Capability specifically we just put it in a private
+      path and get it from there. By making it private its also only available to us **/
+      acct.link<&NonFungibleToken.Collection>(/private/packCollection, target: /storage/packCollection)
+      
+      let ownerPackCollection = acct.getCapability<&NonFungibleToken.Collection>(/private/packCollection)
+      assert(ownerPackCollection.borrow() != nil, message: "Missing or mis-typed PackCollection")
+      /** **/
+      
+      // create a new empty collection
+      let packSaleCollection <- MarketplaceContract.createSaleCollection(ownerVault: ownerVault, ownerCollection: ownerPackCollection)
+            
+      // save it to the account
+      acct.save(<-packSaleCollection, to: /storage/packSaleCollection)
+
+      // create a public capability for the collection
+      acct.link<&MarketplaceContract.SaleCollection{MarketplaceContract.SalePublic}>(/public/packSaleCollection, target: /storage/packSaleCollection)
+    
+      log("Gave account a sale collection")
+    }
+  }
+
+  execute {
+    
+  }
+}
 		`;
 	}
 

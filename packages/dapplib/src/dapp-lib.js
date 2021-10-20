@@ -833,6 +833,30 @@ module.exports = class DappLib {
         };
     }
 
+    //  basicBeastGetNextEvolutionSetID
+    // calls scripts/basicbeast/sets/get_next_evolutionSetID.cdc
+    //
+    // signer/proposer/authorizer: data.signer
+    //
+    static async basicBeastGetNextEvolutionSetID(data) {
+        let result = await Blockchain.get({
+                config: DappLib.getConfig(),
+                roles: {
+                    proposer: data.signer,
+                },
+            },
+            'basicbeast_sets_get_next_evolutionSetID', {}
+        );
+
+        console.log(result)
+
+        return {
+            type: DappLib.DAPP_RESULT_BIG_NUMBER,
+            label: 'The current generation is',
+            result: result.callData,
+        };
+    }
+
     // characterxAddCharactersToSet
     // calls transactions/characterx/add_characters_to_set.cdc
     //
