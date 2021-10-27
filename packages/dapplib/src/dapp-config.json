@@ -1,157 +1,25 @@
 {
-	"httpUri": "http://localhost:8080",
+	"httpUri": "https://access-testnet.onflow.org",
+	"accounts": [
+		"0xac70648174bc9884",
+		"0x0",
+		"0x1",
+		"0x2"
+	],
 	"contracts": {
-		"Flow.FlowFees": "0xe5a8b7f23e8b548f",
+		"Flow.FlowFees": "0x912d5440f7e3769e",
 		"Flow.FlowServiceAccount": "0xf8d6e0586b0a20c7",
 		"Flow.FlowStorageFees": "0xf8d6e0586b0a20c7",
-		"Flow.FlowToken": "0x0ae53cb6e3f42a79",
-		"Flow.FungibleToken": "0xee82856bf20e2aa6",
-		"Flow.FUSD": "0x01cf0e2f2f715450",
-		"Flow.NonFungibleToken": "0x01cf0e2f2f715450",
-		"Project.NFTContract": "0x01cf0e2f2f715450",
-		"Project.PackContract": "0x01cf0e2f2f715450",
-		"Project.AdminContract": "0x01cf0e2f2f715450",
-		"Project.CharacterX": "0x01cf0e2f2f715450",
-		"Project.Hero": "0x01cf0e2f2f715450",
-		"Project.MarketplaceContract": "0x01cf0e2f2f715450",
-		"Project.BasicBeast": "0x01cf0e2f2f715450"
-	},
-	"accounts": [
-		"0x01cf0e2f2f715450",
-		"0x179b6b1cb6755e31",
-		"0xf3fcd2c1a78f5eee",
-		"0xe03daebed8ca0615",
-		"0x045a1763c93006ca"
-	],
-	"serviceWallet": {
-		"address": "0xf8d6e0586b0a20c7",
-		"keys": [
-			{
-				"privateKey": "348bdc3216e6571ced8faf35ef6d5336d1dcda5895e1abcc556fa780bd0ac081",
-				"keyId": 0,
-				"weight": 1000
-			}
-		]
-	},
-	"contractWallet": {
-		"address": "0x120e725050340cab",
-		"keys": [
-			{
-				"publicKey": "efc24d5e3ee084b500b3517f58ada434be91baf6a10da2249667bfd0e58458f14a7b3fbc2194045bff03aaf2589891ed47816670d102cf179b0acc89f5b87231",
-				"privateKey": "46eec716fc431ccd62d66d7dd67620ccc0436222afb6b02acce2c3dfa5fceb67",
-				"keyId": 0,
-				"weight": 1000
-			},
-			{
-				"publicKey": "55c85215967264eb1493fc7461f95df74dfe17e41862b32b2423e4e84605411809908ab04bd5031c9b4c620a79709682a25962ea8b500fd6e5fba1615ee8e520",
-				"privateKey": "40dc83ad5568b0bf91681663cb3ffbc5919a8baa4d6172d5217d2bcde8191202",
-				"keyId": 1,
-				"weight": 500
-			}
-		]
-	},
-	"wallets": [
-		{
-			"address": "0x01cf0e2f2f715450",
-			"keys": [
-				{
-					"publicKey": "8ad5d4c1fc7fcdb44a3e45bd04c8c1ebca5dd5a15d13069a16b2fb0c4b4664a75c15203e0a2e463878b2eb45ff7359fab0681c1a75f6240be2db91a69811c527",
-					"privateKey": "de39572b8f13cdee8fd094436ebfe57492b879fbc0e989c0869758db2caf5484",
-					"keyId": 0,
-					"weight": 1000
-				},
-				{
-					"publicKey": "2296f6617275e386dde8a93f7d2142ca83e9fd8732f2e0c7a46a97a2cafc1c44b3b1037ea011f5e31fd356c3640ec954d93678e75922fcd303ec9eacffee654a",
-					"privateKey": "c370119986c945eb61184dcecd38aa68a243fd973e6be7d8aef26edc85d5623d",
-					"keyId": 1,
-					"weight": 500
-				}
-			]
-		},
-		{
-			"address": "0x179b6b1cb6755e31",
-			"keys": [
-				{
-					"publicKey": "a3bc316daccc90befe8f48ac50982aa5ec2a5c3ad2cebc4848ff132c28acc2ce720524c9770eda5f2355a981784987243e308ccbebe4eb5c73d5f7632450febe",
-					"privateKey": "b6053494adfd2e84025614d43eccb3998672b9b41c7a92e2238e0f1897c8d7ed",
-					"keyId": 0,
-					"weight": 1000
-				},
-				{
-					"publicKey": "d7d77155fa24e4a3541e4ccd4b7347f7acec7d8ea3a27ebe6768313b3caeb4a4f1df502047aa3f3a37125f370b14d84ab27c5d84161d407c45fcf612d9fffd0f",
-					"privateKey": "ac2ec8ab4e4c85b6ab65c9f73a490983c49ddea0fa7fcc7df6f63dd811d51785",
-					"keyId": 1,
-					"weight": 500
-				}
-			]
-		},
-		{
-			"address": "0xf3fcd2c1a78f5eee",
-			"keys": [
-				{
-					"publicKey": "d18f3b2cc1c2e7343db71db3af2f62a0def1d5bea62677816933c02855c9c79065be7a4a2eb2b7c4f62cfeba3db722a0c31dcba53fe3331ea8f75b35013799cf",
-					"privateKey": "67eaeed197b7248e6fd55097b476f8d0ed6386c9a85a025fcae4fb72c108ddce",
-					"keyId": 0,
-					"weight": 1000
-				},
-				{
-					"publicKey": "7fd2544536fc7dac56f9e506320372cdb9f789c01d9e1f296ff309f2ea0dc215208bbd84e3031c9dc0c44ba179f3c73987f62908f2aa20551c9f1e9a9b19eb98",
-					"privateKey": "3ae44868b78e746a329ff955520e5a11b1fb2afd868f16973370c2d287acd3b6",
-					"keyId": 1,
-					"weight": 500
-				}
-			]
-		},
-		{
-			"address": "0xe03daebed8ca0615",
-			"keys": [
-				{
-					"publicKey": "d918c9e3c4afcec3d5a10bd1ba7154c29e039534329fcda4006dc5b4d0a0cb84e77f585ebd60adcd47540970daf279434345bc4262c26820d39b2f7bce870f70",
-					"privateKey": "a8aa8b5169ee9c280f034f9239576f9ef02ec01239a018c7024fe3ebe5cb3c7e",
-					"keyId": 0,
-					"weight": 1000
-				},
-				{
-					"publicKey": "8c6ab36ff9ff371ae66f6e510f8a248bbe22a4f73e4713eb34bf638c9b000283103dcd58813c29a966d62d8cfee112045d03ecada1e78bc758da7bf7739c57e7",
-					"privateKey": "810d3056117bc34659e1cd9629d4c506dd8e4d7e8ffafaaa6b0b748a40637218",
-					"keyId": 1,
-					"weight": 500
-				}
-			]
-		},
-		{
-			"address": "0x045a1763c93006ca",
-			"keys": [
-				{
-					"publicKey": "e1ae65f04e6f513036adce93b71117bb94955fd917c009c52e5b535e1ee947dc82d69a80f8ca6d2ad56d65c781954a6fa628b4cc081dc9514e843480a6938af6",
-					"privateKey": "39276b565656b5ecdbd2a6a28b50df640d2b39073349c8fd7a67815327586976",
-					"keyId": 0,
-					"weight": 1000
-				},
-				{
-					"publicKey": "78afe0319eef245bd598b88476995c1c74c88456c3f21bd3d3218e4ae24d56091d5a6091474fff5fe8af4fa762571055226a2c3fa08388a4fe565f15b4e61c75",
-					"privateKey": "9ab1e3af8ecc6d80f533a29047ee90a605fd3374b0fb4d4c6e493621791952b4",
-					"keyId": 1,
-					"weight": 500
-				}
-			]
-		},
-		{
-			"address": "0x120e725050340cab",
-			"keys": [
-				{
-					"publicKey": "efc24d5e3ee084b500b3517f58ada434be91baf6a10da2249667bfd0e58458f14a7b3fbc2194045bff03aaf2589891ed47816670d102cf179b0acc89f5b87231",
-					"privateKey": "46eec716fc431ccd62d66d7dd67620ccc0436222afb6b02acce2c3dfa5fceb67",
-					"keyId": 0,
-					"weight": 1000
-				},
-				{
-					"publicKey": "55c85215967264eb1493fc7461f95df74dfe17e41862b32b2423e4e84605411809908ab04bd5031c9b4c620a79709682a25962ea8b500fd6e5fba1615ee8e520",
-					"privateKey": "40dc83ad5568b0bf91681663cb3ffbc5919a8baa4d6172d5217d2bcde8191202",
-					"keyId": 1,
-					"weight": 500
-				}
-			]
-		}
-	]
+		"Flow.FlowToken": "0x7e60df042a9c0868",
+		"Flow.FungibleToken": "0x9a0766d93b6608b7",
+		"Flow.NonFungibleToken": "0x631e88ae7f1d7c20",
+		"Flow.FUSD": "0xe223d8a629e49c68",
+		"Project.Hero": "0xac70648174bc9884",
+		"Project.MarketplaceContract": "0xac70648174bc9884",
+		"Project.CharacterX": "0x0",
+		"Project.PackContract": "0x0",
+		"Project.NFTContract": "0x0",
+		"Project.AdminContract": "0x0",
+		"Project.BasicBeast": "0x4742010dbfe107da"
+	}
 }

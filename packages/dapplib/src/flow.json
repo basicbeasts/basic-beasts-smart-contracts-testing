@@ -77,6 +77,11 @@
 			"aliases": {
 				"testnet": "0x0"
 			}
+		},
+		"Project.BasicBeast": {
+			"aliases": {
+				"testnet": "0x4742010dbfe107da"
+			}
 		}
 	},
 	"networks": {

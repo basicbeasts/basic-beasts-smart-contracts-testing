@@ -476,8 +476,8 @@ pub contract BasicBeast: NonFungibleToken {
             pre {
                 BasicBeast.beastTemplates[beastTemplateID] != nil: "Cannot remove the BeastTemplate from EvolutionSet: The BeastTemplate doesn't exist."
                 !self.locked: "Cannot remove the BeastTemplate to the EvolutionSet: The EvolutionSet is locked."
-                self.retired[beastTemplateID] == false: "Cannot remove the BeastTemplate: Cannot remove a retired BeastTemplate from its EvolutionSet"
                 self.numOfMintedPerBeastTemplate[beastTemplateID] == 0: "Cannot remove the BeastTemplate: The BeastTemplate has already been minted or does not exist in this EvolutionSet." 
+                self.retired[beastTemplateID] == false: "Cannot remove the BeastTemplate: Cannot remove a retired BeastTemplate from its EvolutionSet"
             }
 
             // Set the Beast minted count for this BeastTemplate to nil
