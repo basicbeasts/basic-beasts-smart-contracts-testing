@@ -2,361 +2,505 @@ const assert = require('chai').assert;
 const DappLib = require('../src/dapp-lib.js');
 const fkill = require('fkill');
 
-describe('Flow Dapp Tests', async () => {
-	let config = null;
-	before('setup contract', async () => {
-		// Setup tasks for tests
-		config = DappLib.getConfig();
-	});
+describe('Flow Dapp Tests', async() => {
+    let config = null;
+    before('setup contract', async() => {
+        // Setup tasks for tests
+        config = DappLib.getConfig();
+    });
 
-	after(() => {
-		fkill(':3570');
-	});
+    after(() => {
+        fkill(':3570');
+    });
 
-	/************ Basic Beasts ************/
-	describe('Basic Beasts Tests', async () => {
-		it(`1. Set up account`, async () => {
-			let testData0 = {
-				signer: config.accounts[0],
-			};
+    /************ Basic Beasts ************/
+    describe('Basic Beasts Tests', async() => {
+        it(`1. Set up account`, async() => {
+            let testData0 = {
+                signer: config.accounts[0],
+            };
 
-			let testData1 = {
-				signer: config.accounts[1],
-			};
+            let testData1 = {
+                signer: config.accounts[1],
+            };
 
-			let testData2 = {
-				signer: config.accounts[2],
-			};
+            let testData2 = {
+                signer: config.accounts[2],
+            };
 
-			let testData3 = {
-				signer: config.accounts[3],
-			};
+            let testData3 = {
+                signer: config.accounts[3],
+            };
 
-			let testData4 = {
-				signer: config.accounts[4],
-			};
+            let testData4 = {
+                signer: config.accounts[4],
+            };
 
-			await DappLib.basicBeastSetupAccount(testData0);
-			await DappLib.basicBeastSetupAccount(testData1);
-			await DappLib.basicBeastSetupAccount(testData2);
-			await DappLib.basicBeastSetupAccount(testData3);
-			await DappLib.basicBeastSetupAccount(testData4);
-		});
+            await DappLib.basicBeastSetupAccount(testData0);
+            await DappLib.basicBeastSetupAccount(testData1);
+            await DappLib.basicBeastSetupAccount(testData2);
+            await DappLib.basicBeastSetupAccount(testData3);
+            await DappLib.basicBeastSetupAccount(testData4);
+        });
 
-		it(`2. Create EvolutionSet - Admin`, async () => {
-			let testData1 = {
-				signer: config.accounts[0],
-				setName: 'Stark',
-				setID: '1',
-			};
+        it(`2. Create EvolutionSet - Admin`, async() => {
+            let testData1 = {
+                signer: config.accounts[0],
+                setName: 'Stark',
+                setID: '1',
+            };
 
-			let testData2 = {
-				signer: config.accounts[0],
-				setName: 'Targaryen',
-				setID: '2',
-			};
+            let testData2 = {
+                signer: config.accounts[0],
+                setName: 'Targaryen',
+                setID: '2',
+            };
 
-			let testData3 = {
-				signer: config.accounts[0],
-				setName: 'Lannister',
-				setID: '3',
-			};
+            let testData3 = {
+                signer: config.accounts[0],
+                setName: 'Lannister',
+                setID: '3',
+            };
 
-			let testData4 = {
-				signer: config.accounts[0],
-				setName: 'Greyjoy',
-				setID: '4',
-			};
+            let testData4 = {
+                signer: config.accounts[0],
+                setName: 'Greyjoy',
+                setID: '4',
+            };
 
-			await DappLib.basicBeastCreateEvolutionSet(testData1);
-			await DappLib.basicBeastCreateEvolutionSet(testData2);
-			await DappLib.basicBeastCreateEvolutionSet(testData3);
-			await DappLib.basicBeastCreateEvolutionSet(testData4);
+            await DappLib.basicBeastCreateEvolutionSet(testData1);
+            await DappLib.basicBeastCreateEvolutionSet(testData2);
+            await DappLib.basicBeastCreateEvolutionSet(testData3);
+            await DappLib.basicBeastCreateEvolutionSet(testData4);
 
-			let res1 = await DappLib.basicBeastGetEvolutionSetName(testData1);
-			assert.equal(
-				res1.result,
-				'Stark',
-				'Incorrect. Set name should be Stark'
-			);
+            let res1 = await DappLib.basicBeastGetEvolutionSetName(testData1);
+            assert.equal(
+                res1.result,
+                'Stark',
+                'Incorrect. Set name should be Stark'
+            );
 
-			let res2 = await DappLib.basicBeastGetEvolutionSetName(testData2);
-			assert.equal(
-				res2.result,
-				'Targaryen',
-				'Incorrect. Set name should be Targaryen'
-			);
+            let res2 = await DappLib.basicBeastGetEvolutionSetName(testData2);
+            assert.equal(
+                res2.result,
+                'Targaryen',
+                'Incorrect. Set name should be Targaryen'
+            );
 
-			let res3 = await DappLib.basicBeastGetEvolutionSetName(testData3);
-			assert.equal(
-				res3.result,
-				'Lannister',
-				'Incorrect. Set name should be Lannister'
-			);
+            let res3 = await DappLib.basicBeastGetEvolutionSetName(testData3);
+            assert.equal(
+                res3.result,
+                'Lannister',
+                'Incorrect. Set name should be Lannister'
+            );
 
-			let res4 = await DappLib.basicBeastGetEvolutionSetName(testData4);
-			assert.equal(
-				res4.result,
-				'Greyjoy',
-				'Incorrect. Set name should be Greyjoy'
-			);
-		});
+            let res4 = await DappLib.basicBeastGetEvolutionSetName(testData4);
+            assert.equal(
+                res4.result,
+                'Greyjoy',
+                'Incorrect. Set name should be Greyjoy'
+            );
+        });
 
-		it(`3. Cannot create a Non Admin EvolutionSet`, async () => {
-			let testData1 = {
-				signer: config.accounts[1],
-				setName: 'Non admin EvolutionSet',
-			};
+        it(`3. Cannot create a Non Admin EvolutionSet`, async() => {
+            let testData1 = {
+                signer: config.accounts[1],
+                setName: 'Non admin EvolutionSet',
+            };
 
-			try {
-				await DappLib.basicBeastCreateEvolutionSet(testData1);
-			} catch (e) {
-				let res = await DappLib.basicBeastGetNextEvolutionSetID({});
-				// next EvolutionSetID should be 5 since there are created 4 in total and setID starts with 1
-				assert.equal(
-					res.result,
-					5,
-					'❗Incorrect. Non Admin account should not be able to create an EvolutionSet'
-				);
-			}
-		});
+            try {
+                await DappLib.basicBeastCreateEvolutionSet(testData1);
+            } catch (e) {
+                let res = await DappLib.basicBeastGetNextEvolutionSetID({});
+                // next EvolutionSetID should be 5 since there are created 4 in total and setID starts with 1
+                assert.equal(
+                    res.result,
+                    5,
+                    '❗Incorrect. Non Admin account should not be able to create an EvolutionSet'
+                );
+            }
+        });
 
-		it(`4. Create beastTemplates - Admin`, async () => {
-			let testData1 = {
-				signer: config.accounts[0],
-				dexNumber: '1',
-				name: 'Moon',
-				image: 'URL',
-				description: 'Basic beast',
-				rarity: 'Secret Rare',
-				skin: 'Normal',
-				starLevel: '1',
-				asexual: 'false',
-				ultimateSkill: 'Fart',
-				basicSkills: ['Eat', 'Sleep'],
-				elements: { Fire: 'true' },
-				data: { Data: 'Data..' },
-				beastTemplateID: 1,
-			};
+        it(`4. Create beastTemplates - Admin`, async() => {
+            let testData1 = {
+                signer: config.accounts[0],
+                dexNumber: '1',
+                name: 'Moon',
+                image: 'URL',
+                description: 'Basic beast',
+                rarity: 'Secret Rare',
+                skin: 'Normal',
+                starLevel: '1',
+                asexual: 'false',
+                ultimateSkill: 'Fart',
+                basicSkills: ['Eat', 'Sleep'],
+                elements: { Fire: 'true' },
+                data: { Data: 'Data..' },
+                beastTemplateID: 1,
+            };
 
-			let testData2 = {
-				signer: config.accounts[0],
-				dexNumber: '2',
-				name: 'Sir Moon',
-				image: 'URL',
-				description: 'Fine beast',
-				rarity: 'Secret Rare',
-				skin: 'Normal',
-				starLevel: '2',
-				asexual: 'false',
-				ultimateSkill: 'Do Math',
-				basicSkills: ['Eat', 'Sleep'],
-				elements: { Fire: 'true' },
-				data: { Data: 'Data..' },
-				beastTemplateID: 2,
-			};
+            let testData2 = {
+                signer: config.accounts[0],
+                dexNumber: '2',
+                name: 'Sir Moon',
+                image: 'URL',
+                description: 'Fine beast',
+                rarity: 'Secret Rare',
+                skin: 'Normal',
+                starLevel: '2',
+                asexual: 'false',
+                ultimateSkill: 'Do Math',
+                basicSkills: ['Eat', 'Sleep'],
+                elements: { Fire: 'true' },
+                data: { Data: 'Data..' },
+                beastTemplateID: 2,
+            };
 
-			let testData3 = {
-				signer: config.accounts[0],
-				dexNumber: '3',
-				name: 'CEO Moon',
-				image: 'URL',
-				description: 'Perfect beast',
-				rarity: 'Secret Rare',
-				skin: 'Shiny Gold',
-				starLevel: '3',
-				asexual: 'false',
-				ultimateSkill: 'Dance to BTS',
-				basicSkills: ['Eat', 'Sleep'],
-				elements: { Fire: 'true' },
-				data: { Data: 'Data..' },
-				beastTemplateID: 3,
-			};
+            let testData3 = {
+                signer: config.accounts[0],
+                dexNumber: '3',
+                name: 'CEO Moon',
+                image: 'URL',
+                description: 'Perfect beast',
+                rarity: 'Secret Rare',
+                skin: 'Shiny Gold',
+                starLevel: '3',
+                asexual: 'false',
+                ultimateSkill: 'Dance to BTS',
+                basicSkills: ['Eat', 'Sleep'],
+                elements: { Fire: 'true' },
+                data: { Data: 'Data..' },
+                beastTemplateID: 3,
+            };
 
-			await DappLib.basicBeastCreateBeastTemplate(testData1);
-			await DappLib.basicBeastCreateBeastTemplate(testData2);
-			await DappLib.basicBeastCreateBeastTemplate(testData3);
+            await DappLib.basicBeastCreateBeastTemplate(testData1);
+            await DappLib.basicBeastCreateBeastTemplate(testData2);
+            await DappLib.basicBeastCreateBeastTemplate(testData3);
 
-			let res1 = await DappLib.basicBeastGetBeastTemplate(testData1);
-			assert.equal(
-				res1.result.dexNumber,
-				'1',
-				"❗Incorrect. The beast's dexNumber should be 1"
-			);
-			assert.equal(
-				res1.result.name,
-				'Moon',
-				"❗Incorrect. The beast's name should be Moon"
-			);
-			assert.equal(
-				res1.result.image,
-				'URL',
-				"❗Incorrect. The beast's image should be URL"
-			);
-			assert.equal(
-				res1.result.description,
-				'Basic Beast',
-				"❗Incorrect. The beast's description should be Basic Beast"
-			);
-			assert.equal(
-				res1.result.rarity,
-				'Secret Rare',
-				"❗Incorrect. The beast's rarity should be Secret Rare"
-			);
-			assert.equal(
-				res1.result.skin,
-				'Normal',
-				"❗Incorrect. The beast's skin should be Normal"
-			);
+            let res1 = await DappLib.basicBeastGetBeastTemplate(testData1);
+            let res1 = await DappLib.basicBeastGetBeastTemplate(testData2);
+            let res1 = await DappLib.basicBeastGetBeastTemplate(testData3);
 
-			/*
-			let resDes =
-				await DappLib.characterxCharactersGetCharacterDescription({
-					characterID,
-				});
-			let resImage = await DappLib.characterxCharactersGetCharacterImage({
-				characterID,
-			});
-			let resCreatedFrom1 =
-				await DappLib.characterxCharactersGetCharacterCreatedFrom1({
-					characterID,
-				});
-			let resCreatedFrom2 =
-				await DappLib.characterxCharactersGetCharacterCreatedFrom2({
-					characterID,
-				});
-			let resSex = await DappLib.characterxCharactersGetCharacterSex({
-				characterID,
-			});
-			let resRace = await DappLib.characterxCharactersGetCharacterRace({
-				characterID,
-			});
-			let resRarity =
-				await DappLib.characterxCharactersGetCharacterRarity({
-					characterID,
-				});
-			let resLineage =
-				await DappLib.characterxCharactersGetCharacterLineage({
-					characterID,
-				});
-			let resBloodline =
-				await DappLib.characterxCharactersGetCharacterBloodline({
-					characterID,
-				});
-			let resElement =
-				await DappLib.characterxCharactersGetCharacterElement({
-					characterID,
-				});
-			let resTraits =
-				await DappLib.characterxCharactersGetCharacterTraits({
-					characterID,
-				});
-			let resData = await DappLib.characterxCharactersGetCharacterData({
-				characterID,
-			});
+            // assert res1
+            assert.equal(
+                res1.result.dexNumber,
+                '1',
+                "❗Incorrect. The beast's dexNumber should be 1"
+            );
 
-			assert.equal(
-				resName.result,
-				'Willi Blue',
-				"❗Incorrect. The character's name should be: Willi Blue"
-			);
-			assert.equal(
-				resDes.result,
-				'Character with the coolest name ever',
-				"❗Incorrect. The character's description should be: Character with the coolest name ever"
-			);
-			assert.equal(
-				resImage.result,
-				'URL',
-				"❗Incorrect. The character's image should be: URL"
-			);
-			assert.equal(
-				resCreatedFrom1.result,
-				0,
-				"❗Incorrect. The character's createdFrom_1 should be: 0"
-			);
-			assert.equal(
-				resCreatedFrom2.result,
-				0,
-				"❗Incorrect. The character's createdFrom_2 should be: 0"
-			);
-			assert.equal(
-				resSex.result,
-				'Male',
-				"❗Incorrect. The character's sex should be: Male"
-			);
-			assert.equal(
-				resRace.result,
-				'Yellow',
-				"❗Incorrect. The character's race should be: Yellow"
-			);
-			assert.equal(
-				resRarity.result,
-				'Fancy Intense',
-				'❗Incorrect. The character rarity should be: Fancy Intense'
-			);
-			assert.equal(
-				Object.keys(resLineage.result)[0],
-				'Targaryen',
-				"❗Incorrect. The character's lineage's key should be: Targaryen"
-			);
-			assert.equal(
-				resLineage.result[Object.keys(resLineage.result)[0]],
-				true,
-				"❗Incorrect. The character's lineage's value should be: true"
-			);
-			assert.equal(
-				Object.keys(resBloodline.result)[0],
-				'O',
-				"❗Incorrect. The character's bloodline's key should be: O"
-			);
-			assert.equal(
-				resBloodline.result[Object.keys(resBloodline.result)[0]],
-				false,
-				"❗Incorrect. The character's bloodline's value should be: false"
-			);
-			assert.equal(
-				Object.keys(resElement.result)[0],
-				'Fire',
-				"❗Incorrect. The character's element's key should be: Fire"
-			);
-			assert.equal(
-				resElement.result[Object.keys(resElement.result)[0]],
-				true,
-				"❗Incorrect. The character's element's value should be: true"
-			);
-			assert.equal(
-				Object.keys(resTraits.result)[0],
-				'Traits',
-				"❗Incorrect. The character's traits's key should be: Traits"
-			);
-			assert.equal(
-				resTraits.result[Object.keys(resTraits.result)[0]],
-				'Traits..',
-				"❗Incorrect. The character's traits's value should be: Traits.."
-			);
-			assert.equal(
-				Object.keys(resTraits.result)[1],
-				'Traits 2',
-				"❗Incorrect. The character's traits's key should be: Traits 2"
-			);
-			assert.equal(
-				resTraits.result[Object.keys(resTraits.result)[1]],
-				'Traits.. 2',
-				"❗Incorrect. The character's traits's value should be: Traits.. 2"
-			);
-			assert.equal(
-				Object.keys(resData.result)[0],
-				'Data',
-				"❗Incorrect. The character's data's key should be: Data"
-			);
-			assert.equal(
-				resData.result[Object.keys(resData.result)[0]],
-				'Data..',
-				"❗Incorrect. The character's data's value should be: Data.."
-			);*/
-		});
-		/*
+            assert.equal(
+                res1.result.name,
+                'Moon',
+                "❗Incorrect. The beast's name should be Moon"
+            );
+
+            assert.equal(
+                res1.result.image,
+                'URL',
+                "❗Incorrect. The beast's image should be URL"
+            );
+
+            assert.equal(
+                res1.result.description,
+                'Basic beast',
+                "❗Incorrect. The beast's description should be Basic beast"
+            );
+
+            assert.equal(
+                res1.result.rarity,
+                'Secret Rare',
+                "❗Incorrect. The beast's rarity should be Secret Rare"
+            );
+
+            assert.equal(
+                res1.result.skin,
+                'Normal',
+                "❗Incorrect. The beast's skin should be Normal"
+            );
+
+            assert.equal(
+                res1.result.starLevel,
+                '1',
+                "❗Incorrect. The beast's starLevel should be 1"
+            );
+
+            assert.isFalse(
+                res1.result.asexual,
+                "❗Incorrect. The beast's asexual should be false"
+            );
+
+            assert.equal(
+                res1.result.ultimateSkill,
+                'Fart',
+                "❗Incorrect. The beast's ultimateSkill should be Fart"
+            );
+
+            assert.deepEqual(
+                res1.result.basicSkills, ['Eat', 'Sleep'],
+                "❗Incorrect. The beast's basicSkills should be Eat and Sleep"
+            );
+
+            assert.equal(
+                Object.keys(
+                    res1.result.elements)[0],
+                "Fire",
+                "❗Incorrect. The beast's element's key should be: Fire"
+            );
+
+            assert.isTrue(
+                res1.result.elements[Object.keys(res1.result)[0]],
+                "❗Incorrect. The beast's element's value should be: True"
+            );
+
+            assert.equal(
+                Object.keys(
+                    res1.result.data)[0],
+                "Data",
+                "❗Incorrect. The beast's data's key should be: Data"
+            );
+
+            assert.equal(
+                res1.result.data[Object.keys(res1.result.data)[0]],
+                "Data..",
+                "❗Incorrect. The character's data's value should be: Data.."
+            );
+
+            // assert res2
+            assert.equal(
+                res2.result.dexNumber,
+                '2',
+                "❗Incorrect. The beast's dexNumber should be 2"
+            );
+
+            assert.equal(
+                res2.result.name,
+                'Sir Moon',
+                "❗Incorrect. The beast's name should be Sir Moon"
+            );
+
+            assert.equal(
+                res2.result.image,
+                'URL',
+                "❗Incorrect. The beast's image should be URL"
+            );
+
+            assert.equal(
+                res2.result.description,
+                'Fine beast',
+                "❗Incorrect. The beast's description should be Fine beast"
+            );
+
+            assert.equal(
+                res2.result.rarity,
+                'Secret Rare',
+                "❗Incorrect. The beast's rarity should be Secret Rare"
+            );
+
+            assert.equal(
+                res2.result.skin,
+                'Normal',
+                "❗Incorrect. The beast's skin should be Normal"
+            );
+
+            assert.equal(
+                res2.result.starLevel,
+                '2',
+                "❗Incorrect. The beast's starLevel should be 2"
+            );
+
+            // here
+
+            assert.isFalse(
+                res1.result.asexual,
+                "❗Incorrect. The beast's asexual should be false"
+            );
+
+            assert.equal(
+                res1.result.ultimateSkill,
+                'Fart',
+                "❗Incorrect. The beast's ultimateSkill should be Fart"
+            );
+
+            assert.deepEqual(
+                res1.result.basicSkills, ['Eat', 'Sleep'],
+                "❗Incorrect. The beast's basicSkills should be Eat and Sleep"
+            );
+
+            assert.equal(
+                Object.keys(
+                    res1.result.elements)[0],
+                "Fire",
+                "❗Incorrect. The beast's element's key should be: Fire"
+            );
+
+            assert.isTrue(
+                res1.result.elements[Object.keys(res1.result)[0]],
+                "❗Incorrect. The beast's element's value should be: True"
+            );
+
+            assert.equal(
+                Object.keys(
+                    res1.result.data)[0],
+                "Data",
+                "❗Incorrect. The beast's data's key should be: Data"
+            );
+
+            assert.equal(
+                res1.result.data[Object.keys(res1.result.data)[0]],
+                "Data..",
+                "❗Incorrect. The character's data's value should be: Data.."
+            );
+
+
+
+            /*
+            let resDes =
+            	await DappLib.characterxCharactersGetCharacterDescription({
+            		characterID,
+            	});
+            let resImage = await DappLib.characterxCharactersGetCharacterImage({
+            	characterID,
+            });
+            let resCreatedFrom1 =
+            	await DappLib.characterxCharactersGetCharacterCreatedFrom1({
+            		characterID,
+            	});
+            let resCreatedFrom2 =
+            	await DappLib.characterxCharactersGetCharacterCreatedFrom2({
+            		characterID,
+            	});
+            let resSex = await DappLib.characterxCharactersGetCharacterSex({
+            	characterID,
+            });
+            let resRace = await DappLib.characterxCharactersGetCharacterRace({
+            	characterID,
+            });
+            let resRarity =
+            	await DappLib.characterxCharactersGetCharacterRarity({
+            		characterID,
+            	});
+            let resLineage =
+            	await DappLib.characterxCharactersGetCharacterLineage({
+            		characterID,
+            	});
+            let resBloodline =
+            	await DappLib.characterxCharactersGetCharacterBloodline({
+            		characterID,
+            	});
+            let resElement =
+            	await DappLib.characterxCharactersGetCharacterElement({
+            		characterID,
+            	});
+            let resTraits =
+            	await DappLib.characterxCharactersGetCharacterTraits({
+            		characterID,
+            	});
+            let resData = await DappLib.characterxCharactersGetCharacterData({
+            	characterID,
+            });
+
+            assert.equal(
+            	resName.result,
+            	'Willi Blue',
+            	"❗Incorrect. The character's name should be: Willi Blue"
+            );
+            assert.equal(
+            	resDes.result,
+            	'Character with the coolest name ever',
+            	"❗Incorrect. The character's description should be: Character with the coolest name ever"
+            );
+            assert.equal(
+            	resImage.result,
+            	'URL',
+            	"❗Incorrect. The character's image should be: URL"
+            );
+            assert.equal(
+            	resCreatedFrom1.result,
+            	0,
+            	"❗Incorrect. The character's createdFrom_1 should be: 0"
+            );
+            assert.equal(
+            	resCreatedFrom2.result,
+            	0,
+            	"❗Incorrect. The character's createdFrom_2 should be: 0"
+            );
+            assert.equal(
+            	resSex.result,
+            	'Male',
+            	"❗Incorrect. The character's sex should be: Male"
+            );
+            assert.equal(
+            	resRace.result,
+            	'Yellow',
+            	"❗Incorrect. The character's race should be: Yellow"
+            );
+            assert.equal(
+            	resRarity.result,
+            	'Fancy Intense',
+            	'❗Incorrect. The character rarity should be: Fancy Intense'
+            );
+            assert.equal(
+            	Object.keys(resLineage.result)[0],
+            	'Targaryen',
+            	"❗Incorrect. The character's lineage's key should be: Targaryen"
+            );
+            assert.equal(
+            	resLineage.result[Object.keys(resLineage.result)[0]],
+            	true,
+            	"❗Incorrect. The character's lineage's value should be: true"
+            );
+            assert.equal(
+            	Object.keys(resBloodline.result)[0],
+            	'O',
+            	"❗Incorrect. The character's bloodline's key should be: O"
+            );
+            assert.equal(
+            	resBloodline.result[Object.keys(resBloodline.result)[0]],
+            	false,
+            	"❗Incorrect. The character's bloodline's value should be: false"
+            );
+            assert.equal(
+            	Object.keys(resElement.result)[0],
+            	'Fire',
+            	"❗Incorrect. The character's element's key should be: Fire"
+            );
+            assert.equal(
+            	resElement.result[Object.keys(resElement.result)[0]],
+            	true,
+            	"❗Incorrect. The character's element's value should be: true"
+            );
+            assert.equal(
+            	Object.keys(resTraits.result)[0],
+            	'Traits',
+            	"❗Incorrect. The character's traits's key should be: Traits"
+            );
+            assert.equal(
+            	resTraits.result[Object.keys(resTraits.result)[0]],
+            	'Traits..',
+            	"❗Incorrect. The character's traits's value should be: Traits.."
+            );
+            assert.equal(
+            	Object.keys(resTraits.result)[1],
+            	'Traits 2',
+            	"❗Incorrect. The character's traits's key should be: Traits 2"
+            );
+            assert.equal(
+            	resTraits.result[Object.keys(resTraits.result)[1]],
+            	'Traits.. 2',
+            	"❗Incorrect. The character's traits's value should be: Traits.. 2"
+            );
+            assert.equal(
+            	Object.keys(resData.result)[0],
+            	'Data',
+            	"❗Incorrect. The character's data's key should be: Data"
+            );
+            assert.equal(
+            	resData.result[Object.keys(resData.result)[0]],
+            	'Data..',
+            	"❗Incorrect. The character's data's value should be: Data.."
+            );*/
+        });
+        /*
                  // As Admin has created a character with characterID = 0. Next characterID should be 1
                  it(`6. Has correct next character ID`, async() => {
                      let res1 = await DappLib.characterxCharactersGetNextCharacterID({})
@@ -544,7 +688,7 @@ describe('Flow Dapp Tests', async () => {
 
                  });
          */
-		/*
+        /*
                 it(`17. Get characters in setID 0`, async() => {
                     let setID = 0
                     let res1 = await DappLib.characterxSetsGetCharactersInSet({ setID })
@@ -730,7 +874,7 @@ describe('Flow Dapp Tests', async () => {
                     }
 
                 });*/
-		/*
+        /*
                it(`24. Get total supply - before minting charaters`, async() => {
 
                    let res1 = await DappLib.characterxGetTotalSupply({})
@@ -795,7 +939,7 @@ describe('Flow Dapp Tests', async () => {
                        });
 
                        */
-		/*
+        /*
                 it(`27. Can not batch mint characterID 1, setID 0 to accounts[2] - Non Admin`, async() => {
 
                     let testData1 = {
@@ -911,9 +1055,9 @@ describe('Flow Dapp Tests', async () => {
                     console.log("Retired should be true: " + res1.result)
                 });
         */
-	});
+    });
 
-	/*
+    /*
         describe('\nPack NFT', async () => {
 
             it(`mints tokens into the admin and user accounts and has the correct balance in the account`, async () => {
